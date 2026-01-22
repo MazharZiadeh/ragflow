@@ -120,18 +120,36 @@ class DoclingParser(RAGFlowPdfParser):
         if not poss:
             return (None, None) if need_position else None
 
+        # Check if page_images is available and non-empty
+        if not getattr(self, "page_images", None) or not self.page_images:
+            return (None, None) if need_position else None
+
         GAP = 6
         pos = poss[0]
-        poss.insert(0, ([pos[0][0]], pos[1], pos[2], max(0, pos[3] - 120), max(pos[3] - GAP, 0)))
+        # Validate page indices are within bounds
+        first_page_idx = pos[0][0]
+        last_page_idx = pos[0][-1]
+        if first_page_idx < 0 or first_page_idx >= len(self.page_images):
+            return (None, None) if need_position else None
+        if last_page_idx < 0 or last_page_idx >= len(self.page_images):
+            return (None, None) if need_position else None
+
+        poss.insert(0, ([first_page_idx], pos[1], pos[2], max(0, pos[3] - 120), max(pos[3] - GAP, 0)))
         pos = poss[-1]
-        poss.append(([pos[0][-1]], pos[1], pos[2], min(self.page_images[pos[0][-1]].size[1], pos[4] + GAP), min(self.page_images[pos[0][-1]].size[1], pos[4] + 120)))
+        last_page_idx = pos[0][-1]
+        if last_page_idx < 0 or last_page_idx >= len(self.page_images):
+            return (None, None) if need_position else None
+        poss.append(([last_page_idx], pos[1], pos[2], min(self.page_images[last_page_idx].size[1], pos[4] + GAP), min(self.page_images[last_page_idx].size[1], pos[4] + 120)))
         positions = []
         for ii, (pns, left, right, top, bottom) in enumerate(poss):
             if bottom <= top:
                 bottom = top + 4
+            # Skip if page index is out of bounds
+            if pns[0] < 0 or pns[0] >= len(self.page_images):
+                continue
             img0 = self.page_images[pns[0]]
             x0, y0, x1, y1 = int(left), int(top), int(right), int(min(bottom, img0.size[1]))
-            
+
             crop0 = img0.crop((x0, y0, x1, y1))
             imgs.append(crop0)
             if 0 < ii < len(poss)-1:
@@ -140,6 +158,9 @@ class DoclingParser(RAGFlowPdfParser):
             for pn in pns[1:]:
                 if remain_bottom <= 0:
                     break
+                # Skip if page index is out of bounds
+                if pn < 0 or pn >= len(self.page_images):
+                    continue
                 page = self.page_images[pn]
                 x0, y0, x1, y1 = int(left), 0, int(right), int(min(remain_bottom, page.size[1]))
                 cimgp = page.crop((x0, y0, x1, y1))
