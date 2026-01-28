@@ -414,15 +414,17 @@ class Agent(LLM, ToolBase):
         logging.warning( f"Exceed max rounds: {self._param.max_rounds}")
         final_instruction = f"""
 {user_request}
-IMPORTANT: You have reached the conversation limit. Based on ALL the information and research you have gathered so far, please provide a DIRECT and COMPREHENSIVE final answer to the original request.
-Instructions:
-1. SYNTHESIZE all information collected during this conversation
-2. Provide a COMPLETE response using existing data - do not suggest additional research
-3. Structure your response as a FINAL DELIVERABLE, not a plan
-4. If information is incomplete, state what you found and provide the best analysis possible with available data
-5. DO NOT mention conversation limits or suggest further steps
-6. Focus on delivering VALUE with the information already gathered
-Respond immediately with your final comprehensive answer.
+IMPORTANT: Provide your final answer based on ALL retrieved information.
+
+## Requirements:
+1. **Synthesize findings** - Combine all relevant information from retrieved sources
+2. **Cite your sources** - Reference specific documents/chunks that support your claims
+3. **Acknowledge gaps** - If information is incomplete, clearly state what is missing rather than guessing
+4. **Be accurate over complete** - It's better to give a partial but accurate answer than a complete but speculative one
+5. **Stay grounded** - Only include information actually found in the retrieved documents
+6. **Structure clearly** - Organize your response to directly address the question
+
+Respond with your final answer now.
         """
         if self.check_if_canceled("Agent final instruction"):
             return

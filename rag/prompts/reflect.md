@@ -1,10 +1,17 @@
 **Context**:
- - To achieve the goal: {{ goal }}.
- - You have executed following tool calls:
+ - Goal: {{ goal }}
+ - Tool calls executed:
 {% for call in tool_calls %}
-Tool call: `{{ call.name }}`
+Tool: `{{ call.name }}`
 Results: {{ call.result }}
 {% endfor %}
+
+## Accuracy Verification
+Before proceeding, verify:
+- Are the retrieved results relevant to the question?
+- Is the information from reliable sources within the knowledge base?
+- Are there any contradictions between different retrieved chunks?
+- Is there sufficient evidence to provide a confident answer?
 
 ## Task Complexity Analysis & Reflection Scope
 

@@ -41,8 +41,8 @@ class LLMParam(ComponentParamBase):
         self.sys_prompt = ""
         self.prompts = [{"role": "user", "content": "{sys.query}"}]
         self.max_tokens = 0
-        self.temperature = 0
-        self.top_p = 0
+        self.temperature = 0.1  # Low temperature for factual accuracy
+        self.top_p = 0.9  # Slightly constrained for more focused responses
         self.presence_penalty = 0
         self.frequency_penalty = 0
         self.output_structure = None
@@ -151,8 +151,15 @@ class LLM(ComponentBase):
 
         msg, sys_prompt = self._sys_prompt_and_msg(self._canvas.get_history(self._param.message_history_window_size)[:-1], args)
         user_defined_prompt, sys_prompt = self._extract_prompts(sys_prompt)
-        if self._param.cite and self._canvas.get_reference()["chunks"]:
+
+        # Check if citations should be enabled
+        ref = self._canvas.get_reference()
+        has_chunks = bool(ref.get("chunks"))
+        if self._param.cite and has_chunks:
+            logging.info(f"LLM component: Enabling citations with {len(ref['chunks'])} reference chunks")
             sys_prompt += citation_prompt(user_defined_prompt)
+        elif self._param.cite and not has_chunks:
+            logging.warning("LLM component: cite=True but no reference chunks available. Make sure Retrieval component runs before LLM and its output is connected.")
 
         return sys_prompt, msg, user_defined_prompt
 

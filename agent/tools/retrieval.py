@@ -16,6 +16,7 @@
 import asyncio
 from functools import partial
 import json
+import logging
 import os
 import re
 from abc import ABC
@@ -41,11 +42,11 @@ class RetrievalParam(ToolParamBase):
     def __init__(self):
         self.meta:ToolMeta = {
             "name": "search_my_dataset",
-            "description": "This tool can be utilized for relevant content searching in the datasets.",
+            "description": "Search the knowledge base for relevant information. Use this tool to find factual information before answering questions. Always search before making claims about specific data, dates, numbers, or domain-specific information.",
             "parameters": {
                 "query": {
                     "type": "string",
-                    "description": "The keywords to search the dataset. The keywords should be the most important words/terms(includes synonyms) from the original request.",
+                    "description": "A search query containing key terms and concepts from the user's question. Include synonyms and related terms to improve recall. For best results, phrase as a question or include the main subject and what you want to know about it.",
                     "default": "",
                     "required": True
                 }
@@ -53,10 +54,10 @@ class RetrievalParam(ToolParamBase):
         }
         super().__init__()
         self.function_name = "search_my_dataset"
-        self.description = "This tool can be utilized for relevant content searching in the datasets."
-        self.similarity_threshold = 0.2
-        self.keywords_similarity_weight = 0.5
-        self.top_n = 8
+        self.description = "Search the knowledge base for relevant information. Use this tool to find factual information before answering questions."
+        self.similarity_threshold = 0.15  # Balanced threshold for precision/recall
+        self.keywords_similarity_weight = 0.25  # 25% keywords, 75% vector for semantic accuracy
+        self.top_n = 10  # Retrieve more chunks for better coverage
         self.top_k = 1024
         self.kb_ids = []
         self.memory_ids = []
@@ -231,11 +232,20 @@ class Retrieval(ToolBase, ABC):
                 del ck["content_ltks"]
 
         if not kbinfos["chunks"]:
-            self.set_output("formalized_content", self._param.empty_response)
+            logging.warning(f"Retrieval returned no chunks for query: '{query}' with similarity_threshold={self._param.similarity_threshold}. Consider lowering the threshold or checking the knowledge base content.")
+            self.set_output("formalized_content", self._param.empty_response if self._param.empty_response else "No relevant information found in the knowledge base for this query.")
             return
 
         # Format the chunks for JSON output (similar to how other tools do it)
         json_output = kbinfos["chunks"].copy()
+
+        # Log retrieval statistics for debugging
+        logging.info(
+            f"Retrieval successful: {len(kbinfos['chunks'])} chunks found for query '{query[:50]}...' "
+            f"with similarity scores ranging from "
+            f"{min((c.get('similarity', 0) for c in kbinfos['chunks']), default=0):.4f} to "
+            f"{max((c.get('similarity', 0) for c in kbinfos['chunks']), default=0):.4f}"
+        )
 
         self._canvas.add_reference(kbinfos["chunks"], kbinfos["doc_aggs"])
         form_cnt = "\n".join(kb_prompt(kbinfos, 200000, True))
@@ -243,6 +253,7 @@ class Retrieval(ToolBase, ABC):
         # Set both formalized content and JSON output
         self.set_output("formalized_content", form_cnt)
         self.set_output("json", json_output)
+        self.set_output("_references", kbinfos)  # Store references for downstream components
 
         return form_cnt
 

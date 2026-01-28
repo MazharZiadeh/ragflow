@@ -124,7 +124,10 @@ class Dealer:
                 if not settings.DOC_ENGINE_INFINITY:
                     src.append(f"q_{len(q_vec)}_vec")
 
-                fusionExpr = FusionExpr("weighted_sum", topk, {"weights": "0.05,0.95"})
+                # Optimized fusion: 30% text (BM25) + 70% vector (semantic)
+                # Higher semantic weight improves accuracy for complex queries
+                # while still leveraging keyword matching for precise term matching
+                fusionExpr = FusionExpr("weighted_sum", topk, {"weights": "0.30,0.70"})
                 matchExprs = [matchText, matchDense, fusionExpr]
 
                 res = self.dataStore.search(src, highlightFields, filters, matchExprs, orderBy, offset, limit,
@@ -291,8 +294,8 @@ class Dealer:
                 rank_fea.append(nor / np.sqrt(denor) / q_denor)
         return np.array(rank_fea) * 10. + pageranks
 
-    def rerank(self, sres, query, tkweight=0.3,
-               vtweight=0.7, cfield="content_ltks",
+    def rerank(self, sres, query, tkweight=0.25,
+               vtweight=0.75, cfield="content_ltks",
                rank_feature: dict | None = None
                ):
         _, keywords = self.qryr.question(query)
@@ -330,8 +333,8 @@ class Dealer:
 
         return sim + rank_fea, tksim, vtsim
 
-    def rerank_by_model(self, rerank_mdl, sres, query, tkweight=0.3,
-                        vtweight=0.7, cfield="content_ltks",
+    def rerank_by_model(self, rerank_mdl, sres, query, tkweight=0.25,
+                        vtweight=0.75, cfield="content_ltks",
                         rank_feature: dict | None = None):
         _, keywords = self.qryr.question(query)
 
@@ -436,6 +439,20 @@ class Dealer:
 
         valid_idx = [int(i) for i in sorted_idx if sim_np[i] >= similarity_threshold]
         filtered_count = len(valid_idx)
+
+        # If no chunks meet the threshold, use top results with a warning
+        if filtered_count == 0 and len(sorted_idx) > 0:
+            # Fallback: return top chunks even if below threshold
+            fallback_count = min(page_size, len(sorted_idx))
+            valid_idx = [int(sorted_idx[i]) for i in range(fallback_count)]
+            filtered_count = fallback_count
+            max_sim = sim_np[sorted_idx[0]] if len(sorted_idx) > 0 else 0
+            logging.warning(
+                f"No chunks met similarity threshold {similarity_threshold:.2f}. "
+                f"Returning top {fallback_count} chunks with max similarity {max_sim:.4f}. "
+                f"Consider lowering the similarity_threshold parameter."
+            )
+
         ranks["total"] = int(filtered_count)
 
         if filtered_count == 0:
