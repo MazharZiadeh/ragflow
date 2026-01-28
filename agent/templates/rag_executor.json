@@ -1,0 +1,106 @@
+{
+  "id": 100,
+  "title": {
+    "en": "RAG Executor",
+    "zh": "RAG执行器"
+  },
+  "description": {
+    "en": "Optimized RAG agent with hybrid search parity (70% keyword / 30% vector), low similarity threshold, and image citation support.",
+    "zh": "优化的RAG代理，具有混合搜索平衡（70%关键词/30%向量）、低相似度阈值和图像引用支持。"
+  },
+  "canvas_type": "Agent",
+  "dsl": {
+    "components": {
+      "begin": {
+        "obj": {
+          "component_name": "Begin",
+          "params": {
+            "prologue": "Hello! I can help you search and analyze information from the knowledge base with accurate citations."
+          }
+        },
+        "downstream": ["Retrieval_Eval"],
+        "upstream": []
+      },
+      "Retrieval_Eval": {
+        "obj": {
+          "component_name": "Retrieval",
+          "params": {
+            "similarity_threshold": 0.1,
+            "keywords_similarity_weight": 0.7,
+            "top_n": 10,
+            "top_k": 1024,
+            "rerank_id": "",
+            "empty_response": "No relevant information found in the knowledge base. Please try rephrasing your question or check if the knowledge base contains relevant content.",
+            "kb_ids": ["573c4825f12d11f0b9783ae7a67b446b"],
+            "use_kg": false,
+            "cross_languages": [],
+            "toc_enhance": false,
+            "meta_data_filter": {},
+            "inputs": {
+              "query": {
+                "name": "Query",
+                "type": "line",
+                "value": "{{Agent:QuerySampler@content}}"
+              }
+            },
+            "outputs": {
+              "formalized_content": {
+                "type": "string",
+                "value": ""
+              },
+              "json": {
+                "type": "array",
+                "value": []
+              }
+            }
+          }
+        },
+        "downstream": ["RAGExecutor"],
+        "upstream": ["begin"]
+      },
+      "RAGExecutor": {
+        "obj": {
+          "component_name": "LLM",
+          "params": {
+            "llm_id": "",
+            "cite": true,
+            "temperature": 0.1,
+            "top_p": 0.9,
+            "max_tokens": 4096,
+            "sys_prompt": "You are a precise RAG assistant that ONLY answers based on the retrieved knowledge base content.\n\n## STRICT RULES:\n1. **ONLY use information from the provided context** - Never use prior knowledge\n2. **CITE EVERY FACT** using [ID:N] format at the end of sentences\n3. **If the context doesn't contain the answer**, respond with: \"The knowledge base does not contain information about [topic]. Please check if the relevant documents have been uploaded.\"\n4. **For images/figures**, include the image citation when referencing visual content\n5. **Never hallucinate or make up information**\n\n## CONTEXT FROM KNOWLEDGE BASE:\n{Retrieval_Eval@formalized_content}\n\n## RESPONSE FORMAT:\n- Answer the question directly using ONLY the above context\n- Place [ID:N] citations at the end of each factual sentence\n- For multiple sources: [ID:1][ID:2] (NOT [ID:1, ID:2])\n- Maximum 4 citations per sentence\n- Acknowledge if information is incomplete or not found",
+            "prompts": [{"role": "user", "content": "{sys.query}"}],
+            "message_history_window_size": 13,
+            "outputs": {
+              "content": {
+                "type": "string",
+                "value": ""
+              }
+            }
+          }
+        },
+        "downstream": ["message:0"],
+        "upstream": ["Retrieval_Eval"]
+      },
+      "message:0": {
+        "obj": {
+          "component_name": "Message",
+          "params": {
+            "content": ["{RAGExecutor@content}"]
+          }
+        },
+        "downstream": [],
+        "upstream": ["RAGExecutor"]
+      }
+    },
+    "history": [],
+    "messages": [],
+    "path": [],
+    "retrieval": {"chunks": {}, "doc_aggs": {}},
+    "globals": {
+      "sys.query": "",
+      "sys.user_id": "",
+      "sys.conversation_turns": 0,
+      "sys.files": []
+    }
+  }
+}

@@ -55,9 +55,9 @@ class RetrievalParam(ToolParamBase):
         super().__init__()
         self.function_name = "search_my_dataset"
         self.description = "Search the knowledge base for relevant information. Use this tool to find factual information before answering questions."
-        self.similarity_threshold = 0.15  # Balanced threshold for precision/recall
-        self.keywords_similarity_weight = 0.25  # 25% keywords, 75% vector for semantic accuracy
-        self.top_n = 10  # Retrieve more chunks for better coverage
+        self.similarity_threshold = 0.1  # Low threshold to prevent over-filtering
+        self.keywords_similarity_weight = 0.7  # 70% keywords, 30% vector (hybrid search parity)
+        self.top_n = 10  # More context for the LLM
         self.top_k = 1024
         self.kb_ids = []
         self.memory_ids = []

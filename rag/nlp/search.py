@@ -124,10 +124,9 @@ class Dealer:
                 if not settings.DOC_ENGINE_INFINITY:
                     src.append(f"q_{len(q_vec)}_vec")
 
-                # Optimized fusion: 30% text (BM25) + 70% vector (semantic)
-                # Higher semantic weight improves accuracy for complex queries
-                # while still leveraging keyword matching for precise term matching
-                fusionExpr = FusionExpr("weighted_sum", topk, {"weights": "0.30,0.70"})
+                # Hybrid search parity: 70% text (BM25) + 30% vector (semantic)
+                # Higher keyword weight matches successful retrieval test parameters
+                fusionExpr = FusionExpr("weighted_sum", topk, {"weights": "0.70,0.30"})
                 matchExprs = [matchText, matchDense, fusionExpr]
 
                 res = self.dataStore.search(src, highlightFields, filters, matchExprs, orderBy, offset, limit,
@@ -294,8 +293,8 @@ class Dealer:
                 rank_fea.append(nor / np.sqrt(denor) / q_denor)
         return np.array(rank_fea) * 10. + pageranks
 
-    def rerank(self, sres, query, tkweight=0.25,
-               vtweight=0.75, cfield="content_ltks",
+    def rerank(self, sres, query, tkweight=0.7,
+               vtweight=0.3, cfield="content_ltks",
                rank_feature: dict | None = None
                ):
         _, keywords = self.qryr.question(query)
@@ -333,8 +332,8 @@ class Dealer:
 
         return sim + rank_fea, tksim, vtsim
 
-    def rerank_by_model(self, rerank_mdl, sres, query, tkweight=0.25,
-                        vtweight=0.75, cfield="content_ltks",
+    def rerank_by_model(self, rerank_mdl, sres, query, tkweight=0.7,
+                        vtweight=0.3, cfield="content_ltks",
                         rank_feature: dict | None = None):
         _, keywords = self.qryr.question(query)
 

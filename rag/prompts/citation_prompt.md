@@ -18,13 +18,14 @@ CRITICAL: You MUST cite your sources using [ID:N] format for ALL factual claims 
 
 ## What MUST Be Cited:
 1. **Quantitative data**: Numbers, percentages, statistics, measurements
-2. **Temporal claims**: Dates, timeframes, sequences of events  
+2. **Temporal claims**: Dates, timeframes, sequences of events
 3. **Causal relationships**: Claims about cause and effect
 4. **Comparative statements**: Rankings, comparisons, superlatives
 5. **Technical definitions**: Specialized terms, concepts, methodologies
 6. **Direct attributions**: What someone said, did, or believes
 7. **Predictions/forecasts**: Future projections, trend analyses
 8. **Controversial claims**: Disputed facts, minority opinions
+9. **Images and figures**: When referencing visual content, diagrams, charts, or tables
 
 ## What Should NOT Be Cited:
 - Common knowledge (e.g., "The sun rises in the east")
