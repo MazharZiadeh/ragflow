@@ -393,6 +393,16 @@ class Agent(LLM, ToolBase):
                     name = func["name"]
                     args = func["arguments"]
                     if name == COMPLETE_TASK:
+                        answer = args.get("answer", "")
+                        if answer:
+                            need2cite = self._param.cite and self._canvas.get_reference()["chunks"] and self._id.find("-->") < 0
+                            if need2cite:
+                                async for delta_ans in self._gen_citations_async(answer):
+                                    yield delta_ans, 0
+                            else:
+                                yield answer, 0
+                            return
+                        # Fallback: no answer text, re-generate
                         append_user_content(hist, f"Respond with a formal answer. FORGET(DO NOT mention) about `{COMPLETE_TASK}`. The language for the response MUST be as the same as the first user request.\n")
                         async for txt, tkcnt in complete():
                             yield txt, tkcnt
