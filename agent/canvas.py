@@ -37,6 +37,41 @@ from common.exceptions import TaskCanceledException
 from rag.prompts.generator import chunks_format
 from rag.utils.redis_conn import REDIS_CONN
 
+# Pre-compiled regex patterns for better performance
+_EMOJI_PATTERN = re.compile(
+    "[\U0001F600-\U0001F64F"
+    "\U0001F300-\U0001F5FF"
+    "\U0001F680-\U0001F6FF"
+    "\U0001F1E0-\U0001F1FF"
+    "\U00002700-\U000027BF"
+    "\U0001F900-\U0001F9FF"
+    "\U0001FA70-\U0001FAFF"
+    "\U0001FAD0-\U0001FAFF]+",
+    flags=re.UNICODE
+)
+_CONTROL_CHAR_PATTERN = re.compile(r"[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]")
+_WHITESPACE_PATTERN = re.compile(r"\s+")
+# Pre-compiled pattern to match citations like [ID:0], [ID: 0], [ID:123], etc.
+# More flexible to handle various LLM output formats
+_CITE_PATTERN = re.compile(r"\[ID:\s*\d+\]")
+
+
+def _clean_tts_text(text: str, max_len: int = 500) -> str:
+    """Clean text for TTS processing by removing control characters, emojis, and normalizing whitespace."""
+    if not text:
+        return ""
+
+    text = text.encode("utf-8", "ignore").decode("utf-8", "ignore")
+    text = _CONTROL_CHAR_PATTERN.sub("", text)
+    text = _EMOJI_PATTERN.sub("", text)
+    text = _WHITESPACE_PATTERN.sub(" ", text).strip()
+
+    if len(text) > max_len:
+        text = text[:max_len]
+
+    return text
+
+
 class Graph:
     """
         dsl = {
@@ -321,7 +356,6 @@ class Canvas(Graph):
             self.history = []
             self.retrieval = []
             self.memory = []
-        print(self.variables)
         for k in self.globals.keys():
             if k.startswith("sys."):
                 if isinstance(self.globals[k], str):
@@ -417,7 +451,6 @@ class Canvas(Graph):
                 logging.info(msg)
                 raise TaskCanceledException(msg)
 
-            loop = asyncio.get_running_loop()
             tasks = []
 
             def _run_async_in_thread(coro_func, **call_kwargs):
@@ -449,9 +482,9 @@ class Canvas(Graph):
 
                 invoke_async = getattr(cpn, "invoke_async", None)
                 if invoke_async and asyncio.iscoroutinefunction(invoke_async):
-                    tasks.append(loop.run_in_executor(self._thread_pool, partial(_run_async_in_thread, invoke_async, **(call_kwargs or {}))))
+                    tasks.append(self._loop.run_in_executor(self._thread_pool, partial(_run_async_in_thread, invoke_async, **(call_kwargs or {}))))
                 else:
-                    tasks.append(loop.run_in_executor(self._thread_pool, partial(task_fn, **(call_kwargs or {}))))
+                    tasks.append(self._loop.run_in_executor(self._thread_pool, partial(task_fn, **(call_kwargs or {}))))
 
             if tasks:
                 await asyncio.gather(*tasks)
@@ -535,10 +568,10 @@ class Canvas(Graph):
                             yield decorate("message", {"content": "", "audio_binary": self.tts(tts_mdl, buff_m)})
                             buff_m = ""
                         cpn_obj.set_output("content", _m)
-                        cite = re.search(r"\[ID:[ 0-9]+\]", _m)
+                        cite = _CITE_PATTERN.search(_m)
                     else:
                         yield decorate("message", {"content": cpn_obj.output("content")})
-                        cite = re.search(r"\[ID:[ 0-9]+\]",  cpn_obj.output("content"))
+                        cite = _CITE_PATTERN.search(cpn_obj.output("content") or "")
 
                     message_end = {}
                     if cpn_obj.get_param("status"):
@@ -659,48 +692,20 @@ class Canvas(Graph):
         return True
 
 
-    def tts(self,tts_mdl, text):
-        def clean_tts_text(text: str) -> str:
-            if not text:
-                return ""
-
-            text = text.encode("utf-8", "ignore").decode("utf-8", "ignore")
-
-            text = re.sub(r"[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]", "", text)
-
-            emoji_pattern = re.compile(
-                "[\U0001F600-\U0001F64F"
-                "\U0001F300-\U0001F5FF"
-                "\U0001F680-\U0001F6FF"
-                "\U0001F1E0-\U0001F1FF"
-                "\U00002700-\U000027BF"
-                "\U0001F900-\U0001F9FF"
-                "\U0001FA70-\U0001FAFF"
-                "\U0001FAD0-\U0001FAFF]+",
-                flags=re.UNICODE
-            )
-            text = emoji_pattern.sub("", text)
-
-            text = re.sub(r"\s+", " ", text).strip()
-
-            MAX_LEN = 500
-            if len(text) > MAX_LEN:
-                text = text[:MAX_LEN]
-
-            return text
+    def tts(self, tts_mdl, text):
         if not tts_mdl or not text:
             return None
-        text = clean_tts_text(text)
+        text = _clean_tts_text(text)
         if not text:
             return None
-        bin = b""
+        chunks = []
         try:
             for chunk in tts_mdl.tts(text):
-                bin += chunk
+                chunks.append(chunk)
         except Exception as e:
             logging.error(f"TTS failed: {e}, text={text!r}")
             return None
-        return binascii.hexlify(bin).decode("utf-8")
+        return binascii.hexlify(b"".join(chunks)).decode("utf-8")
 
     def get_history(self, window_size):
         convs = []
@@ -790,13 +795,15 @@ class Canvas(Graph):
         r = self.retrieval[-1]
         for ck in chunks_format({"chunks": chunks}):
             cid = hash_str2int(ck["id"], 500)
-            # cid = uuid.uuid5(uuid.NAMESPACE_DNS, ck["id"])
-            if cid not in r:
+            if cid not in r["chunks"]:  # Fixed: check in r["chunks"] not r
                 r["chunks"][cid] = ck
 
         for doc in doc_infos:
-            if doc["doc_name"] not in r:
-                r["doc_aggs"][doc["doc_name"]] = doc
+            doc_name = doc.get("doc_name", doc.get("document_name", ""))
+            if doc_name and doc_name not in r["doc_aggs"]:  # Fixed: check in r["doc_aggs"]
+                r["doc_aggs"][doc_name] = doc
+
+        logging.debug(f"Added {len(r['chunks'])} chunks and {len(r['doc_aggs'])} doc_aggs to reference")
 
     def get_reference(self):
         if not self.retrieval:

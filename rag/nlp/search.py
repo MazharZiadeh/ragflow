@@ -124,9 +124,9 @@ class Dealer:
                 if not settings.DOC_ENGINE_INFINITY:
                     src.append(f"q_{len(q_vec)}_vec")
 
-                # Hybrid search parity: 70% text (BM25) + 30% vector (semantic)
-                # Higher keyword weight matches successful retrieval test parameters
-                fusionExpr = FusionExpr("weighted_sum", topk, {"weights": "0.70,0.30"})
+                # Hybrid search: 30% text (BM25) + 70% vector (semantic)
+                # Higher vector weight for better semantic matching in factual Q&A
+                fusionExpr = FusionExpr("weighted_sum", topk, {"weights": "0.30,0.70"})
                 matchExprs = [matchText, matchDense, fusionExpr]
 
                 res = self.dataStore.search(src, highlightFields, filters, matchExprs, orderBy, offset, limit,
@@ -293,8 +293,8 @@ class Dealer:
                 rank_fea.append(nor / np.sqrt(denor) / q_denor)
         return np.array(rank_fea) * 10. + pageranks
 
-    def rerank(self, sres, query, tkweight=0.7,
-               vtweight=0.3, cfield="content_ltks",
+    def rerank(self, sres, query, tkweight=0.3,
+               vtweight=0.7, cfield="content_ltks",
                rank_feature: dict | None = None
                ):
         _, keywords = self.qryr.question(query)
@@ -332,8 +332,8 @@ class Dealer:
 
         return sim + rank_fea, tksim, vtsim
 
-    def rerank_by_model(self, rerank_mdl, sres, query, tkweight=0.7,
-                        vtweight=0.3, cfield="content_ltks",
+    def rerank_by_model(self, rerank_mdl, sres, query, tkweight=0.3,
+                        vtweight=0.7, cfield="content_ltks",
                         rank_feature: dict | None = None):
         _, keywords = self.qryr.question(query)
 
@@ -378,6 +378,8 @@ class Dealer:
             highlight=False,
             rank_feature: dict | None = {PAGERANK_FLD: 10},
     ):
+        logging.info(f"[RETRIEVAL DEBUG] question='{question[:100]}...', vector_similarity_weight={vector_similarity_weight}, "
+                     f"tkweight={1-vector_similarity_weight}, similarity_threshold={similarity_threshold}, kb_ids={kb_ids}")
         ranks = {"total": 0, "chunks": [], "doc_aggs": {}}
         if not question:
             return ranks
@@ -468,11 +470,13 @@ class Dealer:
         vector_column = f"q_{dim}_vec"
         zero_vector = [0.0] * dim
 
+        logging.info(f"[RETRIEVAL DEBUG] Top {len(page_idx)} chunks:")
         for i in page_idx:
             id = sres.ids[i]
             chunk = sres.field[id]
             dnm = chunk.get("docnm_kwd", "")
             did = chunk.get("doc_id", "")
+            logging.info(f"  - Doc: {dnm}, sim={sim_np[i]:.4f}, tsim={tsim[i]:.4f}, vsim={vsim[i]:.4f}")
 
             position_int = chunk.get("position_int", [])
             d = {
