@@ -51,8 +51,26 @@ class LLMToolPluginCallSession(ToolCallSession):
     def tool_call(self, name: str, arguments: dict[str, Any]) -> Any:
         return asyncio.run(self.tool_call_async(name, arguments))
 
+    def _resolve_tool_name(self, name: str) -> str:
+        """Resolve tool name with fuzzy matching for LLM typos."""
+        if name in self.tools_map:
+            return name
+        # Try case-insensitive match
+        for key in self.tools_map:
+            if key.lower() == name.lower():
+                logging.warning(f"Tool name case mismatch: '{name}' resolved to '{key}'")
+                return key
+        # Try edit-distance-1 match (common LLM typos like 'dateset' vs 'dataset')
+        from difflib import get_close_matches
+        matches = get_close_matches(name, self.tools_map.keys(), n=1, cutoff=0.8)
+        if matches:
+            logging.warning(f"Tool name fuzzy matched: '{name}' resolved to '{matches[0]}'")
+            return matches[0]
+        return name  # Return original, will fail at assert
+
     async def tool_call_async(self, name: str, arguments: dict[str, Any]) -> Any:
-        assert name in self.tools_map, f"LLM tool {name} does not exist"
+        name = self._resolve_tool_name(name)
+        assert name in self.tools_map, f"LLM tool {name} does not exist. Available: {list(self.tools_map.keys())}"
         st = timer()
         tool_obj = self.tools_map[name]
         if isinstance(tool_obj, MCPToolCallSession):

@@ -41,20 +41,20 @@ class RetrievalParam(ToolParamBase):
 
     def __init__(self):
         self.meta:ToolMeta = {
-            "name": "search_my_dataset",
-            "description": "Search the knowledge base for relevant information. Use this tool to find factual information before answering questions. Always search before making claims about specific data, dates, numbers, or domain-specific information.",
+            "name": "search_kb",
+            "description": "Search the knowledge base. Use this tool before answering any factual question.",
             "parameters": {
                 "query": {
                     "type": "string",
-                    "description": "A search query containing key terms and concepts from the user's question. Include synonyms and related terms to improve recall. For best results, phrase as a question or include the main subject and what you want to know about it.",
+                    "description": "The search query. Use the key terms from the user's question.",
                     "default": "",
                     "required": True
                 }
             }
         }
         super().__init__()
-        self.function_name = "search_my_dataset"
-        self.description = "Search the knowledge base for relevant information. Use this tool to find factual information before answering questions."
+        self.function_name = "search_kb"
+        self.description = "Search the knowledge base. Use this tool before answering any factual question."
         self.similarity_threshold = 0.1  # Low threshold to prevent over-filtering
         self.keywords_similarity_weight = 0.3  # 30% keywords, 70% vector (semantic-heavy for factual Q&A)
         self.top_n = 10  # More context for the LLM
