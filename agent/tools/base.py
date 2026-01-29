@@ -17,6 +17,7 @@ import logging
 import re
 import time
 from copy import deepcopy
+from difflib import get_close_matches
 import asyncio
 from functools import partial
 from typing import TypedDict, List, Any
@@ -61,7 +62,6 @@ class LLMToolPluginCallSession(ToolCallSession):
                 logging.warning(f"Tool name case mismatch: '{name}' resolved to '{key}'")
                 return key
         # Try edit-distance-1 match (common LLM typos like 'dateset' vs 'dataset')
-        from difflib import get_close_matches
         matches = get_close_matches(name, self.tools_map.keys(), n=1, cutoff=0.8)
         if matches:
             logging.warning(f"Tool name fuzzy matched: '{name}' resolved to '{matches[0]}'")
