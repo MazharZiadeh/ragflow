@@ -14,6 +14,7 @@
 #  limitations under the License.
 #
 import asyncio
+import inspect
 from functools import partial
 import json
 import logging
@@ -203,11 +204,12 @@ class Retrieval(ToolBase, ABC):
             kbinfos["chunks"] = settings.retriever.retrieval_by_children(kbinfos["chunks"],
                                                                          [kb.tenant_id for kb in kbs])
             if self._param.use_kg:
-                ck = await settings.kg_retriever.retrieval(query,
+                _kg_result = settings.kg_retriever.retrieval(query,
                                                      [kb.tenant_id for kb in kbs],
                                                      kb_ids,
                                                      embd_mdl,
                                                      LLMBundle(self._canvas.get_tenant_id(), LLMType.CHAT))
+                ck = (await _kg_result) if inspect.isawaitable(_kg_result) else _kg_result
                 if self.check_if_canceled("Retrieval processing"):
                     return
                 if ck["content_with_weight"]:
@@ -216,8 +218,9 @@ class Retrieval(ToolBase, ABC):
             kbinfos = {"chunks": [], "doc_aggs": []}
 
         if self._param.use_kg and kbs:
-            ck = await settings.kg_retriever.retrieval(query, [kb.tenant_id for kb in kbs], filtered_kb_ids, embd_mdl,
+            _kg_result = settings.kg_retriever.retrieval(query, [kb.tenant_id for kb in kbs], filtered_kb_ids, embd_mdl,
                                                  LLMBundle(kbs[0].tenant_id, LLMType.CHAT))
+            ck = (await _kg_result) if inspect.isawaitable(_kg_result) else _kg_result
             if self.check_if_canceled("Retrieval processing"):
                 return
             if ck["content_with_weight"]:

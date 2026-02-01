@@ -13,6 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+import inspect
 import logging
 import re
 import time
@@ -177,8 +178,12 @@ class ToolBase(ComponentBase):
         self.set_output("_created_time", time.perf_counter())
         try:
             fn_async = getattr(self, "_invoke_async", None)
-            if fn_async and asyncio.iscoroutinefunction(fn_async):
-                res = await fn_async(**kwargs)
+            # Check both the function and its __wrapped__ attr (handles @timeout decorator)
+            if fn_async and (asyncio.iscoroutinefunction(fn_async) or
+                             asyncio.iscoroutinefunction(getattr(fn_async, "__wrapped__", None))):
+                res = fn_async(**kwargs)
+                if inspect.isawaitable(res):
+                    res = await res
             elif asyncio.iscoroutinefunction(self._invoke):
                 res = await self._invoke(**kwargs)
             else:

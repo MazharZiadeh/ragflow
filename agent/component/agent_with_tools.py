@@ -382,11 +382,29 @@ class Agent(LLM, ToolBase):
             hist.append({"role": "assistant", "content": response})
             try:
                 functions = json_repair.loads(re.sub(r"```.*", "", response))
+                if isinstance(functions, dict):
+                    # Normalize a single dict response into a list
+                    # Handle alternate keys: tool_code/tool_name -> name, reasoning -> answer
+                    name = functions.get("name") or functions.get("tool_code") or functions.get("tool_name", "")
+                    args = functions.get("arguments", {})
+                    if not args and name == COMPLETE_TASK:
+                        # LLM may put the answer in 'reasoning' or other fields
+                        answer = functions.get("reasoning") or functions.get("answer") or functions.get("result", "")
+                        args = {"answer": answer} if answer else {}
+                    if name:
+                        functions = [{"name": name, "arguments": args}]
+                    else:
+                        raise TypeError(f"List should be returned, but `{functions}`")
                 if not isinstance(functions, list):
                     raise TypeError(f"List should be returned, but `{functions}`")
-                for f in functions:
+                for i, f in enumerate(functions):
                     if not isinstance(f, dict):
                         raise TypeError(f"An object type should be returned, but `{f}`")
+                    # Normalize alternate key names within list items
+                    if "name" not in f:
+                        f["name"] = f.pop("tool_code", None) or f.pop("tool_name", f.get("name", ""))
+                    if "arguments" not in f:
+                        f["arguments"] = f.pop("params", f.pop("parameters", {}))
 
                 tool_tasks = []
                 for func in functions:

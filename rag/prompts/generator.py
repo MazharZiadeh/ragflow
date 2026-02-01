@@ -338,7 +338,7 @@ def tool_schema(tools_description: list[dict], complete_task=False):
             "type": "function",
             "function": {
                 "name": COMPLETE_TASK,
-                "description": "When you have the final answer and are ready to complete the task, call this function with your answer",
+                "description": "When you have the final answer and are ready to complete the task, call this function with your answer. Your answer must DIRECTLY address the question in clear, concise language. Explain the topic so the reader understands it — do not just list facts. Avoid unnecessary filler or repeating the question.",
                 "parameters": {
                     "type": "object",
                     "properties": {

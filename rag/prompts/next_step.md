@@ -63,12 +63,18 @@ Return ONLY:
   "arguments": { /* tool arguments matching its schema */ }
 }...]<|stop|>
 
-**When you are certain the task is solved OR no further information can be obtained**  
+**When you are certain the task is solved OR no further information can be obtained**
 Return ONLY:
 [{
   "name": "complete_task",
   "arguments": { "answer": "<final answer text>" }
 }]<|stop|>
+
+**ANSWER QUALITY RULES for `complete_task`:**
+- **Be concise**: Answer the question directly. Do not pad with unnecessary introductions or repetition.
+- **Explain, don't just list**: Help the reader understand *why* and *how*, not just *what*.
+- **Stay focused**: Only include information that answers the question. Omit tangential details.
+- **Use plain language**: Write clearly. Avoid academic-style filler paragraphs.
 
 <verification_steps>
 Before providing a final answer:
