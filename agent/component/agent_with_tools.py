@@ -442,17 +442,7 @@ class Agent(LLM, ToolBase):
         logging.warning( f"Exceed max rounds: {self._param.max_rounds}")
         final_instruction = f"""
 {user_request}
-IMPORTANT: Provide your final answer based on ALL retrieved information.
-
-## Requirements:
-1. **Synthesize findings** - Combine all relevant information from retrieved sources
-2. **Cite your sources** - Reference specific documents/chunks that support your claims
-3. **Acknowledge gaps** - If information is incomplete, clearly state what is missing rather than guessing
-4. **Be accurate over complete** - It's better to give a partial but accurate answer than a complete but speculative one
-5. **Stay grounded** - Only include information actually found in the retrieved documents
-6. **Structure clearly** - Organize your response to directly address the question
-
-Respond with your final answer now.
+Give your final answer now. Be concise (1-4 sentences for simple questions). Stay grounded in retrieved documents. Cite sources briefly. If information is incomplete, say so.
         """
         if self.check_if_canceled("Agent final instruction"):
             return
