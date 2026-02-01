@@ -39,7 +39,8 @@ settings.init_settings()
 __all__ = ["app"]
 
 app = Quart(__name__)
-app = cors(app, allow_origin="*")
+_cors_origin = os.environ.get("CORS_ORIGIN", "").strip()
+app = cors(app, allow_origin=_cors_origin) if _cors_origin else cors(app)
 
 # openapi supported
 QuartSchema(app)
