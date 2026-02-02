@@ -462,7 +462,7 @@ async def async_chat(dialog, messages, stream=True, **kwargs):
     msg = [{"role": "system", "content": prompt_config["system"].format(**kwargs)+attachments_}]
     prompt4citation = ""
     if knowledges:
-        msg[0]["content"] += "\n\nIMPORTANT RESPONSE RULES:\n1. Answer ONLY the specific question asked — nothing more.\n2. If retrieved content is not relevant to the question, say \"No relevant information found\" instead of summarizing it.\n3. Match response length to question complexity: simple question = 1-3 sentences.\n4. Never start with \"Based on the provided information...\" or similar preamble."
+        msg[0]["content"] += "\n\nIMPORTANT RESPONSE RULES:\n1. Answer ONLY the specific question asked — nothing more.\n2. If retrieved content is COMPLETELY unrelated to the question, say \"No relevant information found.\" But if it contains any useful information, use it to answer.\n3. Match response length to question complexity: simple question = 1-3 sentences.\n4. Never start with \"Based on the provided information...\" or similar preamble."
         if prompt_config.get("quote", True) and kwargs.get("quote", True):
             prompt4citation = citation_prompt()
     msg.extend([{"role": m["role"], "content": re.sub(r"##\d+\$\$", "", m["content"])} for m in messages if m["role"] != "system"])

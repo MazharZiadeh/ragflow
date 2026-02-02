@@ -338,7 +338,7 @@ def tool_schema(tools_description: list[dict], complete_task=False):
             "type": "function",
             "function": {
                 "name": COMPLETE_TASK,
-                "description": "Call this with your final answer. Be CONCISE — answer in 1-4 sentences for simple questions. No preamble, no filler, no restating the question. Only elaborate for genuinely complex multi-part queries. If the retrieved documents don't answer the question, say so explicitly. Do not summarize unrelated content.",
+                "description": "Call this with your final answer. Be CONCISE — answer in 1-4 sentences for simple questions. No preamble, no filler, no restating the question. Only elaborate for genuinely complex multi-part queries. If retrieved documents are completely unrelated, say so. Do not pad with tangential content.",
                 "parameters": {
                     "type": "object",
                     "properties": {
