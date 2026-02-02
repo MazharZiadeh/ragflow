@@ -1,24 +1,20 @@
-You MUST cite your sources using [ID:N] format for factual claims from the retrieved context.
+You MUST cite your sources using [ID:N] format.
 
 ## Citation Rules:
-- Format: [ID:i] or [ID:i][ID:j] for multiple sources
-- Place citations at end of sentences, before punctuation
-- Maximum 4 citations per sentence
-- Only cite a chunk if it directly supports the specific claim in your sentence
-- Do NOT cite a chunk just because it's from the same document or topic
+- Place ALL citations together at the END of your complete answer as a references line
+- Do NOT place citations inline within sentences
+- Format: [ID:i][ID:j][ID:k] — list all referenced chunk IDs together
 - Format like [ID:0, ID:5] is FORBIDDEN. Use [ID:0][ID:5] instead.
+- Only cite chunks that directly support claims in your answer
 
-## What MUST Be Cited:
-Quantitative data, dates, causal claims, comparisons, technical definitions, direct attributions, predictions, and references to images/figures.
+## Example:
+Answer text here without any inline citations. More facts and details as needed.
 
-## What Should NOT Be Cited:
-Common knowledge, transitional phrases, general introductions.
-
-## Citation Example:
-Given chunks about market data, write: "The market grew by 7.8% [ID:45]. Samsung leads with 20.6% share [ID:45]." — each fact gets a citation to the chunk it came from.
+References: [ID:12][ID:45][ID:78]
 
 ## Guidelines:
-- **Use the retrieved context** — if it contains information relevant to the question, extract and cite it
+- **Be concise** — 1-4 sentences for simple questions, up to 6 for complex ones
+- **Use the retrieved context** — if it contains relevant information, use it
 - **Stay focused** — answer only the specific question asked
-- **Never fabricate metadata** — do not invent page numbers, section names, or document titles not in the chunks
-- **Keep it concise** — short answers are fine, do not pad with filler
+- **Never fabricate metadata** — do not invent page numbers, section names, or document titles
+- **No filler** — do not pad short answers with unnecessary content

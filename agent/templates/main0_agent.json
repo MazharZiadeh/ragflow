@@ -6,7 +6,16 @@
         "params": {
           "message_history_window_size": 13,
           "inputs": {},
-          "outputs": {},
+          "outputs": {
+            "_created_time": {
+              "value": 147943.457572074,
+              "type": "<class 'float'>"
+            },
+            "_elapsed_time": {
+              "value": 0.0011235970014240593,
+              "type": "<class 'float'>"
+            }
+          },
           "description": "",
           "max_retries": 0,
           "delay_after_error": 2.0,
@@ -31,11 +40,29 @@
         "component_name": "Categorize",
         "params": {
           "message_history_window_size": 1,
-          "inputs": {},
+          "inputs": {
+            "sys.query": {
+              "value": "What are the three mandatory safety training courses all lab personnel must attend before being permitted to work in a lab?"
+            }
+          },
           "outputs": {
             "category_name": {
               "type": "string",
-              "value": null
+              "value": "Simple_Lookup"
+            },
+            "_created_time": {
+              "value": 147943.459750899,
+              "type": "<class 'float'>"
+            },
+            "_next": {
+              "value": [
+                "Agent:SimpleRetrieval"
+              ],
+              "type": "<class 'list'>"
+            },
+            "_elapsed_time": {
+              "value": 5.617378925002413,
+              "type": "<class 'float'>"
             }
           },
           "description": "",
@@ -46,7 +73,7 @@
           "exception_goto": null,
           "debug_inputs": {},
           "llm_id": "phi4:latest@Ollama",
-          "sys_prompt": "\nYou are an advanced classification system that categorizes user questions into specific types. Analyze the input question and classify it into ONE of the following categories:\n\n\nHere's description of each category:\n - \n\n---- Instructions ----\n - Consider both explicit mentions and implied context\n - Prioritize the most specific applicable category\n - Return only the category name without explanations\n - Use \"Other\" only when no other category fits\n\n ",
+          "sys_prompt": "\nYou are an advanced classification system that categorizes user questions into specific types. Analyze the input question and classify it into ONE of the following categories:\nConversational\n - Simple_Lookup\n - Complex_Analysis\n\nHere's description of each category:\n - \n------\nCategory: Conversational\nDescription: Greetings, casual chat, thank yous, or questions that don't require knowledge retrieval. Examples: 'Hello', 'How are you?', 'Thanks!', 'What can you do?'\n\n------\nCategory: Simple_Lookup\nDescription: Straightforward factual questions answerable with specific information. Starts with 'What is', 'When is', 'Who is', 'Where is'. No comparison or complex reasoning needed.\n\n------\nCategory: Complex_Analysis\nDescription: Complex queries requiring analysis, comparison, or synthesis across multiple sources. Includes 'How' or 'Why' questions, summaries, comparisons. Triggers comprehensive retrieval.\n\n---- Instructions ----\n - Consider both explicit mentions and implied context\n - Prioritize the most specific applicable category\n - Return only the category name without explanations\n - Use \"Other\" only when no other category fits\n\n \n---- Examples ----\nUSER: \"Hi there\" → Conversational\nUSER: \"Thank you\" → Conversational\nUSER: \"What is machine learning?\" → Simple_Lookup\nUSER: \"Who invented the telephone?\" → Simple_Lookup\nUSER: \"Compare supervised and unsupervised learning\" → Complex_Analysis\nUSER: \"Why did the Roman Empire fall?\" → Complex_Analysis\n",
           "prompts": [
             {
               "role": "user",
@@ -249,12 +276,35 @@
               "description": "All relevant background information, prior facts, decisions, and state needed by the agent to solve the current query. Should be as detailed and self-contained as possible.",
               "required": true,
               "value": null
+            },
+            "sys.query": {
+              "value": "What are the three mandatory safety training courses all lab personnel must attend before being permitted to work in a lab?"
             }
           },
           "outputs": {
             "content": {
               "type": "string",
-              "value": null
+              "value": "Lab personnel are required to complete health and safety trainings as designated by their supervisor [Doc: Biosafety-Manual-V1.pdf, Page 5]. Mandatory training includes reviewing the Laboratory Safety Plan (LSP) [Doc: LSR-Orientation-Mar-2025.pdf, Page 21] and understanding laboratory-specific SOPs [Doc: LSR-Orientation-Mar-2025.pdf, Page 21]. Additionally, personnel must be informed about hazards and ways to protect themselves [Doc: Biosafety-Manual-V1.pdf, Page 5] and follow appropriate laboratory practices and safety requirements [Doc: Biosafety-Manual-V1.pdf, Page 5]. \n\nThe three mandatory safety training courses are not explicitly listed as a set curriculum in the provided documents. However, the documents state personnel must attend required health and safety trainings [Doc: Biosafety-Manual-V1.pdf, Page 5], review the LSP [Doc: LSR-Orientation-Mar-2025.pdf, Page 21], and be trained on SOPs [Doc: LSR-Orientation-Mar-2025.pdf, Page 21]."
+            },
+            "_created_time": {
+              "value": 147949.078140428,
+              "type": "<class 'float'>"
+            },
+            "_elapsed_time": {
+              "value": 0.00024104199837893248,
+              "type": "<class 'float'>"
+            },
+            "use_tools": {
+              "value": [
+                {
+                  "name": "search_kb_0",
+                  "arguments": {
+                    "query": "mandatory safety training courses lab personnel"
+                  },
+                  "results": "\nID: 341\n├── Title: LSR-Orientation-Mar-2025.pdf\n└── Content:\n\n\nTraining\n\n- Ensure everyone who works in the lab is competent to carry out their duties.\n  o Lab Orientation Checklist (recommendation)\n  o Notify HSE if additional safety-related training is needed for the lab group.\n\nTraining requirements:\n  o Lab Safety Training (online or live classes available)\n  o Hazardous Waste Training\n  o Emergency and Incident Preparedness Training\n  o Any additional training in LS\n  o First Aid Training (recommend 2 people)\n  o Fire Extinguisher Training (recommend 2 people)\n\nLab orientation\nNeed for retraining\n3 required training in Salute\nAd lab\n--- Page 27 ---\n\nID: 372\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nprocedures for unattended operations are developed and followed by personnel working in laboratories under their supervision. (Unattended Operations)\n\n9) If a Principal Investigator or laboratory manager authorizes visitors or children to enter hazardous work areas, then that Principal Investigator or laboratory manager is responsible for the health and safety of those individuals. (Visitors and Children in Labs)\n\n10) It is the responsibility of the center directors, Principal Investigators, and laboratory managers to ensure visiting scientists and other similar users have been properly trained and made aware of any potential health and physical hazards that may exist in their labs. (Visiting Scientists and Other Similar Users)\n\n11) Principal Investigators, laboratory managers, and centers are free to set policies that establish minimum PPE requirements for personnel working in and entering their laboratories above the KAUST minimum standards. (Personal Protective Equipment)\n\n12) It is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision. (PPE Training)\n\n13) HSE strongly encourages Principal Investigators and laboratory managers to ensure the use of eye protection is a mandatory requirement for all laboratory personnel, including visitors, working in or entering laboratories under their control. (Eye Protection)\n\n14) Please note: shorts or short skirts (and similar clothing) and open toed shoes (sandals, flip flops, etc.) are not permitted in KAUST laboratories. See the PPE Standard for KAUST Laboratories for more information. (Protective Clothing)\n\n15) It is the responsibility of the Principal Investigator to determine the hazards associated with all of the chemicals used in laboratories under their supervision. (Working Safely With Hazardous Chemicals)\n\n16) It is the responsibility of the Principal Investigator and laboratory manager to ensure staff and students under their supervision are provided with adequate training and information specific to the hazards in their laboratories. (Chemical Hazard Information)\n\n17) All chemicals (both hazardous and non-hazardous) must be properly labeled with clear indication of its contents and an appropriate warning of its physical and health hazards. (Chemical Container Labeling Requirements)\n\n--- Page 125 ---\n\nID: 243\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nCHAPTER ONE: RESPONSIBILITIES\n\nLABORATORY SAFETY RESPONSIBILITIES\n\nThe ultimate responsibility for health and safety within laboratories falls on each individual who works in the laboratory; however, it is the responsibility of the Principal Investigator, faculty, and laboratory manager to ensure that persons working in the laboratory have received all appropriate training, and have been provided with all the necessary information to work safely in laboratories under their control. Principal Investigators, faculty, and lab managers have numerous resources available to them for helping to ensure a safe and healthy laboratory.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar both with this Laboratory Safety Manual and the relevant Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research.\n\nRESEARCH CENTER DIRECTORS AND PRINCIPAL INVESTIGATORS (PIs)\n\nResearch center directors and Principal Investigators are accountable for the health and safety of employees engaged in activities under their supervision. This responsibility cannot be delegated. To fulfill this responsibility, they should be familiar with KAUST's HSE policy and this Laboratory Safety Manual. Their responsibilities include:\n\n- Communicate and implement KAUST's HSE policy and the Lab Safety Manual requirements to faculty, staff, visiting scholars and students working in laboratories within their units;\n- Ensure laboratory personnel know and follow the guidelines and requirements contained within the KAUST Laboratory Safety Manual;\n- Ensure laboratory personnel develop and adhere to proper health and safety protocols.\n- Support staff participation on campus, center, and lab safety committee(s); training programs; and safety meetings;\n- Ensure that laboratory personnel are prepared and trained to handle and dispose of hazardous substances used in their laboratories are written, communicated, and followed. Ensure laboratory personnel are familiar with the relevant Laboratory Safety Plan and are trained to handle and dispose of hazardous substances used in their laboratories.\n\n--- Page 8 ---\n\nID: 40\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nPPE TRAINING\n\nLaboratory personnel must be trained in the selection, proper use, limitations, care, and maintenance of PPE. Training requirements can be met in a variety of ways including videos, group training sessions, and handouts. Periodic retraining should be offered to both the employees and supervisors as appropriate. Examples of topics to be covered during the training include:\n\n- When PPE must be worn.\n- What PPE is necessary to carry out a procedure or experiment.\n- How to properly put on, take off, adjust, and wear PPE.\n- The proper cleaning, care, maintenance, useful life, limitations, and disposal of the PPE.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision.\n\nEYE PROTECTION\n\nEye protection is one of the most important and easiest forms of PPE to wear. Laboratory personnel must use eye protection for many of the chemical and physical hazards found in laboratories including flying particles, broken glass, molten metal, acids or caustic liquids, chemical liquids, chemical gases or vapors, or potentially injurious light radiation.\n\nAppropriate eye protection is required whenever working in or entering a laboratory in which hazardous chemical or infectious materials, or other mechanical or physical eye hazards are present. Eye and face protection must be selected on the basis of hazard and assessment of risk.\n\nAll laboratory employees and visitors are required to wear protective eyewear while in laboratories where chemicals are being handled or stored, at all times, even when not working directly with chemicals.\n\nOrdinaron glasses de adequatethe eyes. A eyeprot functions. aty glass otber ofyle to the eye elds. Wh eye protires the used-glass or prdequate\n\nNOTE: NORMAL PRESCRIPTION GLASSES AND/OR CONTACT LENSES BY THEMSELVES ARE NOT CONSIDERED AS PROTECTIVE EYEWEAR.\n\n--- Page 32 ---\n\nID: 400\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nAPPENDICES\n\nAPPENDIX 1 – COMPILED LAB SAFETY RESPONSIBILITIES\n\nThe following is a compiled list of lab safety responsibilities for Principal Investigators and laboratory managers. The item after the statements in bold and parentheses correspond to the section header within this Laboratory Safety Manual.\n\n1) It is the responsibility of the Principal Investigator to ensure a Laboratory Safety Plan is written and that all personnel working in laboratories under their supervision have reviewed and understood the plan. (Laboratory Safety Plan)\n\n2) It is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar with this Laboratory Safety Manual, the Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research. (Laboratory Safety Responsibilities)\n\n3) It is the responsibility of the Principal Investigator and laboratory manager to ensure that personnel working in laboratories under their supervision are informed and follow laboratory-specific, research center-specific, and campus-wide policies and procedures related to laboratory safety – such as the guidelines and requirements covered in this Laboratory Safety Manual. (Laboratory Safety Policies)\n\n4) It is the responsibility of Principal Investigators and laboratory managers to ensure personnel working in laboratories under their supervision have been provided with the proper training, have received information about the hazards in the laboratory they may encounter, and have been informed about ways they can protect themselves. (Employee Training)\n\n5) It is the responsibility of the Principal Investigator and laboratory manager to ensure written SOPs incorporating health and safety considerations are developed for work involving the use of hazardous chemicals in laboratories under their supervision and that PPE and engineering controls are adequate to prevent overexposure. In addition, Principal Investigators and laboratory managers must ensure that personnel working in laboratories under their supervision have been trained on those SOPs. (Standard Operating Procedures)\n\n6) It is the responsibility of Principal Investigators and laboratory managers to ensure that all laboratory personnel are aware of and follow the procedures for working alone in the laboratory and are managed in accordance with the policy to ensure their safety and the safety of others. (Working Alone)\n\n7) It is the responsibility of Principal Investigators and laboratory managers to ensure that laboratories under their supervision are maintained in a clean and orderly manner and that personnel working in the lab practice good housekeeping. (Laboratory Housekeeping)\n\n--- Page 124 -\n\nID: 63\n├── Title: Biosafety-Manual-V1.pdf\n└── Content:\n\n\n8. Obtain prior approval from institutional committees.\n\n9. Ensure that all incidents and near misses occurring in their laboratories are reported to their supervisor and that an incident report is submitted to KAUST HSE using the online reporting system.\n\nThe Principal Investigator/Laboratory Supervisor must ensure that all persons working with biohazards in the laboratory are properly trained, understand the hazards, know how to protect themselves, and are equipped and prepared to work safely.\n\n3.2. Laboratory Personnel\n\nLaboratory personnel consists of those individuals who conduct their work in a laboratory and are at risk of possible exposure to biohazards or other health or physical hazards on a regular or periodic basis. Personnel include laboratory technicians, instructors and researchers, visiting researchers, graduate assistants, and students. The responsibilities of laboratory personnel include:\n\n1. Follow all appropriate laboratory practices and safety requirements for the work being performed as per this Biosafety Manual and the KAUST Laboratory Safety Manual;\n\n2. Attend required health and safety trainings as designated by your supervisor;\n\n3. Inform your principal investigator, supervisor, laboratory manager, or instructor of any safety hazards or unsafe working conditions in the workplace, classroom, or laboratory (e.g., faulty fume hoods, or malfunctions of emergency safety equipment);\n\n4. Follow the standard operating procedures for your laboratory and the experiments being conducted - as provided by your supervisor;\n\n5. Know all emergency procedures as established by the Principal Investigator/ Laboratory Supervisor;\n\n6. Report all incidents, near misses, and workplace injuries immediately to your supervisor and by using the online reporting system.\n\n3.3. Health, Safety, and Environment (HSE)\n\nThe HSE department will provide technical information and program support to assist in compliance with KAUST’s Biosafety Manual. This includes developing policies, recommendations, and guidelines using those Biosafety Manual and the Laboratory Safety Manual to liaison serving as cc providing health and safety responsibilities regarding a University refiimpor (incroui'd'ini tniannual and taj), compete and consultants in health andn ency, resphciue: sain Biosafety atory per research day;\n\n1. Designating a University Biosafety Officer;\n\n2. Provide information to the research community regarding procedures and regulations for the safe use of biohazardous agents/materials, bloodborne pathogens, and r/sNA molecules in research;\n\nPage 5 of 58\nHSE-RST-Bio001M\n--- Page 5 ---\n\nID: 75\n├── Title: LSR-Orientation-Mar-2025.pdf\n└── Content:\n\n\nHazard Identification and Risk Control\n\nLab Safety Plan (LSP) - Prepare/review the Lab Safety Plan (future LARA) to identify all the hazards present in the lab and ensure that safety controls are available and operational to minimize the risks (e.g., fume hood, biosafety cabinets, enclosures, etc.).\n\nLSP must be read, understood and signed by everyone working in your lab\nLSP available to all lab personnel\nLSP must be reviewed annually\nA template is available on our webpage\n\nStandard Operating Procedures (SOPs) - Assist lab members to develop written SOPs for hazardous operations, equipment, or specific experiment.\n\nEnsure that SOPs are reviewed regularly (or yearly)\nEnsure lab members sign the SOPs that apply to their work\nEnsure lab-specific SOPs are available (either paper copies or electronic access while in the lab)\n\n--- Page 21 ---\n\nID: 271\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nINTRODUCTION\n\nKing Abdullah University of Science and Technology (KAUST) intends to be a leading international research institution with a strong commitment to protecting the health and safety of its faculty, staff, students, and visitors, as well as protecting its assets and the environment. Moreover, it is the vision of KAUST to be a leader among its peers in the international research community for its health, safety, and environmental performance.\n\nKAUST's commitment to health, safety, and environmental performance extends to all functions within the University. However, because of the special safety concerns that arise in a laboratory setting, this Laboratory Safety Manual has been developed by the Health, Safety, and Environmental (HSE) Department to serve as a general guide to laboratory safety within KAUST. It is to be used as a resource to assist laboratories in designing their own Laboratory Safety Plans.\n\nThis Laboratory Safety Manual is intended to establish basic safe operating practices so that faculty, staff, and students of KAUST may carry out effective educational and research programs in a safe and healthy environment. It is not intended to be a complete or final listing of all laboratory hazards or safe work practices. Because of the diverse nature of work being conducted at KAUST, additional procedures or requirements may be necessary for individual research labs.\n\nThe information contained within this laboratory safety manual is intended to comply with national regulations, international standards and laboratory best management practices.\n\nLABORATORY SAFETY PLAN\n\nEach laboratory where there is a risk of health or physical hazards is required to have a written Laboratory Safety Plan to protect against hazards to personnel, property, or the environment. This includes laboratories having hazardous materials (chemical, biological or radioactive), compressed gases, high-pressure, high-energy, Laser, X-Ray, or other significant physical, mechanical, or electrical hazards. The Laboratory Safety Plan should outline the lab-specific practices and procedures, personal protective equipment, training requirements, standard operating procedures, emergency procedures, and other safety requirements to protect employees from the hazards they may encounter in the laboratory. The Laboratory Safety Plan must be updated whenever there is a significant change in laboratory operations and/or hazards present, or a change in emergency contact personnel. A Laboratory Safety Plan template is available on the Lab Safety webpage.\n\n--- Page 7 ---"
+                }
+              ],
+              "type": "<class 'list'>"
             }
           },
           "description": "",
@@ -263,16 +313,16 @@
           "exception_method": null,
           "exception_default_value": null,
           "exception_goto": [],
-          "debug_inputs": {},
+          "debug_inputs": [],
           "user_prompt": "",
           "reasoning": null,
           "context": null,
-          "llm_id": "qwen2.5:32b@Ollama",
-          "sys_prompt": "You are a precise Retrieval Assistant. Your sole objective is to answer the user's question using ONLY the provided context.\n### CONSTRAINTS:\n1. **Source Grounding:** If the answer isn't in the context, state exactly what is missing rather than saying \"I don't know.\"\n2. **Directness:** Do not use filler phrases like \"Based on the documents provided...\" Jump straight to the facts.\n3. **Citation Format:** Every factual claim must be followed by: **[Doc: document_name, Page: X]**.\n4. **No Assumptions:** Do not use outside knowledge. If the context says the sky is green, the sky is green.\n### TONE:\nProfessional, objective, and concise.",
+          "llm_id": "gemma3:27b@Ollama",
+          "sys_prompt": "You are a precise, concise retrieval assistant. Answer using ONLY the provided context.\n\nRULES:\n1. Be CONCISE: 1-4 sentences for simple questions, up to 6 for complex ones. No filler, no headers, no preamble.\n2. Jump straight to the answer. Never start with \"Based on...\" or \"According to...\".\n3. Place ALL citations at the END of your answer in a single references line, e.g.: [ID:12][ID:45][ID:78]\n4. Do NOT put citations inline within sentences.\n5. If the context doesn't answer the question, say: \"This information is not in my knowledge base.\"\n6. Do not fabricate document names, page numbers, or metadata not present in the context.",
           "prompts": [
             {
-              "content": "=== RETRIEVED DOCUMENTS FROM KNOWLEDGE BASE ===\n{Retrieval_Simple@formalized_content}\n=== END OF RETRIEVED DOCUMENTS ===\n>>> CRITICAL: You have NO knowledge except what appears above in RETRIEVED DOCUMENTS <\n**User Question:** {sys.query}\n**Your Task:**\n1. Search ONLY the retrieved documents above for the answer\n2. Extract facts ONLY from the retrieved content\n3. Use format: **[Doc: document_name, Page: X]** for citations\n4. Cite EVERY fact immediately after stating it\n5. If not in retrieved documents above, say: \"This information is not in my knowledge base\"\n**Answer using ONLY the retrieved documents:**",
-              "role": "user"
+              "role": "user",
+              "content": "=== RETRIEVED DOCUMENTS FROM KNOWLEDGE BASE ===\n{Retrieval_Simple@formalized_content}\n=== END OF RETRIEVED DOCUMENTS ===\n>>> CRITICAL: You have NO knowledge except what appears above in RETRIEVED DOCUMENTS <\n**User Question:** {sys.query}\n**Your Task:**\n1. Search ONLY the retrieved documents above for the answer\n2. Extract facts ONLY from the retrieved content\n3. Use format: **[Doc: document_name, Page: X]** for citations\n4. Cite EVERY fact immediately after stating it\n5. If not in retrieved documents above, say: \"This information is not in my knowledge base\"\n**Answer using ONLY the retrieved documents:**"
             }
           ],
           "max_tokens": 2048,
@@ -302,6 +352,272 @@
                   },
                   "metadata": {
                     "value": null
+                  },
+                  "_created_time": {
+                    "value": 147959.291866565,
+                    "type": "<class 'float'>"
+                  },
+                  "formalized_content": {
+                    "value": "\nID: 341\n├── Title: LSR-Orientation-Mar-2025.pdf\n└── Content:\n\n\nTraining\n\n- Ensure everyone who works in the lab is competent to carry out their duties.\n  o Lab Orientation Checklist (recommendation)\n  o Notify HSE if additional safety-related training is needed for the lab group.\n\nTraining requirements:\n  o Lab Safety Training (online or live classes available)\n  o Hazardous Waste Training\n  o Emergency and Incident Preparedness Training\n  o Any additional training in LS\n  o First Aid Training (recommend 2 people)\n  o Fire Extinguisher Training (recommend 2 people)\n\nLab orientation\nNeed for retraining\n3 required training in Salute\nAd lab\n--- Page 27 ---\n\nID: 372\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nprocedures for unattended operations are developed and followed by personnel working in laboratories under their supervision. (Unattended Operations)\n\n9) If a Principal Investigator or laboratory manager authorizes visitors or children to enter hazardous work areas, then that Principal Investigator or laboratory manager is responsible for the health and safety of those individuals. (Visitors and Children in Labs)\n\n10) It is the responsibility of the center directors, Principal Investigators, and laboratory managers to ensure visiting scientists and other similar users have been properly trained and made aware of any potential health and physical hazards that may exist in their labs. (Visiting Scientists and Other Similar Users)\n\n11) Principal Investigators, laboratory managers, and centers are free to set policies that establish minimum PPE requirements for personnel working in and entering their laboratories above the KAUST minimum standards. (Personal Protective Equipment)\n\n12) It is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision. (PPE Training)\n\n13) HSE strongly encourages Principal Investigators and laboratory managers to ensure the use of eye protection is a mandatory requirement for all laboratory personnel, including visitors, working in or entering laboratories under their control. (Eye Protection)\n\n14) Please note: shorts or short skirts (and similar clothing) and open toed shoes (sandals, flip flops, etc.) are not permitted in KAUST laboratories. See the PPE Standard for KAUST Laboratories for more information. (Protective Clothing)\n\n15) It is the responsibility of the Principal Investigator to determine the hazards associated with all of the chemicals used in laboratories under their supervision. (Working Safely With Hazardous Chemicals)\n\n16) It is the responsibility of the Principal Investigator and laboratory manager to ensure staff and students under their supervision are provided with adequate training and information specific to the hazards in their laboratories. (Chemical Hazard Information)\n\n17) All chemicals (both hazardous and non-hazardous) must be properly labeled with clear indication of its contents and an appropriate warning of its physical and health hazards. (Chemical Container Labeling Requirements)\n\n--- Page 125 ---\n\nID: 243\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nCHAPTER ONE: RESPONSIBILITIES\n\nLABORATORY SAFETY RESPONSIBILITIES\n\nThe ultimate responsibility for health and safety within laboratories falls on each individual who works in the laboratory; however, it is the responsibility of the Principal Investigator, faculty, and laboratory manager to ensure that persons working in the laboratory have received all appropriate training, and have been provided with all the necessary information to work safely in laboratories under their control. Principal Investigators, faculty, and lab managers have numerous resources available to them for helping to ensure a safe and healthy laboratory.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar both with this Laboratory Safety Manual and the relevant Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research.\n\nRESEARCH CENTER DIRECTORS AND PRINCIPAL INVESTIGATORS (PIs)\n\nResearch center directors and Principal Investigators are accountable for the health and safety of employees engaged in activities under their supervision. This responsibility cannot be delegated. To fulfill this responsibility, they should be familiar with KAUST's HSE policy and this Laboratory Safety Manual. Their responsibilities include:\n\n- Communicate and implement KAUST's HSE policy and the Lab Safety Manual requirements to faculty, staff, visiting scholars and students working in laboratories within their units;\n- Ensure laboratory personnel know and follow the guidelines and requirements contained within the KAUST Laboratory Safety Manual;\n- Ensure laboratory personnel develop and adhere to proper health and safety protocols.\n- Support staff participation on campus, center, and lab safety committee(s); training programs; and safety meetings;\n- Ensure that laboratory personnel are prepared and trained to handle and dispose of hazardous substances used in their laboratories are written, communicated, and followed. Ensure laboratory personnel are familiar with the relevant Laboratory Safety Plan and are trained to handle and dispose of hazardous substances used in their laboratories.\n\n--- Page 8 ---\n\nID: 40\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nPPE TRAINING\n\nLaboratory personnel must be trained in the selection, proper use, limitations, care, and maintenance of PPE. Training requirements can be met in a variety of ways including videos, group training sessions, and handouts. Periodic retraining should be offered to both the employees and supervisors as appropriate. Examples of topics to be covered during the training include:\n\n- When PPE must be worn.\n- What PPE is necessary to carry out a procedure or experiment.\n- How to properly put on, take off, adjust, and wear PPE.\n- The proper cleaning, care, maintenance, useful life, limitations, and disposal of the PPE.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision.\n\nEYE PROTECTION\n\nEye protection is one of the most important and easiest forms of PPE to wear. Laboratory personnel must use eye protection for many of the chemical and physical hazards found in laboratories including flying particles, broken glass, molten metal, acids or caustic liquids, chemical liquids, chemical gases or vapors, or potentially injurious light radiation.\n\nAppropriate eye protection is required whenever working in or entering a laboratory in which hazardous chemical or infectious materials, or other mechanical or physical eye hazards are present. Eye and face protection must be selected on the basis of hazard and assessment of risk.\n\nAll laboratory employees and visitors are required to wear protective eyewear while in laboratories where chemicals are being handled or stored, at all times, even when not working directly with chemicals.\n\nOrdinaron glasses de adequatethe eyes. A eyeprot functions. aty glass otber ofyle to the eye elds. Wh eye protires the used-glass or prdequate\n\nNOTE: NORMAL PRESCRIPTION GLASSES AND/OR CONTACT LENSES BY THEMSELVES ARE NOT CONSIDERED AS PROTECTIVE EYEWEAR.\n\n--- Page 32 ---\n\nID: 400\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nAPPENDICES\n\nAPPENDIX 1 – COMPILED LAB SAFETY RESPONSIBILITIES\n\nThe following is a compiled list of lab safety responsibilities for Principal Investigators and laboratory managers. The item after the statements in bold and parentheses correspond to the section header within this Laboratory Safety Manual.\n\n1) It is the responsibility of the Principal Investigator to ensure a Laboratory Safety Plan is written and that all personnel working in laboratories under their supervision have reviewed and understood the plan. (Laboratory Safety Plan)\n\n2) It is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar with this Laboratory Safety Manual, the Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research. (Laboratory Safety Responsibilities)\n\n3) It is the responsibility of the Principal Investigator and laboratory manager to ensure that personnel working in laboratories under their supervision are informed and follow laboratory-specific, research center-specific, and campus-wide policies and procedures related to laboratory safety – such as the guidelines and requirements covered in this Laboratory Safety Manual. (Laboratory Safety Policies)\n\n4) It is the responsibility of Principal Investigators and laboratory managers to ensure personnel working in laboratories under their supervision have been provided with the proper training, have received information about the hazards in the laboratory they may encounter, and have been informed about ways they can protect themselves. (Employee Training)\n\n5) It is the responsibility of the Principal Investigator and laboratory manager to ensure written SOPs incorporating health and safety considerations are developed for work involving the use of hazardous chemicals in laboratories under their supervision and that PPE and engineering controls are adequate to prevent overexposure. In addition, Principal Investigators and laboratory managers must ensure that personnel working in laboratories under their supervision have been trained on those SOPs. (Standard Operating Procedures)\n\n6) It is the responsibility of Principal Investigators and laboratory managers to ensure that all laboratory personnel are aware of and follow the procedures for working alone in the laboratory and are managed in accordance with the policy to ensure their safety and the safety of others. (Working Alone)\n\n7) It is the responsibility of Principal Investigators and laboratory managers to ensure that laboratories under their supervision are maintained in a clean and orderly manner and that personnel working in the lab practice good housekeeping. (Laboratory Housekeeping)\n\n--- Page 124 -\n\nID: 63\n├── Title: Biosafety-Manual-V1.pdf\n└── Content:\n\n\n8. Obtain prior approval from institutional committees.\n\n9. Ensure that all incidents and near misses occurring in their laboratories are reported to their supervisor and that an incident report is submitted to KAUST HSE using the online reporting system.\n\nThe Principal Investigator/Laboratory Supervisor must ensure that all persons working with biohazards in the laboratory are properly trained, understand the hazards, know how to protect themselves, and are equipped and prepared to work safely.\n\n3.2. Laboratory Personnel\n\nLaboratory personnel consists of those individuals who conduct their work in a laboratory and are at risk of possible exposure to biohazards or other health or physical hazards on a regular or periodic basis. Personnel include laboratory technicians, instructors and researchers, visiting researchers, graduate assistants, and students. The responsibilities of laboratory personnel include:\n\n1. Follow all appropriate laboratory practices and safety requirements for the work being performed as per this Biosafety Manual and the KAUST Laboratory Safety Manual;\n\n2. Attend required health and safety trainings as designated by your supervisor;\n\n3. Inform your principal investigator, supervisor, laboratory manager, or instructor of any safety hazards or unsafe working conditions in the workplace, classroom, or laboratory (e.g., faulty fume hoods, or malfunctions of emergency safety equipment);\n\n4. Follow the standard operating procedures for your laboratory and the experiments being conducted - as provided by your supervisor;\n\n5. Know all emergency procedures as established by the Principal Investigator/ Laboratory Supervisor;\n\n6. Report all incidents, near misses, and workplace injuries immediately to your supervisor and by using the online reporting system.\n\n3.3. Health, Safety, and Environment (HSE)\n\nThe HSE department will provide technical information and program support to assist in compliance with KAUST’s Biosafety Manual. This includes developing policies, recommendations, and guidelines using those Biosafety Manual and the Laboratory Safety Manual to liaison serving as cc providing health and safety responsibilities regarding a University refiimpor (incroui'd'ini tniannual and taj), compete and consultants in health andn ency, resphciue: sain Biosafety atory per research day;\n\n1. Designating a University Biosafety Officer;\n\n2. Provide information to the research community regarding procedures and regulations for the safe use of biohazardous agents/materials, bloodborne pathogens, and r/sNA molecules in research;\n\nPage 5 of 58\nHSE-RST-Bio001M\n--- Page 5 ---\n\nID: 75\n├── Title: LSR-Orientation-Mar-2025.pdf\n└── Content:\n\n\nHazard Identification and Risk Control\n\nLab Safety Plan (LSP) - Prepare/review the Lab Safety Plan (future LARA) to identify all the hazards present in the lab and ensure that safety controls are available and operational to minimize the risks (e.g., fume hood, biosafety cabinets, enclosures, etc.).\n\nLSP must be read, understood and signed by everyone working in your lab\nLSP available to all lab personnel\nLSP must be reviewed annually\nA template is available on our webpage\n\nStandard Operating Procedures (SOPs) - Assist lab members to develop written SOPs for hazardous operations, equipment, or specific experiment.\n\nEnsure that SOPs are reviewed regularly (or yearly)\nEnsure lab members sign the SOPs that apply to their work\nEnsure lab-specific SOPs are available (either paper copies or electronic access while in the lab)\n\n--- Page 21 ---\n\nID: 271\n├── Title: laboratory_safety_manual.pdf\n└── Content:\n\n\nINTRODUCTION\n\nKing Abdullah University of Science and Technology (KAUST) intends to be a leading international research institution with a strong commitment to protecting the health and safety of its faculty, staff, students, and visitors, as well as protecting its assets and the environment. Moreover, it is the vision of KAUST to be a leader among its peers in the international research community for its health, safety, and environmental performance.\n\nKAUST's commitment to health, safety, and environmental performance extends to all functions within the University. However, because of the special safety concerns that arise in a laboratory setting, this Laboratory Safety Manual has been developed by the Health, Safety, and Environmental (HSE) Department to serve as a general guide to laboratory safety within KAUST. It is to be used as a resource to assist laboratories in designing their own Laboratory Safety Plans.\n\nThis Laboratory Safety Manual is intended to establish basic safe operating practices so that faculty, staff, and students of KAUST may carry out effective educational and research programs in a safe and healthy environment. It is not intended to be a complete or final listing of all laboratory hazards or safe work practices. Because of the diverse nature of work being conducted at KAUST, additional procedures or requirements may be necessary for individual research labs.\n\nThe information contained within this laboratory safety manual is intended to comply with national regulations, international standards and laboratory best management practices.\n\nLABORATORY SAFETY PLAN\n\nEach laboratory where there is a risk of health or physical hazards is required to have a written Laboratory Safety Plan to protect against hazards to personnel, property, or the environment. This includes laboratories having hazardous materials (chemical, biological or radioactive), compressed gases, high-pressure, high-energy, Laser, X-Ray, or other significant physical, mechanical, or electrical hazards. The Laboratory Safety Plan should outline the lab-specific practices and procedures, personal protective equipment, training requirements, standard operating procedures, emergency procedures, and other safety requirements to protect employees from the hazards they may encounter in the laboratory. The Laboratory Safety Plan must be updated whenever there is a significant change in laboratory operations and/or hazards present, or a change in emergency contact personnel. A Laboratory Safety Plan template is available on the Lab Safety webpage.\n\n--- Page 7 ---",
+                    "type": "<class 'str'>"
+                  },
+                  "json": {
+                    "value": [
+                      {
+                        "chunk_id": "3f2340e360acadc7",
+                        "content_with_weight": "\n\nTraining\n\n- Ensure everyone who works in the lab is competent to carry out their duties.\n  o Lab Orientation Checklist (recommendation)\n  o Notify HSE if additional safety-related training is needed for the lab group.\n\nTraining requirements:\n  o Lab Safety Training (online or live classes available)\n  o Hazardous Waste Training\n  o Emergency and Incident Preparedness Training\n  o Any additional training in LS\n  o First Aid Training (recommend 2 people)\n  o Fire Extinguisher Training (recommend 2 people)\n\nLab orientation\nNeed for retraining\n3 required training in Salute\nAd lab\n--- Page 27 ---",
+                        "doc_id": "764c42d9fd0b11f0b840164a69504768",
+                        "docnm_kwd": "LSR-Orientation-Mar-2025.pdf",
+                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                        "important_kwd": [],
+                        "image_id": "",
+                        "similarity": 0.5488697707329745,
+                        "vector_similarity": 0.7084694200218964,
+                        "term_similarity": 0.1764705890588235,
+                        "positions": [],
+                        "doc_type_kwd": "",
+                        "mom_id": ""
+                      },
+                      {
+                        "chunk_id": "7a3391371cf90b70",
+                        "content_with_weight": "\n\nprocedures for unattended operations are developed and followed by personnel working in laboratories under their supervision. (Unattended Operations)\n\n9) If a Principal Investigator or laboratory manager authorizes visitors or children to enter hazardous work areas, then that Principal Investigator or laboratory manager is responsible for the health and safety of those individuals. (Visitors and Children in Labs)\n\n10) It is the responsibility of the center directors, Principal Investigators, and laboratory managers to ensure visiting scientists and other similar users have been properly trained and made aware of any potential health and physical hazards that may exist in their labs. (Visiting Scientists and Other Similar Users)\n\n11) Principal Investigators, laboratory managers, and centers are free to set policies that establish minimum PPE requirements for personnel working in and entering their laboratories above the KAUST minimum standards. (Personal Protective Equipment)\n\n12) It is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision. (PPE Training)\n\n13) HSE strongly encourages Principal Investigators and laboratory managers to ensure the use of eye protection is a mandatory requirement for all laboratory personnel, including visitors, working in or entering laboratories under their control. (Eye Protection)\n\n14) Please note: shorts or short skirts (and similar clothing) and open toed shoes (sandals, flip flops, etc.) are not permitted in KAUST laboratories. See the PPE Standard for KAUST Laboratories for more information. (Protective Clothing)\n\n15) It is the responsibility of the Principal Investigator to determine the hazards associated with all of the chemicals used in laboratories under their supervision. (Working Safely With Hazardous Chemicals)\n\n16) It is the responsibility of the Principal Investigator and laboratory manager to ensure staff and students under their supervision are provided with adequate training and information specific to the hazards in their laboratories. (Chemical Hazard Information)\n\n17) All chemicals (both hazardous and non-hazardous) must be properly labeled with clear indication of its contents and an appropriate warning of its physical and health hazards. (Chemical Container Labeling Requirements)\n\n--- Page 125 ---",
+                        "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                        "docnm_kwd": "laboratory_safety_manual.pdf",
+                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                        "important_kwd": [],
+                        "image_id": "",
+                        "similarity": 0.5312000936951896,
+                        "vector_similarity": 0.6075967722284222,
+                        "term_similarity": 0.35294117711764705,
+                        "positions": [],
+                        "doc_type_kwd": "",
+                        "mom_id": ""
+                      },
+                      {
+                        "chunk_id": "2c4607af616db4df",
+                        "content_with_weight": "\n\nCHAPTER ONE: RESPONSIBILITIES\n\nLABORATORY SAFETY RESPONSIBILITIES\n\nThe ultimate responsibility for health and safety within laboratories falls on each individual who works in the laboratory; however, it is the responsibility of the Principal Investigator, faculty, and laboratory manager to ensure that persons working in the laboratory have received all appropriate training, and have been provided with all the necessary information to work safely in laboratories under their control. Principal Investigators, faculty, and lab managers have numerous resources available to them for helping to ensure a safe and healthy laboratory.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar both with this Laboratory Safety Manual and the relevant Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research.\n\nRESEARCH CENTER DIRECTORS AND PRINCIPAL INVESTIGATORS (PIs)\n\nResearch center directors and Principal Investigators are accountable for the health and safety of employees engaged in activities under their supervision. This responsibility cannot be delegated. To fulfill this responsibility, they should be familiar with KAUST's HSE policy and this Laboratory Safety Manual. Their responsibilities include:\n\n- Communicate and implement KAUST's HSE policy and the Lab Safety Manual requirements to faculty, staff, visiting scholars and students working in laboratories within their units;\n- Ensure laboratory personnel know and follow the guidelines and requirements contained within the KAUST Laboratory Safety Manual;\n- Ensure laboratory personnel develop and adhere to proper health and safety protocols.\n- Support staff participation on campus, center, and lab safety committee(s); training programs; and safety meetings;\n- Ensure that laboratory personnel are prepared and trained to handle and dispose of hazardous substances used in their laboratories are written, communicated, and followed. Ensure laboratory personnel are familiar with the relevant Laboratory Safety Plan and are trained to handle and dispose of hazardous substances used in their laboratories.\n\n--- Page 8 ---",
+                        "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                        "docnm_kwd": "laboratory_safety_manual.pdf",
+                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                        "important_kwd": [],
+                        "image_id": "",
+                        "similarity": 0.5278909652858966,
+                        "vector_similarity": 0.6028694459294321,
+                        "term_similarity": 0.35294117711764705,
+                        "positions": [],
+                        "doc_type_kwd": "",
+                        "mom_id": ""
+                      },
+                      {
+                        "chunk_id": "2056ad3ec7435db1",
+                        "content_with_weight": "\n\nPPE TRAINING\n\nLaboratory personnel must be trained in the selection, proper use, limitations, care, and maintenance of PPE. Training requirements can be met in a variety of ways including videos, group training sessions, and handouts. Periodic retraining should be offered to both the employees and supervisors as appropriate. Examples of topics to be covered during the training include:\n\n- When PPE must be worn.\n- What PPE is necessary to carry out a procedure or experiment.\n- How to properly put on, take off, adjust, and wear PPE.\n- The proper cleaning, care, maintenance, useful life, limitations, and disposal of the PPE.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision.\n\nEYE PROTECTION\n\nEye protection is one of the most important and easiest forms of PPE to wear. Laboratory personnel must use eye protection for many of the chemical and physical hazards found in laboratories including flying particles, broken glass, molten metal, acids or caustic liquids, chemical liquids, chemical gases or vapors, or potentially injurious light radiation.\n\nAppropriate eye protection is required whenever working in or entering a laboratory in which hazardous chemical or infectious materials, or other mechanical or physical eye hazards are present. Eye and face protection must be selected on the basis of hazard and assessment of risk.\n\nAll laboratory employees and visitors are required to wear protective eyewear while in laboratories where chemicals are being handled or stored, at all times, even when not working directly with chemicals.\n\nOrdinaron glasses de adequatethe eyes. A eyeprot functions. aty glass otber ofyle to the eye elds. Wh eye protires the used-glass or prdequate\n\nNOTE: NORMAL PRESCRIPTION GLASSES AND/OR CONTACT LENSES BY THEMSELVES ARE NOT CONSIDERED AS PROTECTIVE EYEWEAR.\n\n--- Page 32 ---",
+                        "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                        "docnm_kwd": "laboratory_safety_manual.pdf",
+                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                        "important_kwd": [],
+                        "image_id": "",
+                        "similarity": 0.5205755442425858,
+                        "vector_similarity": 0.6428390124557949,
+                        "term_similarity": 0.23529411841176467,
+                        "positions": [],
+                        "doc_type_kwd": "",
+                        "mom_id": ""
+                      },
+                      {
+                        "chunk_id": "79db6fb829ec1350",
+                        "content_with_weight": "\n\nAPPENDICES\n\nAPPENDIX 1 – COMPILED LAB SAFETY RESPONSIBILITIES\n\nThe following is a compiled list of lab safety responsibilities for Principal Investigators and laboratory managers. The item after the statements in bold and parentheses correspond to the section header within this Laboratory Safety Manual.\n\n1) It is the responsibility of the Principal Investigator to ensure a Laboratory Safety Plan is written and that all personnel working in laboratories under their supervision have reviewed and understood the plan. (Laboratory Safety Plan)\n\n2) It is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar with this Laboratory Safety Manual, the Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research. (Laboratory Safety Responsibilities)\n\n3) It is the responsibility of the Principal Investigator and laboratory manager to ensure that personnel working in laboratories under their supervision are informed and follow laboratory-specific, research center-specific, and campus-wide policies and procedures related to laboratory safety – such as the guidelines and requirements covered in this Laboratory Safety Manual. (Laboratory Safety Policies)\n\n4) It is the responsibility of Principal Investigators and laboratory managers to ensure personnel working in laboratories under their supervision have been provided with the proper training, have received information about the hazards in the laboratory they may encounter, and have been informed about ways they can protect themselves. (Employee Training)\n\n5) It is the responsibility of the Principal Investigator and laboratory manager to ensure written SOPs incorporating health and safety considerations are developed for work involving the use of hazardous chemicals in laboratories under their supervision and that PPE and engineering controls are adequate to prevent overexposure. In addition, Principal Investigators and laboratory managers must ensure that personnel working in laboratories under their supervision have been trained on those SOPs. (Standard Operating Procedures)\n\n6) It is the responsibility of Principal Investigators and laboratory managers to ensure that all laboratory personnel are aware of and follow the procedures for working alone in the laboratory and are managed in accordance with the policy to ensure their safety and the safety of others. (Working Alone)\n\n7) It is the responsibility of Principal Investigators and laboratory managers to ensure that laboratories under their supervision are maintained in a clean and orderly manner and that personnel working in the lab practice good housekeeping. (Laboratory Housekeeping)\n\n--- Page 124 -",
+                        "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                        "docnm_kwd": "laboratory_safety_manual.pdf",
+                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                        "important_kwd": [],
+                        "image_id": "",
+                        "similarity": 0.5137342084903588,
+                        "vector_similarity": 0.6078555916584958,
+                        "term_similarity": 0.2941176477647059,
+                        "positions": [],
+                        "doc_type_kwd": "",
+                        "mom_id": ""
+                      },
+                      {
+                        "chunk_id": "66a73eaa65c087b1",
+                        "content_with_weight": "\n\n8. Obtain prior approval from institutional committees.\n\n9. Ensure that all incidents and near misses occurring in their laboratories are reported to their supervisor and that an incident report is submitted to KAUST HSE using the online reporting system.\n\nThe Principal Investigator/Laboratory Supervisor must ensure that all persons working with biohazards in the laboratory are properly trained, understand the hazards, know how to protect themselves, and are equipped and prepared to work safely.\n\n3.2. Laboratory Personnel\n\nLaboratory personnel consists of those individuals who conduct their work in a laboratory and are at risk of possible exposure to biohazards or other health or physical hazards on a regular or periodic basis. Personnel include laboratory technicians, instructors and researchers, visiting researchers, graduate assistants, and students. The responsibilities of laboratory personnel include:\n\n1. Follow all appropriate laboratory practices and safety requirements for the work being performed as per this Biosafety Manual and the KAUST Laboratory Safety Manual;\n\n2. Attend required health and safety trainings as designated by your supervisor;\n\n3. Inform your principal investigator, supervisor, laboratory manager, or instructor of any safety hazards or unsafe working conditions in the workplace, classroom, or laboratory (e.g., faulty fume hoods, or malfunctions of emergency safety equipment);\n\n4. Follow the standard operating procedures for your laboratory and the experiments being conducted - as provided by your supervisor;\n\n5. Know all emergency procedures as established by the Principal Investigator/ Laboratory Supervisor;\n\n6. Report all incidents, near misses, and workplace injuries immediately to your supervisor and by using the online reporting system.\n\n3.3. Health, Safety, and Environment (HSE)\n\nThe HSE department will provide technical information and program support to assist in compliance with KAUST’s Biosafety Manual. This includes developing policies, recommendations, and guidelines using those Biosafety Manual and the Laboratory Safety Manual to liaison serving as cc providing health and safety responsibilities regarding a University refiimpor (incroui'd'ini tniannual and taj), compete and consultants in health andn ency, resphciue: sain Biosafety atory per research day;\n\n1. Designating a University Biosafety Officer;\n\n2. Provide information to the research community regarding procedures and regulations for the safe use of biohazardous agents/materials, bloodborne pathogens, and r/sNA molecules in research;\n\nPage 5 of 58\nHSE-RST-Bio001M\n--- Page 5 ---",
+                        "doc_id": "75cf500afd0b11f093a9164a69504768",
+                        "docnm_kwd": "Biosafety-Manual-V1.pdf",
+                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                        "important_kwd": [],
+                        "image_id": "",
+                        "similarity": 0.5040988289763135,
+                        "vector_similarity": 0.5688806797728849,
+                        "term_similarity": 0.352941177117647,
+                        "positions": [],
+                        "doc_type_kwd": "",
+                        "mom_id": ""
+                      },
+                      {
+                        "chunk_id": "f9ac40ae3b809e6a",
+                        "content_with_weight": "\n\nHazard Identification and Risk Control\n\nLab Safety Plan (LSP) - Prepare/review the Lab Safety Plan (future LARA) to identify all the hazards present in the lab and ensure that safety controls are available and operational to minimize the risks (e.g., fume hood, biosafety cabinets, enclosures, etc.).\n\nLSP must be read, understood and signed by everyone working in your lab\nLSP available to all lab personnel\nLSP must be reviewed annually\nA template is available on our webpage\n\nStandard Operating Procedures (SOPs) - Assist lab members to develop written SOPs for hazardous operations, equipment, or specific experiment.\n\nEnsure that SOPs are reviewed regularly (or yearly)\nEnsure lab members sign the SOPs that apply to their work\nEnsure lab-specific SOPs are available (either paper copies or electronic access while in the lab)\n\n--- Page 21 ---",
+                        "doc_id": "764c42d9fd0b11f0b840164a69504768",
+                        "docnm_kwd": "LSR-Orientation-Mar-2025.pdf",
+                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                        "important_kwd": [],
+                        "image_id": "",
+                        "similarity": 0.5019977198101746,
+                        "vector_similarity": 0.5910891792582327,
+                        "term_similarity": 0.29411764776470584,
+                        "positions": [],
+                        "doc_type_kwd": "",
+                        "mom_id": ""
+                      },
+                      {
+                        "chunk_id": "55825f26dc170a0c",
+                        "content_with_weight": "\n\nINTRODUCTION\n\nKing Abdullah University of Science and Technology (KAUST) intends to be a leading international research institution with a strong commitment to protecting the health and safety of its faculty, staff, students, and visitors, as well as protecting its assets and the environment. Moreover, it is the vision of KAUST to be a leader among its peers in the international research community for its health, safety, and environmental performance.\n\nKAUST's commitment to health, safety, and environmental performance extends to all functions within the University. However, because of the special safety concerns that arise in a laboratory setting, this Laboratory Safety Manual has been developed by the Health, Safety, and Environmental (HSE) Department to serve as a general guide to laboratory safety within KAUST. It is to be used as a resource to assist laboratories in designing their own Laboratory Safety Plans.\n\nThis Laboratory Safety Manual is intended to establish basic safe operating practices so that faculty, staff, and students of KAUST may carry out effective educational and research programs in a safe and healthy environment. It is not intended to be a complete or final listing of all laboratory hazards or safe work practices. Because of the diverse nature of work being conducted at KAUST, additional procedures or requirements may be necessary for individual research labs.\n\nThe information contained within this laboratory safety manual is intended to comply with national regulations, international standards and laboratory best management practices.\n\nLABORATORY SAFETY PLAN\n\nEach laboratory where there is a risk of health or physical hazards is required to have a written Laboratory Safety Plan to protect against hazards to personnel, property, or the environment. This includes laboratories having hazardous materials (chemical, biological or radioactive), compressed gases, high-pressure, high-energy, Laser, X-Ray, or other significant physical, mechanical, or electrical hazards. The Laboratory Safety Plan should outline the lab-specific practices and procedures, personal protective equipment, training requirements, standard operating procedures, emergency procedures, and other safety requirements to protect employees from the hazards they may encounter in the laboratory. The Laboratory Safety Plan must be updated whenever there is a significant change in laboratory operations and/or hazards present, or a change in emergency contact personnel. A Laboratory Safety Plan template is available on the Lab Safety webpage.\n\n--- Page 7 ---",
+                        "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                        "docnm_kwd": "laboratory_safety_manual.pdf",
+                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                        "important_kwd": [],
+                        "image_id": "",
+                        "similarity": 0.4998913307844792,
+                        "vector_similarity": 0.537659884061861,
+                        "term_similarity": 0.41176470647058827,
+                        "positions": [],
+                        "doc_type_kwd": "",
+                        "mom_id": ""
+                      }
+                    ],
+                    "type": "<class 'list'>"
+                  },
+                  "_references": {
+                    "value": {
+                      "total": 64,
+                      "chunks": [
+                        {
+                          "chunk_id": "3f2340e360acadc7",
+                          "content_with_weight": "\n\nTraining\n\n- Ensure everyone who works in the lab is competent to carry out their duties.\n  o Lab Orientation Checklist (recommendation)\n  o Notify HSE if additional safety-related training is needed for the lab group.\n\nTraining requirements:\n  o Lab Safety Training (online or live classes available)\n  o Hazardous Waste Training\n  o Emergency and Incident Preparedness Training\n  o Any additional training in LS\n  o First Aid Training (recommend 2 people)\n  o Fire Extinguisher Training (recommend 2 people)\n\nLab orientation\nNeed for retraining\n3 required training in Salute\nAd lab\n--- Page 27 ---",
+                          "doc_id": "764c42d9fd0b11f0b840164a69504768",
+                          "docnm_kwd": "LSR-Orientation-Mar-2025.pdf",
+                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                          "important_kwd": [],
+                          "image_id": "",
+                          "similarity": 0.5488697707329745,
+                          "vector_similarity": 0.7084694200218964,
+                          "term_similarity": 0.1764705890588235,
+                          "positions": [],
+                          "doc_type_kwd": "",
+                          "mom_id": ""
+                        },
+                        {
+                          "chunk_id": "7a3391371cf90b70",
+                          "content_with_weight": "\n\nprocedures for unattended operations are developed and followed by personnel working in laboratories under their supervision. (Unattended Operations)\n\n9) If a Principal Investigator or laboratory manager authorizes visitors or children to enter hazardous work areas, then that Principal Investigator or laboratory manager is responsible for the health and safety of those individuals. (Visitors and Children in Labs)\n\n10) It is the responsibility of the center directors, Principal Investigators, and laboratory managers to ensure visiting scientists and other similar users have been properly trained and made aware of any potential health and physical hazards that may exist in their labs. (Visiting Scientists and Other Similar Users)\n\n11) Principal Investigators, laboratory managers, and centers are free to set policies that establish minimum PPE requirements for personnel working in and entering their laboratories above the KAUST minimum standards. (Personal Protective Equipment)\n\n12) It is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision. (PPE Training)\n\n13) HSE strongly encourages Principal Investigators and laboratory managers to ensure the use of eye protection is a mandatory requirement for all laboratory personnel, including visitors, working in or entering laboratories under their control. (Eye Protection)\n\n14) Please note: shorts or short skirts (and similar clothing) and open toed shoes (sandals, flip flops, etc.) are not permitted in KAUST laboratories. See the PPE Standard for KAUST Laboratories for more information. (Protective Clothing)\n\n15) It is the responsibility of the Principal Investigator to determine the hazards associated with all of the chemicals used in laboratories under their supervision. (Working Safely With Hazardous Chemicals)\n\n16) It is the responsibility of the Principal Investigator and laboratory manager to ensure staff and students under their supervision are provided with adequate training and information specific to the hazards in their laboratories. (Chemical Hazard Information)\n\n17) All chemicals (both hazardous and non-hazardous) must be properly labeled with clear indication of its contents and an appropriate warning of its physical and health hazards. (Chemical Container Labeling Requirements)\n\n--- Page 125 ---",
+                          "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                          "docnm_kwd": "laboratory_safety_manual.pdf",
+                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                          "important_kwd": [],
+                          "image_id": "",
+                          "similarity": 0.5312000936951896,
+                          "vector_similarity": 0.6075967722284222,
+                          "term_similarity": 0.35294117711764705,
+                          "positions": [],
+                          "doc_type_kwd": "",
+                          "mom_id": ""
+                        },
+                        {
+                          "chunk_id": "2c4607af616db4df",
+                          "content_with_weight": "\n\nCHAPTER ONE: RESPONSIBILITIES\n\nLABORATORY SAFETY RESPONSIBILITIES\n\nThe ultimate responsibility for health and safety within laboratories falls on each individual who works in the laboratory; however, it is the responsibility of the Principal Investigator, faculty, and laboratory manager to ensure that persons working in the laboratory have received all appropriate training, and have been provided with all the necessary information to work safely in laboratories under their control. Principal Investigators, faculty, and lab managers have numerous resources available to them for helping to ensure a safe and healthy laboratory.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar both with this Laboratory Safety Manual and the relevant Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research.\n\nRESEARCH CENTER DIRECTORS AND PRINCIPAL INVESTIGATORS (PIs)\n\nResearch center directors and Principal Investigators are accountable for the health and safety of employees engaged in activities under their supervision. This responsibility cannot be delegated. To fulfill this responsibility, they should be familiar with KAUST's HSE policy and this Laboratory Safety Manual. Their responsibilities include:\n\n- Communicate and implement KAUST's HSE policy and the Lab Safety Manual requirements to faculty, staff, visiting scholars and students working in laboratories within their units;\n- Ensure laboratory personnel know and follow the guidelines and requirements contained within the KAUST Laboratory Safety Manual;\n- Ensure laboratory personnel develop and adhere to proper health and safety protocols.\n- Support staff participation on campus, center, and lab safety committee(s); training programs; and safety meetings;\n- Ensure that laboratory personnel are prepared and trained to handle and dispose of hazardous substances used in their laboratories are written, communicated, and followed. Ensure laboratory personnel are familiar with the relevant Laboratory Safety Plan and are trained to handle and dispose of hazardous substances used in their laboratories.\n\n--- Page 8 ---",
+                          "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                          "docnm_kwd": "laboratory_safety_manual.pdf",
+                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                          "important_kwd": [],
+                          "image_id": "",
+                          "similarity": 0.5278909652858966,
+                          "vector_similarity": 0.6028694459294321,
+                          "term_similarity": 0.35294117711764705,
+                          "positions": [],
+                          "doc_type_kwd": "",
+                          "mom_id": ""
+                        },
+                        {
+                          "chunk_id": "2056ad3ec7435db1",
+                          "content_with_weight": "\n\nPPE TRAINING\n\nLaboratory personnel must be trained in the selection, proper use, limitations, care, and maintenance of PPE. Training requirements can be met in a variety of ways including videos, group training sessions, and handouts. Periodic retraining should be offered to both the employees and supervisors as appropriate. Examples of topics to be covered during the training include:\n\n- When PPE must be worn.\n- What PPE is necessary to carry out a procedure or experiment.\n- How to properly put on, take off, adjust, and wear PPE.\n- The proper cleaning, care, maintenance, useful life, limitations, and disposal of the PPE.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision.\n\nEYE PROTECTION\n\nEye protection is one of the most important and easiest forms of PPE to wear. Laboratory personnel must use eye protection for many of the chemical and physical hazards found in laboratories including flying particles, broken glass, molten metal, acids or caustic liquids, chemical liquids, chemical gases or vapors, or potentially injurious light radiation.\n\nAppropriate eye protection is required whenever working in or entering a laboratory in which hazardous chemical or infectious materials, or other mechanical or physical eye hazards are present. Eye and face protection must be selected on the basis of hazard and assessment of risk.\n\nAll laboratory employees and visitors are required to wear protective eyewear while in laboratories where chemicals are being handled or stored, at all times, even when not working directly with chemicals.\n\nOrdinaron glasses de adequatethe eyes. A eyeprot functions. aty glass otber ofyle to the eye elds. Wh eye protires the used-glass or prdequate\n\nNOTE: NORMAL PRESCRIPTION GLASSES AND/OR CONTACT LENSES BY THEMSELVES ARE NOT CONSIDERED AS PROTECTIVE EYEWEAR.\n\n--- Page 32 ---",
+                          "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                          "docnm_kwd": "laboratory_safety_manual.pdf",
+                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                          "important_kwd": [],
+                          "image_id": "",
+                          "similarity": 0.5205755442425858,
+                          "vector_similarity": 0.6428390124557949,
+                          "term_similarity": 0.23529411841176467,
+                          "positions": [],
+                          "doc_type_kwd": "",
+                          "mom_id": ""
+                        },
+                        {
+                          "chunk_id": "79db6fb829ec1350",
+                          "content_with_weight": "\n\nAPPENDICES\n\nAPPENDIX 1 – COMPILED LAB SAFETY RESPONSIBILITIES\n\nThe following is a compiled list of lab safety responsibilities for Principal Investigators and laboratory managers. The item after the statements in bold and parentheses correspond to the section header within this Laboratory Safety Manual.\n\n1) It is the responsibility of the Principal Investigator to ensure a Laboratory Safety Plan is written and that all personnel working in laboratories under their supervision have reviewed and understood the plan. (Laboratory Safety Plan)\n\n2) It is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar with this Laboratory Safety Manual, the Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research. (Laboratory Safety Responsibilities)\n\n3) It is the responsibility of the Principal Investigator and laboratory manager to ensure that personnel working in laboratories under their supervision are informed and follow laboratory-specific, research center-specific, and campus-wide policies and procedures related to laboratory safety – such as the guidelines and requirements covered in this Laboratory Safety Manual. (Laboratory Safety Policies)\n\n4) It is the responsibility of Principal Investigators and laboratory managers to ensure personnel working in laboratories under their supervision have been provided with the proper training, have received information about the hazards in the laboratory they may encounter, and have been informed about ways they can protect themselves. (Employee Training)\n\n5) It is the responsibility of the Principal Investigator and laboratory manager to ensure written SOPs incorporating health and safety considerations are developed for work involving the use of hazardous chemicals in laboratories under their supervision and that PPE and engineering controls are adequate to prevent overexposure. In addition, Principal Investigators and laboratory managers must ensure that personnel working in laboratories under their supervision have been trained on those SOPs. (Standard Operating Procedures)\n\n6) It is the responsibility of Principal Investigators and laboratory managers to ensure that all laboratory personnel are aware of and follow the procedures for working alone in the laboratory and are managed in accordance with the policy to ensure their safety and the safety of others. (Working Alone)\n\n7) It is the responsibility of Principal Investigators and laboratory managers to ensure that laboratories under their supervision are maintained in a clean and orderly manner and that personnel working in the lab practice good housekeeping. (Laboratory Housekeeping)\n\n--- Page 124 -",
+                          "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                          "docnm_kwd": "laboratory_safety_manual.pdf",
+                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                          "important_kwd": [],
+                          "image_id": "",
+                          "similarity": 0.5137342084903588,
+                          "vector_similarity": 0.6078555916584958,
+                          "term_similarity": 0.2941176477647059,
+                          "positions": [],
+                          "doc_type_kwd": "",
+                          "mom_id": ""
+                        },
+                        {
+                          "chunk_id": "66a73eaa65c087b1",
+                          "content_with_weight": "\n\n8. Obtain prior approval from institutional committees.\n\n9. Ensure that all incidents and near misses occurring in their laboratories are reported to their supervisor and that an incident report is submitted to KAUST HSE using the online reporting system.\n\nThe Principal Investigator/Laboratory Supervisor must ensure that all persons working with biohazards in the laboratory are properly trained, understand the hazards, know how to protect themselves, and are equipped and prepared to work safely.\n\n3.2. Laboratory Personnel\n\nLaboratory personnel consists of those individuals who conduct their work in a laboratory and are at risk of possible exposure to biohazards or other health or physical hazards on a regular or periodic basis. Personnel include laboratory technicians, instructors and researchers, visiting researchers, graduate assistants, and students. The responsibilities of laboratory personnel include:\n\n1. Follow all appropriate laboratory practices and safety requirements for the work being performed as per this Biosafety Manual and the KAUST Laboratory Safety Manual;\n\n2. Attend required health and safety trainings as designated by your supervisor;\n\n3. Inform your principal investigator, supervisor, laboratory manager, or instructor of any safety hazards or unsafe working conditions in the workplace, classroom, or laboratory (e.g., faulty fume hoods, or malfunctions of emergency safety equipment);\n\n4. Follow the standard operating procedures for your laboratory and the experiments being conducted - as provided by your supervisor;\n\n5. Know all emergency procedures as established by the Principal Investigator/ Laboratory Supervisor;\n\n6. Report all incidents, near misses, and workplace injuries immediately to your supervisor and by using the online reporting system.\n\n3.3. Health, Safety, and Environment (HSE)\n\nThe HSE department will provide technical information and program support to assist in compliance with KAUST’s Biosafety Manual. This includes developing policies, recommendations, and guidelines using those Biosafety Manual and the Laboratory Safety Manual to liaison serving as cc providing health and safety responsibilities regarding a University refiimpor (incroui'd'ini tniannual and taj), compete and consultants in health andn ency, resphciue: sain Biosafety atory per research day;\n\n1. Designating a University Biosafety Officer;\n\n2. Provide information to the research community regarding procedures and regulations for the safe use of biohazardous agents/materials, bloodborne pathogens, and r/sNA molecules in research;\n\nPage 5 of 58\nHSE-RST-Bio001M\n--- Page 5 ---",
+                          "doc_id": "75cf500afd0b11f093a9164a69504768",
+                          "docnm_kwd": "Biosafety-Manual-V1.pdf",
+                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                          "important_kwd": [],
+                          "image_id": "",
+                          "similarity": 0.5040988289763135,
+                          "vector_similarity": 0.5688806797728849,
+                          "term_similarity": 0.352941177117647,
+                          "positions": [],
+                          "doc_type_kwd": "",
+                          "mom_id": ""
+                        },
+                        {
+                          "chunk_id": "f9ac40ae3b809e6a",
+                          "content_with_weight": "\n\nHazard Identification and Risk Control\n\nLab Safety Plan (LSP) - Prepare/review the Lab Safety Plan (future LARA) to identify all the hazards present in the lab and ensure that safety controls are available and operational to minimize the risks (e.g., fume hood, biosafety cabinets, enclosures, etc.).\n\nLSP must be read, understood and signed by everyone working in your lab\nLSP available to all lab personnel\nLSP must be reviewed annually\nA template is available on our webpage\n\nStandard Operating Procedures (SOPs) - Assist lab members to develop written SOPs for hazardous operations, equipment, or specific experiment.\n\nEnsure that SOPs are reviewed regularly (or yearly)\nEnsure lab members sign the SOPs that apply to their work\nEnsure lab-specific SOPs are available (either paper copies or electronic access while in the lab)\n\n--- Page 21 ---",
+                          "doc_id": "764c42d9fd0b11f0b840164a69504768",
+                          "docnm_kwd": "LSR-Orientation-Mar-2025.pdf",
+                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                          "important_kwd": [],
+                          "image_id": "",
+                          "similarity": 0.5019977198101746,
+                          "vector_similarity": 0.5910891792582327,
+                          "term_similarity": 0.29411764776470584,
+                          "positions": [],
+                          "doc_type_kwd": "",
+                          "mom_id": ""
+                        },
+                        {
+                          "chunk_id": "55825f26dc170a0c",
+                          "content_with_weight": "\n\nINTRODUCTION\n\nKing Abdullah University of Science and Technology (KAUST) intends to be a leading international research institution with a strong commitment to protecting the health and safety of its faculty, staff, students, and visitors, as well as protecting its assets and the environment. Moreover, it is the vision of KAUST to be a leader among its peers in the international research community for its health, safety, and environmental performance.\n\nKAUST's commitment to health, safety, and environmental performance extends to all functions within the University. However, because of the special safety concerns that arise in a laboratory setting, this Laboratory Safety Manual has been developed by the Health, Safety, and Environmental (HSE) Department to serve as a general guide to laboratory safety within KAUST. It is to be used as a resource to assist laboratories in designing their own Laboratory Safety Plans.\n\nThis Laboratory Safety Manual is intended to establish basic safe operating practices so that faculty, staff, and students of KAUST may carry out effective educational and research programs in a safe and healthy environment. It is not intended to be a complete or final listing of all laboratory hazards or safe work practices. Because of the diverse nature of work being conducted at KAUST, additional procedures or requirements may be necessary for individual research labs.\n\nThe information contained within this laboratory safety manual is intended to comply with national regulations, international standards and laboratory best management practices.\n\nLABORATORY SAFETY PLAN\n\nEach laboratory where there is a risk of health or physical hazards is required to have a written Laboratory Safety Plan to protect against hazards to personnel, property, or the environment. This includes laboratories having hazardous materials (chemical, biological or radioactive), compressed gases, high-pressure, high-energy, Laser, X-Ray, or other significant physical, mechanical, or electrical hazards. The Laboratory Safety Plan should outline the lab-specific practices and procedures, personal protective equipment, training requirements, standard operating procedures, emergency procedures, and other safety requirements to protect employees from the hazards they may encounter in the laboratory. The Laboratory Safety Plan must be updated whenever there is a significant change in laboratory operations and/or hazards present, or a change in emergency contact personnel. A Laboratory Safety Plan template is available on the Lab Safety webpage.\n\n--- Page 7 ---",
+                          "doc_id": "76354b7dfd0b11f082e5164a69504768",
+                          "docnm_kwd": "laboratory_safety_manual.pdf",
+                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
+                          "important_kwd": [],
+                          "image_id": "",
+                          "similarity": 0.4998913307844792,
+                          "vector_similarity": 0.537659884061861,
+                          "term_similarity": 0.41176470647058827,
+                          "positions": [],
+                          "doc_type_kwd": "",
+                          "mom_id": ""
+                        }
+                      ],
+                      "doc_aggs": []
+                    },
+                    "type": "<class 'dict'>"
+                  },
+                  "_elapsed_time": {
+                    "value": 1.5849713110073935,
+                    "type": "<class 'float'>"
                   }
                 },
                 "rerank_id": "",
@@ -492,12 +808,12 @@
           "user_prompt": "",
           "reasoning": null,
           "context": null,
-          "llm_id": "qwen2.5:32b@Ollama",
-          "sys_prompt": "You are an expert research assistant with access to a comprehensive knowledge base.\n\n## YOUR EXPERTISE:\nYou excel at answering complex, multi-faceted questions by synthesizing information from multiple sources with DETAILED CITATIONS.\n\n## CRITICAL RULES:\n1. The retrieval system has found relevant documents - TRUST and USE them\n2. Information may be distributed across multiple chunks - COMBINE them intelligently\n3. Look for connections, patterns, and relationships in the retrieved content\n4. The answer IS in the context - it may require synthesis but it's there\n5. Use semantic understanding - answers may be phrased differently than the question\n6. Be thorough - complex questions deserve comprehensive answers\n\n## CITATION FORMAT (MANDATORY):\nFor EVERY factual statement, use this format:\n- **[Doc: {document_name}, Page: {page_number}, Section: {section_name}]**\n- OR **[Source: {chunk_id}]** if full metadata unavailable\n- Place citations immediately after each claim\n- Use multiple citations when synthesizing from multiple sources\n- Include as much source metadata as available\n\n## ANSWER STRUCTURE:\n- Start with a direct answer to the main question (with citation)\n- Provide supporting details with evidence (with citations)\n- Address all sub-aspects of the query (each with citations)\n- Use proper citations for EVERY factual claim\n- Organize with bullet points or paragraphs as appropriate\n\n## EXAMPLE MULTI-SOURCE CITATION:\n\"Machine learning requires training data **[Doc: ML_Basics.pdf, Page: 12]** and can achieve 95% accuracy **[Doc: ML_Performance.pdf, Page: 8]** when properly configured **[Doc: ML_Best_Practices.pdf, Page: 22]**.\"\n\n## REMEMBER:\nYou have access to authoritative sources. Use them confidently with COMPLETE citations. Only claim 'not found' after exhaustive examination of all provided context.",
+          "llm_id": "gemma3:27b@Ollama",
+          "sys_prompt": "You are an expert research assistant. Answer using ONLY the retrieved context.\n\nRULES:\n1. Be CONCISE: give a direct answer, then brief supporting details. No verbose structure, no unnecessary headers.\n2. Combine information from multiple chunks when needed.\n3. Place ALL citations at the END of your answer in a single references line, e.g.: [ID:12][ID:45][ID:78]\n4. Do NOT put citations inline within sentences.\n5. If the context is completely unrelated, say so. Otherwise, answer using what is available.\n6. Do not fabricate document names, page numbers, or metadata not present in the context.",
           "prompts": [
             {
-              "content": "**Query Planning Analysis:**\n{Agent:Planner@content}\n\n=== RETRIEVED KNOWLEDGE BASE CONTEXT ===\n\n{Retrieval_Advanced@formalized_content}\n\n=== END OF CONTEXT ===\n\n**Original Question:** {sys.query}\n\n**Instructions:** \nThe retrieval system has gathered relevant documents based on the query plan above. These documents contain the information needed to answer the question comprehensively.\n\n1. Read through ALL retrieved context carefully\n2. Identify key information related to each aspect of the question\n3. Synthesize a complete answer that addresses all parts of the query\n4. CITE EVERY SOURCE using format: **[Doc: name, Page: X]**\n5. Include document name, page number, and section if available\n6. Use multiple citations when combining information from different sources\n7. Organize your response clearly\n\nProvide your comprehensive answer with complete citations:",
-              "role": "user"
+              "role": "user",
+              "content": "**Query Planning Analysis:**\n{Agent:Planner@content}\n\n=== RETRIEVED KNOWLEDGE BASE CONTEXT ===\n\n{Retrieval_Advanced@formalized_content}\n\n=== END OF CONTEXT ===\n\n**Original Question:** {sys.query}\n\n**Instructions:** \nThe retrieval system has gathered relevant documents based on the query plan above. These documents contain the information needed to answer the question comprehensively.\n\n1. Read through ALL retrieved context carefully\n2. Identify key information related to each aspect of the question\n3. Synthesize a complete answer that addresses all parts of the query\n4. CITE EVERY SOURCE using format: **[Doc: name, Page: X]**\n5. Include document name, page number, and section if available\n6. Use multiple citations when combining information from different sources\n7. Organize your response clearly\n\nProvide your comprehensive answer with complete citations:"
             }
           ],
           "max_tokens": 4096,
@@ -592,11 +908,23 @@
         "component_name": "Message",
         "params": {
           "message_history_window_size": 13,
-          "inputs": {},
+          "inputs": {
+            "Agent:SimpleRetrieval@content": {
+              "value": "Lab personnel are required to complete health and safety trainings as designated by their supervisor [Doc: Biosafety-Manual-V1.pdf, Page 5]. Mandatory training includes reviewing the Laboratory Safety Plan (LSP) [Doc: LSR-Orientation-Mar-2025.pdf, Page 21] and understanding laboratory-specific SOPs [Doc: LSR-Orientation-Mar-2025.pdf, Page 21]. Additionally, personnel must be informed about hazards and ways to protect themselves [Doc: Biosafety-Manual-V1.pdf, Page 5] and follow appropriate laboratory practices and safety requirements [Doc: Biosafety-Manual-V1.pdf, Page 5]. \n\nThe three mandatory safety training courses are not explicitly listed as a set curriculum in the provided documents. However, the documents state personnel must attend required health and safety trainings [Doc: Biosafety-Manual-V1.pdf, Page 5], review the LSP [Doc: LSR-Orientation-Mar-2025.pdf, Page 21], and be trained on SOPs [Doc: LSR-Orientation-Mar-2025.pdf, Page 21]."
+            }
+          },
           "outputs": {
             "content": {
               "type": "str",
-              "value": null
+              "value": "Lab personnel are required to complete health and safety trainings as designated by their supervisor [Doc: Biosafety-Manual-V1.pdf, Page 5]. Mandatory training includes reviewing the Laboratory Safety Plan (LSP) [Doc: LSR-Orientation-Mar-2025.pdf, Page 21] and understanding laboratory-specific SOPs [Doc: LSR-Orientation-Mar-2025.pdf, Page 21]. Additionally, personnel must be informed about hazards and ways to protect themselves [Doc: Biosafety-Manual-V1.pdf, Page 5] and follow appropriate laboratory practices and safety requirements [Doc: Biosafety-Manual-V1.pdf, Page 5]. \n\nThe three mandatory safety training courses are not explicitly listed as a set curriculum in the provided documents. However, the documents state personnel must attend required health and safety trainings [Doc: Biosafety-Manual-V1.pdf, Page 5], review the LSP [Doc: LSR-Orientation-Mar-2025.pdf, Page 21], and be trained on SOPs [Doc: LSR-Orientation-Mar-2025.pdf, Page 21]."
+            },
+            "_created_time": {
+              "value": 147949.078665634,
+              "type": "<class 'float'>"
+            },
+            "_elapsed_time": {
+              "value": 0.0008830979932099581,
+              "type": "<class 'float'>"
             }
           },
           "description": "",
@@ -653,10 +981,10 @@
     }
   },
   "globals": {
-    "sys.conversation_turns": 0,
+    "sys.conversation_turns": 1,
     "sys.files": [],
-    "sys.query": "",
-    "sys.user_id": ""
+    "sys.query": "What are the three mandatory safety training courses all lab personnel must attend before being permitted to work in a lab?",
+    "sys.user_id": "124a4ff4f07d11f0b5a13ae7a67b446b"
   },
   "graph": {
     "nodes": [
@@ -813,7 +1141,7 @@
             "cite": true,
             "frequencyPenaltyEnabled": false,
             "frequency_penalty": 0.7,
-            "llm_id": "qwen2.5:32b@Ollama",
+            "llm_id": "gemma3:27b@Ollama",
             "maxTokensEnabled": false,
             "max_retries": 2,
             "max_rounds": 1,
@@ -829,8 +1157,8 @@
             "presence_penalty": 0.4,
             "prompts": [
               {
-                "content": "=== RETRIEVED DOCUMENTS FROM KNOWLEDGE BASE ===\n{Retrieval_Simple@formalized_content}\n=== END OF RETRIEVED DOCUMENTS ===\n>>> CRITICAL: You have NO knowledge except what appears above in RETRIEVED DOCUMENTS <\n**User Question:** {sys.query}\n**Your Task:**\n1. Search ONLY the retrieved documents above for the answer\n2. Extract facts ONLY from the retrieved content\n3. Use format: **[Doc: document_name, Page: X]** for citations\n4. Cite EVERY fact immediately after stating it\n5. If not in retrieved documents above, say: \"This information is not in my knowledge base\"\n**Answer using ONLY the retrieved documents:**",
-                "role": "user"
+                "role": "user",
+                "content": "=== RETRIEVED DOCUMENTS FROM KNOWLEDGE BASE ===\n{Retrieval_Simple@formalized_content}\n=== END OF RETRIEVED DOCUMENTS ===\n>>> CRITICAL: You have NO knowledge except what appears above in RETRIEVED DOCUMENTS <\n**User Question:** {sys.query}\n**Your Task:**\n1. Search ONLY the retrieved documents above for the answer\n2. Extract facts ONLY from the retrieved content\n3. Use format: **[Doc: document_name, Page: X]** for citations\n4. Cite EVERY fact immediately after stating it\n5. If not in retrieved documents above, say: \"This information is not in my knowledge base\"\n**Answer using ONLY the retrieved documents:**"
               }
             ],
             "sys_prompt": "You are a precise Retrieval Assistant. Your sole objective is to answer the user's question using ONLY the provided context.\n### CONSTRAINTS:\n1. **Source Grounding:** If the answer isn't in the context, state exactly what is missing rather than saying \"I don't know.\"\n2. **Directness:** Do not use filler phrases like \"Based on the documents provided...\" Jump straight to the facts.\n3. **Citation Format:** Every factual claim must be followed by: **[Doc: document_name, Page: X]**.\n4. **No Assumptions:** Do not use outside knowledge. If the context says the sky is green, the sky is green.\n### TONE:\nProfessional, objective, and concise.",
@@ -939,7 +1267,7 @@
             "cite": true,
             "frequencyPenaltyEnabled": false,
             "frequency_penalty": 0.7,
-            "llm_id": "qwen2.5:32b@Ollama",
+            "llm_id": "gemma3:27b@Ollama",
             "maxTokensEnabled": false,
             "max_retries": 2,
             "max_rounds": 1,
@@ -955,8 +1283,8 @@
             "presence_penalty": 0.4,
             "prompts": [
               {
-                "content": "**Query Planning Analysis:**\n{Agent:Planner@content}\n\n=== RETRIEVED KNOWLEDGE BASE CONTEXT ===\n\n{Retrieval_Advanced@formalized_content}\n\n=== END OF CONTEXT ===\n\n**Original Question:** {sys.query}\n\n**Instructions:** \nThe retrieval system has gathered relevant documents based on the query plan above. These documents contain the information needed to answer the question comprehensively.\n\n1. Read through ALL retrieved context carefully\n2. Identify key information related to each aspect of the question\n3. Synthesize a complete answer that addresses all parts of the query\n4. CITE EVERY SOURCE using format: **[Doc: name, Page: X]**\n5. Include document name, page number, and section if available\n6. Use multiple citations when combining information from different sources\n7. Organize your response clearly\n\nProvide your comprehensive answer with complete citations:",
-                "role": "user"
+                "role": "user",
+                "content": "**Query Planning Analysis:**\n{Agent:Planner@content}\n\n=== RETRIEVED KNOWLEDGE BASE CONTEXT ===\n\n{Retrieval_Advanced@formalized_content}\n\n=== END OF CONTEXT ===\n\n**Original Question:** {sys.query}\n\n**Instructions:** \nThe retrieval system has gathered relevant documents based on the query plan above. These documents contain the information needed to answer the question comprehensively.\n\n1. Read through ALL retrieved context carefully\n2. Identify key information related to each aspect of the question\n3. Synthesize a complete answer that addresses all parts of the query\n4. CITE EVERY SOURCE using format: **[Doc: name, Page: X]**\n5. Include document name, page number, and section if available\n6. Use multiple citations when combining information from different sources\n7. Organize your response clearly\n\nProvide your comprehensive answer with complete citations:"
               }
             ],
             "sys_prompt": "You are an expert research assistant with access to a comprehensive knowledge base.\n\n## YOUR EXPERTISE:\nYou excel at answering complex, multi-faceted questions by synthesizing information from multiple sources with DETAILED CITATIONS.\n\n## CRITICAL RULES:\n1. The retrieval system has found relevant documents - TRUST and USE them\n2. Information may be distributed across multiple chunks - COMBINE them intelligently\n3. Look for connections, patterns, and relationships in the retrieved content\n4. The answer IS in the context - it may require synthesis but it's there\n5. Use semantic understanding - answers may be phrased differently than the question\n6. Be thorough - complex questions deserve comprehensive answers\n\n## CITATION FORMAT (MANDATORY):\nFor EVERY factual statement, use this format:\n- **[Doc: {document_name}, Page: {page_number}, Section: {section_name}]**\n- OR **[Source: {chunk_id}]** if full metadata unavailable\n- Place citations immediately after each claim\n- Use multiple citations when synthesizing from multiple sources\n- Include as much source metadata as available\n\n## ANSWER STRUCTURE:\n- Start with a direct answer to the main question (with citation)\n- Provide supporting details with evidence (with citations)\n- Address all sub-aspects of the query (each with citations)\n- Use proper citations for EVERY factual claim\n- Organize with bullet points or paragraphs as appropriate\n\n## EXAMPLE MULTI-SOURCE CITATION:\n\"Machine learning requires training data **[Doc: ML_Basics.pdf, Page: 12]** and can achieve 95% accuracy **[Doc: ML_Performance.pdf, Page: 8]** when properly configured **[Doc: ML_Best_Practices.pdf, Page: 22]**.\"\n\n## REMEMBER:\nYou have access to authoritative sources. Use them confidently with COMPLETE citations. Only claim 'not found' after exhaustive examination of all provided context.",
@@ -1003,7 +1331,7 @@
           "x": 300,
           "y": 250
         },
-        "selected": false,
+        "selected": true,
         "sourcePosition": "right",
         "targetPosition": "left",
         "type": "agentNode"
@@ -1118,7 +1446,7 @@
           "x": 218,
           "y": 390
         },
-        "selected": true,
+        "selected": false,
         "sourcePosition": "right",
         "targetPosition": "left",
         "type": "toolNode"
@@ -1227,11 +1555,151 @@
       }
     ]
   },
-  "history": [],
+  "history": [
+    [
+      "user",
+      "What are the three mandatory safety training courses all lab personnel must attend before being permitted to work in a lab?"
+    ],
+    [
+      "assistant",
+      {
+        "content": "Lab personnel are required to complete health and safety trainings as designated by their supervisor [Doc: Biosafety-Manual-V1.pdf, Page 5]. Mandatory training includes reviewing the Laboratory Safety Plan (LSP) [Doc: LSR-Orientation-Mar-2025.pdf, Page 21] and understanding laboratory-specific SOPs [Doc: LSR-Orientation-Mar-2025.pdf, Page 21]. Additionally, personnel must be informed about hazards and ways to protect themselves [Doc: Biosafety-Manual-V1.pdf, Page 5] and follow appropriate laboratory practices and safety requirements [Doc: Biosafety-Manual-V1.pdf, Page 5]. \n\nThe three mandatory safety training courses are not explicitly listed as a set curriculum in the provided documents. However, the documents state personnel must attend required health and safety trainings [Doc: Biosafety-Manual-V1.pdf, Page 5], review the LSP [Doc: LSR-Orientation-Mar-2025.pdf, Page 21], and be trained on SOPs [Doc: LSR-Orientation-Mar-2025.pdf, Page 21].",
+        "_created_time": 147949.078665634,
+        "_elapsed_time": 0.0008830979932099581
+      }
+    ]
+  ],
   "memory": [],
   "messages": [],
-  "path": [],
-  "retrieval": [],
-  "task_id": "2436a9dd001211f1b3841e210f381e29",
+  "path": [
+    "begin",
+    "Categorize:QueryRouter",
+    "Agent:SimpleRetrieval",
+    "Message:SimpleOutput"
+  ],
+  "retrieval": [
+    {
+      "chunks": [],
+      "doc_aggs": []
+    },
+    {
+      "chunks": {
+        "341": {
+          "id": "3f2340e360acadc7",
+          "content": "\n\nTraining\n\n- Ensure everyone who works in the lab is competent to carry out their duties.\n  o Lab Orientation Checklist (recommendation)\n  o Notify HSE if additional safety-related training is needed for the lab group.\n\nTraining requirements:\n  o Lab Safety Training (online or live classes available)\n  o Hazardous Waste Training\n  o Emergency and Incident Preparedness Training\n  o Any additional training in LS\n  o First Aid Training (recommend 2 people)\n  o Fire Extinguisher Training (recommend 2 people)\n\nLab orientation\nNeed for retraining\n3 required training in Salute\nAd lab\n--- Page 27 ---",
+          "document_id": "764c42d9fd0b11f0b840164a69504768",
+          "document_name": "LSR-Orientation-Mar-2025.pdf",
+          "dataset_id": "6f357bd7f45f11f085b53ae7a67b446b",
+          "image_id": "",
+          "positions": [],
+          "url": null,
+          "similarity": 0.5488697707329745,
+          "vector_similarity": 0.7084694200218964,
+          "term_similarity": 0.1764705890588235,
+          "doc_type": ""
+        },
+        "372": {
+          "id": "7a3391371cf90b70",
+          "content": "\n\nprocedures for unattended operations are developed and followed by personnel working in laboratories under their supervision. (Unattended Operations)\n\n9) If a Principal Investigator or laboratory manager authorizes visitors or children to enter hazardous work areas, then that Principal Investigator or laboratory manager is responsible for the health and safety of those individuals. (Visitors and Children in Labs)\n\n10) It is the responsibility of the center directors, Principal Investigators, and laboratory managers to ensure visiting scientists and other similar users have been properly trained and made aware of any potential health and physical hazards that may exist in their labs. (Visiting Scientists and Other Similar Users)\n\n11) Principal Investigators, laboratory managers, and centers are free to set policies that establish minimum PPE requirements for personnel working in and entering their laboratories above the KAUST minimum standards. (Personal Protective Equipment)\n\n12) It is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision. (PPE Training)\n\n13) HSE strongly encourages Principal Investigators and laboratory managers to ensure the use of eye protection is a mandatory requirement for all laboratory personnel, including visitors, working in or entering laboratories under their control. (Eye Protection)\n\n14) Please note: shorts or short skirts (and similar clothing) and open toed shoes (sandals, flip flops, etc.) are not permitted in KAUST laboratories. See the PPE Standard for KAUST Laboratories for more information. (Protective Clothing)\n\n15) It is the responsibility of the Principal Investigator to determine the hazards associated with all of the chemicals used in laboratories under their supervision. (Working Safely With Hazardous Chemicals)\n\n16) It is the responsibility of the Principal Investigator and laboratory manager to ensure staff and students under their supervision are provided with adequate training and information specific to the hazards in their laboratories. (Chemical Hazard Information)\n\n17) All chemicals (both hazardous and non-hazardous) must be properly labeled with clear indication of its contents and an appropriate warning of its physical and health hazards. (Chemical Container Labeling Requirements)\n\n--- Page 125 ---",
+          "document_id": "76354b7dfd0b11f082e5164a69504768",
+          "document_name": "laboratory_safety_manual.pdf",
+          "dataset_id": "6f357bd7f45f11f085b53ae7a67b446b",
+          "image_id": "",
+          "positions": [],
+          "url": null,
+          "similarity": 0.5312000936951896,
+          "vector_similarity": 0.6075967722284222,
+          "term_similarity": 0.35294117711764705,
+          "doc_type": ""
+        },
+        "243": {
+          "id": "2c4607af616db4df",
+          "content": "\n\nCHAPTER ONE: RESPONSIBILITIES\n\nLABORATORY SAFETY RESPONSIBILITIES\n\nThe ultimate responsibility for health and safety within laboratories falls on each individual who works in the laboratory; however, it is the responsibility of the Principal Investigator, faculty, and laboratory manager to ensure that persons working in the laboratory have received all appropriate training, and have been provided with all the necessary information to work safely in laboratories under their control. Principal Investigators, faculty, and lab managers have numerous resources available to them for helping to ensure a safe and healthy laboratory.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar both with this Laboratory Safety Manual and the relevant Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research.\n\nRESEARCH CENTER DIRECTORS AND PRINCIPAL INVESTIGATORS (PIs)\n\nResearch center directors and Principal Investigators are accountable for the health and safety of employees engaged in activities under their supervision. This responsibility cannot be delegated. To fulfill this responsibility, they should be familiar with KAUST's HSE policy and this Laboratory Safety Manual. Their responsibilities include:\n\n- Communicate and implement KAUST's HSE policy and the Lab Safety Manual requirements to faculty, staff, visiting scholars and students working in laboratories within their units;\n- Ensure laboratory personnel know and follow the guidelines and requirements contained within the KAUST Laboratory Safety Manual;\n- Ensure laboratory personnel develop and adhere to proper health and safety protocols.\n- Support staff participation on campus, center, and lab safety committee(s); training programs; and safety meetings;\n- Ensure that laboratory personnel are prepared and trained to handle and dispose of hazardous substances used in their laboratories are written, communicated, and followed. Ensure laboratory personnel are familiar with the relevant Laboratory Safety Plan and are trained to handle and dispose of hazardous substances used in their laboratories.\n\n--- Page 8 ---",
+          "document_id": "76354b7dfd0b11f082e5164a69504768",
+          "document_name": "laboratory_safety_manual.pdf",
+          "dataset_id": "6f357bd7f45f11f085b53ae7a67b446b",
+          "image_id": "",
+          "positions": [],
+          "url": null,
+          "similarity": 0.5278909652858966,
+          "vector_similarity": 0.6028694459294321,
+          "term_similarity": 0.35294117711764705,
+          "doc_type": ""
+        },
+        "40": {
+          "id": "2056ad3ec7435db1",
+          "content": "\n\nPPE TRAINING\n\nLaboratory personnel must be trained in the selection, proper use, limitations, care, and maintenance of PPE. Training requirements can be met in a variety of ways including videos, group training sessions, and handouts. Periodic retraining should be offered to both the employees and supervisors as appropriate. Examples of topics to be covered during the training include:\n\n- When PPE must be worn.\n- What PPE is necessary to carry out a procedure or experiment.\n- How to properly put on, take off, adjust, and wear PPE.\n- The proper cleaning, care, maintenance, useful life, limitations, and disposal of the PPE.\n\nIt is the responsibility of Principal Investigators and laboratory managers to ensure laboratory staff and students have received the appropriate training on the selection and use of proper PPE, that proper PPE is available and in good condition, and laboratory personnel use proper PPE when working in laboratories under their supervision.\n\nEYE PROTECTION\n\nEye protection is one of the most important and easiest forms of PPE to wear. Laboratory personnel must use eye protection for many of the chemical and physical hazards found in laboratories including flying particles, broken glass, molten metal, acids or caustic liquids, chemical liquids, chemical gases or vapors, or potentially injurious light radiation.\n\nAppropriate eye protection is required whenever working in or entering a laboratory in which hazardous chemical or infectious materials, or other mechanical or physical eye hazards are present. Eye and face protection must be selected on the basis of hazard and assessment of risk.\n\nAll laboratory employees and visitors are required to wear protective eyewear while in laboratories where chemicals are being handled or stored, at all times, even when not working directly with chemicals.\n\nOrdinaron glasses de adequatethe eyes. A eyeprot functions. aty glass otber ofyle to the eye elds. Wh eye protires the used-glass or prdequate\n\nNOTE: NORMAL PRESCRIPTION GLASSES AND/OR CONTACT LENSES BY THEMSELVES ARE NOT CONSIDERED AS PROTECTIVE EYEWEAR.\n\n--- Page 32 ---",
+          "document_id": "76354b7dfd0b11f082e5164a69504768",
+          "document_name": "laboratory_safety_manual.pdf",
+          "dataset_id": "6f357bd7f45f11f085b53ae7a67b446b",
+          "image_id": "",
+          "positions": [],
+          "url": null,
+          "similarity": 0.5205755442425858,
+          "vector_similarity": 0.6428390124557949,
+          "term_similarity": 0.23529411841176467,
+          "doc_type": ""
+        },
+        "400": {
+          "id": "79db6fb829ec1350",
+          "content": "\n\nAPPENDICES\n\nAPPENDIX 1 – COMPILED LAB SAFETY RESPONSIBILITIES\n\nThe following is a compiled list of lab safety responsibilities for Principal Investigators and laboratory managers. The item after the statements in bold and parentheses correspond to the section header within this Laboratory Safety Manual.\n\n1) It is the responsibility of the Principal Investigator to ensure a Laboratory Safety Plan is written and that all personnel working in laboratories under their supervision have reviewed and understood the plan. (Laboratory Safety Plan)\n\n2) It is the responsibility of Principal Investigators and laboratory managers to ensure that all persons in the laboratory are familiar with this Laboratory Safety Manual, the Laboratory Safety Plan, and are properly trained and competent to safely carry out their job duties and research. (Laboratory Safety Responsibilities)\n\n3) It is the responsibility of the Principal Investigator and laboratory manager to ensure that personnel working in laboratories under their supervision are informed and follow laboratory-specific, research center-specific, and campus-wide policies and procedures related to laboratory safety – such as the guidelines and requirements covered in this Laboratory Safety Manual. (Laboratory Safety Policies)\n\n4) It is the responsibility of Principal Investigators and laboratory managers to ensure personnel working in laboratories under their supervision have been provided with the proper training, have received information about the hazards in the laboratory they may encounter, and have been informed about ways they can protect themselves. (Employee Training)\n\n5) It is the responsibility of the Principal Investigator and laboratory manager to ensure written SOPs incorporating health and safety considerations are developed for work involving the use of hazardous chemicals in laboratories under their supervision and that PPE and engineering controls are adequate to prevent overexposure. In addition, Principal Investigators and laboratory managers must ensure that personnel working in laboratories under their supervision have been trained on those SOPs. (Standard Operating Procedures)\n\n6) It is the responsibility of Principal Investigators and laboratory managers to ensure that all laboratory personnel are aware of and follow the procedures for working alone in the laboratory and are managed in accordance with the policy to ensure their safety and the safety of others. (Working Alone)\n\n7) It is the responsibility of Principal Investigators and laboratory managers to ensure that laboratories under their supervision are maintained in a clean and orderly manner and that personnel working in the lab practice good housekeeping. (Laboratory Housekeeping)\n\n--- Page 124 -",
+          "document_id": "76354b7dfd0b11f082e5164a69504768",
+          "document_name": "laboratory_safety_manual.pdf",
+          "dataset_id": "6f357bd7f45f11f085b53ae7a67b446b",
+          "image_id": "",
+          "positions": [],
+          "url": null,
+          "similarity": 0.5137342084903588,
+          "vector_similarity": 0.6078555916584958,
+          "term_similarity": 0.2941176477647059,
+          "doc_type": ""
+        },
+        "63": {
+          "id": "66a73eaa65c087b1",
+          "content": "\n\n8. Obtain prior approval from institutional committees.\n\n9. Ensure that all incidents and near misses occurring in their laboratories are reported to their supervisor and that an incident report is submitted to KAUST HSE using the online reporting system.\n\nThe Principal Investigator/Laboratory Supervisor must ensure that all persons working with biohazards in the laboratory are properly trained, understand the hazards, know how to protect themselves, and are equipped and prepared to work safely.\n\n3.2. Laboratory Personnel\n\nLaboratory personnel consists of those individuals who conduct their work in a laboratory and are at risk of possible exposure to biohazards or other health or physical hazards on a regular or periodic basis. Personnel include laboratory technicians, instructors and researchers, visiting researchers, graduate assistants, and students. The responsibilities of laboratory personnel include:\n\n1. Follow all appropriate laboratory practices and safety requirements for the work being performed as per this Biosafety Manual and the KAUST Laboratory Safety Manual;\n\n2. Attend required health and safety trainings as designated by your supervisor;\n\n3. Inform your principal investigator, supervisor, laboratory manager, or instructor of any safety hazards or unsafe working conditions in the workplace, classroom, or laboratory (e.g., faulty fume hoods, or malfunctions of emergency safety equipment);\n\n4. Follow the standard operating procedures for your laboratory and the experiments being conducted - as provided by your supervisor;\n\n5. Know all emergency procedures as established by the Principal Investigator/ Laboratory Supervisor;\n\n6. Report all incidents, near misses, and workplace injuries immediately to your supervisor and by using the online reporting system.\n\n3.3. Health, Safety, and Environment (HSE)\n\nThe HSE department will provide technical information and program support to assist in compliance with KAUST’s Biosafety Manual. This includes developing policies, recommendations, and guidelines using those Biosafety Manual and the Laboratory Safety Manual to liaison serving as cc providing health and safety responsibilities regarding a University refiimpor (incroui'd'ini tniannual and taj), compete and consultants in health andn ency, resphciue: sain Biosafety atory per research day;\n\n1. Designating a University Biosafety Officer;\n\n2. Provide information to the research community regarding procedures and regulations for the safe use of biohazardous agents/materials, bloodborne pathogens, and r/sNA molecules in research;\n\nPage 5 of 58\nHSE-RST-Bio001M\n--- Page 5 ---",
+          "document_id": "75cf500afd0b11f093a9164a69504768",
+          "document_name": "Biosafety-Manual-V1.pdf",
+          "dataset_id": "6f357bd7f45f11f085b53ae7a67b446b",
+          "image_id": "",
+          "positions": [],
+          "url": null,
+          "similarity": 0.5040988289763135,
+          "vector_similarity": 0.5688806797728849,
+          "term_similarity": 0.352941177117647,
+          "doc_type": ""
+        },
+        "75": {
+          "id": "f9ac40ae3b809e6a",
+          "content": "\n\nHazard Identification and Risk Control\n\nLab Safety Plan (LSP) - Prepare/review the Lab Safety Plan (future LARA) to identify all the hazards present in the lab and ensure that safety controls are available and operational to minimize the risks (e.g., fume hood, biosafety cabinets, enclosures, etc.).\n\nLSP must be read, understood and signed by everyone working in your lab\nLSP available to all lab personnel\nLSP must be reviewed annually\nA template is available on our webpage\n\nStandard Operating Procedures (SOPs) - Assist lab members to develop written SOPs for hazardous operations, equipment, or specific experiment.\n\nEnsure that SOPs are reviewed regularly (or yearly)\nEnsure lab members sign the SOPs that apply to their work\nEnsure lab-specific SOPs are available (either paper copies or electronic access while in the lab)\n\n--- Page 21 ---",
+          "document_id": "764c42d9fd0b11f0b840164a69504768",
+          "document_name": "LSR-Orientation-Mar-2025.pdf",
+          "dataset_id": "6f357bd7f45f11f085b53ae7a67b446b",
+          "image_id": "",
+          "positions": [],
+          "url": null,
+          "similarity": 0.5019977198101746,
+          "vector_similarity": 0.5910891792582327,
+          "term_similarity": 0.29411764776470584,
+          "doc_type": ""
+        },
+        "271": {
+          "id": "55825f26dc170a0c",
+          "content": "\n\nINTRODUCTION\n\nKing Abdullah University of Science and Technology (KAUST) intends to be a leading international research institution with a strong commitment to protecting the health and safety of its faculty, staff, students, and visitors, as well as protecting its assets and the environment. Moreover, it is the vision of KAUST to be a leader among its peers in the international research community for its health, safety, and environmental performance.\n\nKAUST's commitment to health, safety, and environmental performance extends to all functions within the University. However, because of the special safety concerns that arise in a laboratory setting, this Laboratory Safety Manual has been developed by the Health, Safety, and Environmental (HSE) Department to serve as a general guide to laboratory safety within KAUST. It is to be used as a resource to assist laboratories in designing their own Laboratory Safety Plans.\n\nThis Laboratory Safety Manual is intended to establish basic safe operating practices so that faculty, staff, and students of KAUST may carry out effective educational and research programs in a safe and healthy environment. It is not intended to be a complete or final listing of all laboratory hazards or safe work practices. Because of the diverse nature of work being conducted at KAUST, additional procedures or requirements may be necessary for individual research labs.\n\nThe information contained within this laboratory safety manual is intended to comply with national regulations, international standards and laboratory best management practices.\n\nLABORATORY SAFETY PLAN\n\nEach laboratory where there is a risk of health or physical hazards is required to have a written Laboratory Safety Plan to protect against hazards to personnel, property, or the environment. This includes laboratories having hazardous materials (chemical, biological or radioactive), compressed gases, high-pressure, high-energy, Laser, X-Ray, or other significant physical, mechanical, or electrical hazards. The Laboratory Safety Plan should outline the lab-specific practices and procedures, personal protective equipment, training requirements, standard operating procedures, emergency procedures, and other safety requirements to protect employees from the hazards they may encounter in the laboratory. The Laboratory Safety Plan must be updated whenever there is a significant change in laboratory operations and/or hazards present, or a change in emergency contact personnel. A Laboratory Safety Plan template is available on the Lab Safety webpage.\n\n--- Page 7 ---",
+          "document_id": "76354b7dfd0b11f082e5164a69504768",
+          "document_name": "laboratory_safety_manual.pdf",
+          "dataset_id": "6f357bd7f45f11f085b53ae7a67b446b",
+          "image_id": "",
+          "positions": [],
+          "url": null,
+          "similarity": 0.4998913307844792,
+          "vector_similarity": 0.537659884061861,
+          "term_similarity": 0.41176470647058827,
+          "doc_type": ""
+        }
+      },
+      "doc_aggs": {}
+    }
+  ],
+  "task_id": "93a5f393001211f1863f1e210f381e29",
   "variables": {}
 }

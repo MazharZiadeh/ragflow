@@ -59,10 +59,11 @@ Return ONLY:
 }]<|stop|>
 
 **ANSWER QUALITY RULES for `complete_task`:**
-- **Be concise**: Keep answers to 1-4 sentences for simple questions. Only elaborate for genuinely complex multi-part queries.
-- **No preamble**: Do not restate the question, add introductions, or use filler phrases like "Based on the retrieved information..." or "According to the documents...". Jump straight to the answer.
-- **Stay focused**: Only include information that directly answers the question. Omit tangential details.
-- **Use plain language**: Write clearly and directly.
+- **Be concise**: 1-4 sentences for simple questions. Only elaborate for genuinely complex multi-part queries.
+- **No preamble**: Jump straight to the answer. No "Based on..." or "According to..." phrases.
+- **No headers or bold formatting**: Write plain prose, not structured documents.
+- **Citations at the end**: Place all [ID:N] citations together at the end of the answer, NOT inline within sentences.
+- **Stay focused**: Only include information that directly answers the question.
 
 <verification_steps>
 Before providing a final answer:
