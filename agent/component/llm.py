@@ -157,7 +157,16 @@ class LLM(ComponentBase):
         has_chunks = bool(ref.get("chunks"))
         if self._param.cite and has_chunks:
             logging.info(f"LLM component: Enabling citations with {len(ref['chunks'])} reference chunks")
-            sys_prompt += citation_prompt(user_defined_prompt)
+            # Insert citation instructions BEFORE the retrieved context block
+            # so the context is the last thing the LLM sees (recency bias)
+            ctx_marker = "=== RETRIEVED CONTEXT START ==="
+            if ctx_marker in sys_prompt:
+                sys_prompt = sys_prompt.replace(
+                    ctx_marker,
+                    citation_prompt(user_defined_prompt) + "\n\n" + ctx_marker
+                )
+            else:
+                sys_prompt += citation_prompt(user_defined_prompt)
         elif self._param.cite and not has_chunks:
             logging.warning("LLM component: cite=True but no reference chunks available. Make sure Retrieval component runs before LLM and its output is connected.")
 
