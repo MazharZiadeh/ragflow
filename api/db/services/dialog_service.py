@@ -327,6 +327,9 @@ async def async_chat(dialog, messages, stream=True, **kwargs):
             yield ans
             return
 
+    if not prompt_config.get("system", "").strip():
+        prompt_config["system"] = PROMPT_JINJA_ENV.from_string(ASK_SUMMARY).render(knowledge="{knowledge}")
+
     for p in prompt_config["parameters"]:
         if p["key"] == "knowledge":
             continue
@@ -455,8 +458,10 @@ async def async_chat(dialog, messages, stream=True, **kwargs):
 
     msg = [{"role": "system", "content": prompt_config["system"].format(**kwargs)+attachments_}]
     prompt4citation = ""
-    if knowledges and (prompt_config.get("quote", True) and kwargs.get("quote", True)):
-        prompt4citation = citation_prompt()
+    if knowledges:
+        msg[0]["content"] += "\n\nIMPORTANT: Be concise and direct. Answer ONLY what the user asked. Do NOT add background, preamble, or tangentially related information. If the retrieved content does not directly answer the question, say so rather than summarizing unrelated material."
+        if prompt_config.get("quote", True) and kwargs.get("quote", True):
+            prompt4citation = citation_prompt()
     msg.extend([{"role": m["role"], "content": re.sub(r"##\d+\$\$", "", m["content"])} for m in messages if m["role"] != "system"])
     used_token_count, msg = message_fit_in(msg, int(max_tokens * 0.95))
     assert len(msg) >= 2, f"message_fit_in has bug: {msg}"
