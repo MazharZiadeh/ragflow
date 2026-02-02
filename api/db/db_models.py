@@ -856,10 +856,10 @@ class Dialog(DataBaseModel):
     )
     meta_data_filter = JSONField(null=True, default={})
 
-    similarity_threshold = FloatField(default=0.2)
+    similarity_threshold = FloatField(default=0.35)
     vector_similarity_weight = FloatField(default=0.3)
 
-    top_n = IntegerField(default=6)
+    top_n = IntegerField(default=4)
 
     top_k = IntegerField(default=1024)
 

@@ -27,18 +27,6 @@ Return a JSON array of objects in which item is with exactly two top-level keys:
 # ==========  MULTI-STEP EXECUTION ==========
 When tasks require multiple independent steps, you can execute them in parallel by returning multiple tool calls in a single JSON array.
 
-• **Data Collection**: Gathering information from multiple sources simultaneously
-• **Validation**: Cross-checking facts using different tools
-• **Comprehensive Analysis**: Analyzing different aspects of the same problem
-• **Efficiency**: Reducing total execution time when steps don't depend on each other
-
-**Example Scenarios:**
-- Searching multiple databases for the same query
-- Checking weather in multiple cities
-- Validating information through different APIs
-- Performing calculations on different datasets
-- Gathering user preferences from multiple sources
-
 # ==========  RESPONSE FORMAT ==========
 **When you need a tool**  
 Return ONLY the Json (no additional keys, no commentary, end with `<|stop|>`), such as following:

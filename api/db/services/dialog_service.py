@@ -36,7 +36,10 @@ from common.metadata_utils import apply_meta_data_filter
 from api.db.services.tenant_llm_service import TenantLLMService
 from common.time_utils import current_timestamp, datetime_format
 from graphrag.general.mind_map_extractor import MindMapExtractor
-from rag.advanced_rag import DeepResearcher
+try:
+    from rag.advanced_rag import DeepResearcher
+except ImportError:
+    DeepResearcher = None
 from rag.app.resume import forbidden_select_fields4resume
 from rag.app.tag import label_question
 from rag.nlp.search import index_name
@@ -459,7 +462,7 @@ async def async_chat(dialog, messages, stream=True, **kwargs):
     msg = [{"role": "system", "content": prompt_config["system"].format(**kwargs)+attachments_}]
     prompt4citation = ""
     if knowledges:
-        msg[0]["content"] += "\n\nIMPORTANT: Be concise and direct. Answer ONLY what the user asked. Do NOT add background, preamble, or tangentially related information. If the retrieved content does not directly answer the question, say so rather than summarizing unrelated material."
+        msg[0]["content"] += "\n\nIMPORTANT RESPONSE RULES:\n1. Answer ONLY the specific question asked — nothing more.\n2. If retrieved content is not relevant to the question, say \"No relevant information found\" instead of summarizing it.\n3. Match response length to question complexity: simple question = 1-3 sentences.\n4. Never start with \"Based on the provided information...\" or similar preamble."
         if prompt_config.get("quote", True) and kwargs.get("quote", True):
             prompt4citation = citation_prompt()
     msg.extend([{"role": m["role"], "content": re.sub(r"##\d+\$\$", "", m["content"])} for m in messages if m["role"] != "system"])

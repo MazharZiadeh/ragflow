@@ -232,7 +232,7 @@ class Dealer:
                       for ck in chunks]
         cites = {}
         thr = 0.63
-        while thr > 0.3 and len(cites.keys()) == 0 and pieces_ and chunks_tks:
+        while thr > 0.45 and len(cites.keys()) == 0 and pieces_ and chunks_tks:
             for i, a in enumerate(pieces_):
                 sim, tksim, vtsim = self.qryr.hybrid_similarity(ans_v[i],
                                                                 chunk_v,
@@ -441,17 +441,13 @@ class Dealer:
         valid_idx = [int(i) for i in sorted_idx if sim_np[i] >= similarity_threshold]
         filtered_count = len(valid_idx)
 
-        # If no chunks meet the threshold, use top results with a warning
+        # If no chunks meet the threshold, return empty results
+        # and let the empty_response config handle it gracefully
         if filtered_count == 0 and len(sorted_idx) > 0:
-            # Fallback: return top chunks even if below threshold
-            fallback_count = min(page_size, len(sorted_idx))
-            valid_idx = [int(sorted_idx[i]) for i in range(fallback_count)]
-            filtered_count = fallback_count
             max_sim = sim_np[sorted_idx[0]] if len(sorted_idx) > 0 else 0
-            logging.warning(
+            logging.info(
                 f"No chunks met similarity threshold {similarity_threshold:.2f}. "
-                f"Returning top {fallback_count} chunks with max similarity {max_sim:.4f}. "
-                f"Consider lowering the similarity_threshold parameter."
+                f"Max similarity was {max_sim:.4f}. Returning empty results."
             )
 
         ranks["total"] = int(filtered_count)

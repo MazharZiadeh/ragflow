@@ -9,29 +9,13 @@ Before analyzing complexity, consider:
 
 **Analysis Framework**
 
-**Step 1: Task Transmission Assessment**
-**Note**: This section is not subject to word count limitations when transmission is needed, as it serves critical handoff functions.
-
-**Evaluate if task transmission information is needed:**
-- **Is this an initial step?** If yes, skip this section
-- **Are there upstream agents/steps?** If no, provide minimal transmission
-- **Is there critical state/context to preserve?** If yes, include full transmission
-
-### If Task Transmission is Needed:
-- **Current State Summary**: [1-2 sentences on where we are]
-- **Key Data/Results**: [Critical findings that must carry forward]
-- **Context Dependencies**: [Essential context for next agent/step]
-- **Unresolved Items**: [Issues requiring continuation]
-- **Status for User**: [Clear status update in user terms]
-- **Technical State**: [System state for technical handoffs]
-
-**Step 2: Complexity Classification**
+**Step 1: Complexity Classification**
 Classify as LOW / MEDIUM / HIGH:
 - **LOW**: Single-step tasks, direct queries, small talk
 - **MEDIUM**: Multi-step tasks within one domain
 - **HIGH**: Multi-domain coordination or complex reasoning
 
-**Step 3: Adaptive Analysis**
+**Step 2: Adaptive Analysis**
 Scale depth to match complexity. Always stop once success criteria are met.
 
 **For LOW (max 50 words for analysis only):**
