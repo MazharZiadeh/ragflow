@@ -162,10 +162,16 @@ async def upload(dataset_id, tenant_id):
     err, files = FileService.upload_document(kb, file_objs, tenant_id, parent_path=form.get("parent_path"))
     if err:
         return get_result(message="\n".join(err), code=RetCode.SERVER_ERROR)
+
+    # Auto-parse if KB has pipeline_id set
+    auto_parse = bool(kb.pipeline_id)
+    doc_ids = []
+
     # rename key's name
     renamed_doc_list = []
     for file in files:
         doc = file[0]
+        doc_ids.append(doc["id"])
         key_mapping = {
             "chunk_num": "chunk_count",
             "kb_id": "dataset_id",
@@ -176,8 +182,20 @@ async def upload(dataset_id, tenant_id):
         for key, value in doc.items():
             new_key = key_mapping.get(key, key)
             renamed_doc[new_key] = value
-        renamed_doc["run"] = "UNSTART"
+        renamed_doc["run"] = "RUNNING" if auto_parse else "UNSTART"
         renamed_doc_list.append(renamed_doc)
+
+    # Auto-start parsing if KB has pipeline_id
+    if auto_parse and doc_ids:
+        for doc_id in doc_ids:
+            info = {"run": TaskStatus.RUNNING.value, "progress": 0, "progress_msg": ""}
+            DocumentService.update_by_id(doc_id, info)
+            e, doc = DocumentService.get_by_id(doc_id)
+            if e:
+                TaskService.filter_delete([Task.doc_id == doc_id])
+                settings.docStoreConn.delete({"doc_id": doc_id}, search.index_name(tenant_id), dataset_id)
+                queue_tasks(doc.to_dict(), doc.kb_id, tenant_id, 0)
+
     return get_result(data=renamed_doc_list)
 
 
