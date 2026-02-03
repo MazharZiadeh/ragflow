@@ -368,7 +368,8 @@ async def async_chat(dialog, messages, stream=True, **kwargs):
     kbinfos = {"total": 0, "chunks": [], "doc_aggs": []}
     knowledges = []
 
-    if attachments is not None and "knowledge" in [p["key"] for p in prompt_config["parameters"]]:
+    # Retrieval should happen whenever kb_ids exist, not just when "knowledge" is a configured parameter
+    if dialog.kb_ids:
         tenant_ids = list(set([kb.tenant_id for kb in kbs]))
         knowledges = []
         if prompt_config.get("reasoning", False):
