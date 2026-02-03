@@ -250,6 +250,8 @@ class Dealer:
 
         res = ""
         seted = set([])
+        all_citations = []  # Collect all citations to append at the end
+
         for i, p in enumerate(pieces):
             res += p
             if i not in idx:
@@ -261,8 +263,13 @@ class Dealer:
             for c in cites[i]:
                 if c in seted:
                     continue
-                res += f" [ID:{c}]"
+                all_citations.append(c)  # Collect instead of inline insertion
                 seted.add(c)
+
+        # Append all citations at the end instead of inline
+        if all_citations:
+            res = res.rstrip()
+            res += " " + "".join([f"[ID:{c}]" for c in all_citations])
 
         return res, seted
 
