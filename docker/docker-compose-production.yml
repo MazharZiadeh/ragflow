@@ -117,6 +117,91 @@ services:
     devices:
       - /dev/kmsg
 
+  # Blackbox exporter for HTTP/TCP endpoint probing
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    container_name: ragflow-blackbox-exporter
+    volumes:
+      - ./monitoring/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    command:
+      - '--config.file=/etc/blackbox_exporter/config.yml'
+    ports:
+      - "9115:9115"
+    networks:
+      - ragflow
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9115/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis exporter for Redis metrics
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: ragflow-redis-exporter
+    environment:
+      - REDIS_ADDR=redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "9121:9121"
+    networks:
+      - ragflow
+    restart: always
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9121/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MySQL exporter for MySQL metrics
+  mysql-exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: ragflow-mysql-exporter
+    environment:
+      - MYSQLD_EXPORTER_PASSWORD=${MYSQL_PASSWORD}
+    command:
+      - '--mysqld.address=mysql:3306'
+      - '--mysqld.username=${MYSQL_USER:-root}'
+    ports:
+      - "9104:9104"
+    networks:
+      - ragflow
+    restart: always
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9104/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Elasticsearch exporter for ES metrics
+  elasticsearch-exporter:
+    image: quay.io/prometheuscommunity/elasticsearch-exporter:latest
+    container_name: ragflow-elasticsearch-exporter
+    command:
+      - '--es.uri=https://es01:9200'
+      - '--es.ssl-skip-verify'
+      - '--es.all'
+    environment:
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=${ELASTIC_PASSWORD}
+    ports:
+      - "9114:9114"
+    networks:
+      - ragflow
+    restart: always
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9114/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 volumes:
   prometheus_data:
   grafana_data:

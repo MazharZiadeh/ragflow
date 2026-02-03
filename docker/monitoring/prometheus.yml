@@ -42,18 +42,17 @@ scrape_configs:
       - target_label: __address__
         replacement: blackbox-exporter:9115
 
-  # MySQL metrics (if mysqld_exporter is added)
+  # MySQL metrics via mysqld_exporter
   - job_name: 'mysql'
     static_configs:
-      - targets: ['mysql:3306']
+      - targets: ['mysql-exporter:9104']
 
-  # Elasticsearch metrics
+  # Elasticsearch metrics via elasticsearch_exporter
   - job_name: 'elasticsearch'
     static_configs:
-      - targets: ['es01:9200']
-    metrics_path: /_prometheus/metrics
+      - targets: ['elasticsearch-exporter:9114']
 
-  # Redis metrics
+  # Redis metrics via redis_exporter
   - job_name: 'redis'
     static_configs:
-      - targets: ['redis:6379']
+      - targets: ['redis-exporter:9121']
