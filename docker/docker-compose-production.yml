@@ -15,6 +15,10 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+    volumes:
+      # Mount specific files for local development fixes
+      - ../rag/prompts:/ragflow/rag/prompts:ro
+      - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
 
   ragflow-cpu:
     healthcheck:
@@ -29,6 +33,10 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
+    volumes:
+      # Mount specific files for local development fixes
+      - ../rag/prompts:/ragflow/rag/prompts:ro
+      - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
 
   # Prometheus for metrics collection
   prometheus:

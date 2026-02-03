@@ -42,6 +42,9 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./service_conf.yaml.template:/ragflow/conf/service_conf.yaml.template
       - ./entrypoint.sh:/ragflow/entrypoint.sh
+      # Mount specific files for local development fixes
+      - ../rag/prompts:/ragflow/rag/prompts:ro
+      - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
     env_file: .env
     environment:
       - RAGFLOW_SECRET_KEY=${RAGFLOW_SECRET_KEY}
@@ -94,6 +97,9 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./service_conf.yaml.template:/ragflow/conf/service_conf.yaml.template
       - ./entrypoint.sh:/ragflow/entrypoint.sh
+      # Mount specific files for local development fixes
+      - ../rag/prompts:/ragflow/rag/prompts:ro
+      - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
     env_file: .env
     environment:
       - RAGFLOW_SECRET_KEY=${RAGFLOW_SECRET_KEY}
@@ -122,6 +128,9 @@ services:
     volumes:
       - ./ragflow-logs:/ragflow/logs
       - ./service_conf.yaml.template:/ragflow/conf/service_conf.yaml.template
+      # Mount specific files for local development fixes
+      - ../rag/prompts:/ragflow/rag/prompts:ro
+      - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
     env_file: .env
     environment:
       - RAGFLOW_SECRET_KEY=${RAGFLOW_SECRET_KEY}
