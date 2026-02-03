@@ -1,90 +1,350 @@
 {
-  "path": [],
-  "graph": {
-    "edges": [
-      {
-        "id": "e1",
-        "source": "begin",
-        "target": "Agent:QuerySampler",
-        "sourceHandle": "start",
-        "targetHandle": "end"
-      },
-      {
-        "id": "e2",
-        "data": {
-          "isHovered": false
+  "id": 100,
+  "title": {
+    "en": "RAG Judge Agent",
+    "zh": "RAG评估代理"
+  },
+  "description": {
+    "en": "Evaluates RAG system performance by generating test queries, executing them, scoring results, and providing diagnostic recommendations.",
+    "zh": "通过生成测试查询、执行查询、评分结果并提供诊断建议来评估RAG系统性能。"
+  },
+  "canvas_type": "Other",
+  "dsl": {
+    "path": [],
+    "graph": {
+      "edges": [
+        {
+          "id": "e1",
+          "source": "begin",
+          "target": "Agent:QuerySampler",
+          "sourceHandle": "start",
+          "targetHandle": "end"
         },
-        "source": "Agent:QuerySampler",
-        "target": "Agent:RAGExecutor",
-        "sourceHandle": "start",
-        "targetHandle": "end"
-      },
-      {
-        "id": "e3",
-        "data": {
-          "isHovered": false
+        {
+          "id": "e2",
+          "source": "Agent:QuerySampler",
+          "target": "Agent:RAGExecutor",
+          "sourceHandle": "start",
+          "targetHandle": "end"
         },
-        "source": "Agent:RAGExecutor",
-        "target": "Agent:Judge",
-        "sourceHandle": "start",
-        "targetHandle": "end"
-      },
-      {
-        "id": "e4",
-        "source": "Agent:Judge",
-        "target": "Agent:Diagnostician",
-        "sourceHandle": "start",
-        "targetHandle": "end"
-      },
-      {
-        "id": "e5",
-        "source": "Agent:Diagnostician",
-        "target": "Message:EvalReport",
-        "sourceHandle": "start",
-        "targetHandle": "end"
-      },
-      {
-        "id": "xy-edge__Agent:RAGExecutortool-Tool:CrazyDoodlesCampend",
-        "data": {
-          "isHovered": false
+        {
+          "id": "e3",
+          "source": "Agent:RAGExecutor",
+          "target": "Agent:Judge",
+          "sourceHandle": "start",
+          "targetHandle": "end"
         },
-        "source": "Agent:RAGExecutor",
-        "target": "Tool:CrazyDoodlesCamp",
-        "sourceHandle": "tool",
-        "targetHandle": "end"
-      }
-    ],
-    "nodes": [
-      {
-        "id": "begin",
-        "data": {
-          "form": {
+        {
+          "id": "e4",
+          "source": "Agent:Judge",
+          "target": "Agent:Diagnostician",
+          "sourceHandle": "start",
+          "targetHandle": "end"
+        },
+        {
+          "id": "e5",
+          "source": "Agent:Diagnostician",
+          "target": "Message:EvalReport",
+          "sourceHandle": "start",
+          "targetHandle": "end"
+        },
+        {
+          "id": "xy-edge__Agent:RAGExecutortool-Tool:CrazyDoodlesCampend",
+          "source": "Agent:RAGExecutor",
+          "target": "Tool:CrazyDoodlesCamp",
+          "sourceHandle": "tool",
+          "targetHandle": "end"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "begin",
+          "data": {
+            "form": {
+              "mode": "conversational",
+              "inputs": {},
+              "outputs": {},
+              "prologue": "Starting RAG evaluation cycle...",
+              "enablePrologue": true
+            },
+            "name": "begin",
+            "label": "Begin"
+          },
+          "type": "beginNode",
+          "measured": {
+            "width": 200,
+            "height": 82
+          },
+          "position": {
+            "x": 50,
+            "y": 300
+          },
+          "selected": false,
+          "sourcePosition": "right",
+          "targetPosition": "left"
+        },
+        {
+          "id": "Agent:QuerySampler",
+          "data": {
+            "form": {
+              "cite": false,
+              "tools": [],
+              "llm_id": "qwen2.5:32b@Ollama",
+              "outputs": {
+                "content": {
+                  "type": "string",
+                  "value": ""
+                }
+              },
+              "prompts": [
+                {
+                  "role": "user",
+                  "content": "Generate 5 test queries:\n- 2 simple factual (What is X?)\n- 2 analytical (How does X work?)\n- 1 complex multi-part\n\nOutput as JSON array:\n[{\"query\": \"...\", \"type\": \"simple|medium|complex\", \"expected_topics\": [\"...\"]}]"
+                }
+              ],
+              "max_rounds": 1,
+              "sys_prompt": "You are a test query generator. Generate diverse test queries for evaluating a RAG system. Output ONLY valid JSON, no markdown code blocks.",
+              "temperature": 0.4,
+              "message_history_window_size": 1
+            },
+            "name": "Query Sampler",
+            "label": "Agent"
+          },
+          "type": "agentNode",
+          "measured": {
+            "width": 200,
+            "height": 90
+          },
+          "position": {
+            "x": 300,
+            "y": 300
+          },
+          "selected": false,
+          "sourcePosition": "right",
+          "targetPosition": "left"
+        },
+        {
+          "id": "Agent:RAGExecutor",
+          "data": {
+            "form": {
+              "cite": true,
+              "tools": [
+                {
+                  "id": "Retrieval:EvalRetrieval",
+                  "name": "Retrieval_Eval",
+                  "params": {
+                    "top_k": 1024,
+                    "top_n": 6,
+                    "kb_ids": [
+                      "6f357bd7f45f11f085b53ae7a67b446b"
+                    ],
+                    "use_kg": false,
+                    "outputs": {},
+                    "rerank_id": "bge-reranker-v2-m3@Xinference",
+                    "toc_enhance": true,
+                    "retrieval_from": "dataset",
+                    "cross_languages": [],
+                    "meta_data_filter": {},
+                    "similarity_threshold": 0.2,
+                    "keywords_similarity_weight": 0.7
+                  },
+                  "component_name": "Retrieval"
+                }
+              ],
+              "llm_id": "qwen2.5:32b@Ollama",
+              "outputs": {
+                "content": {
+                  "type": "string",
+                  "value": ""
+                }
+              },
+              "prompts": [
+                {
+                  "role": "user",
+                  "content": "Execute these test queries:\n{Agent:QuerySampler@content}\n\nFor each query:\n1. Call the retrieval tool with the query\n2. Generate a response based on retrieved documents\n3. Format output as JSON: {\"query\": \"...\", \"response\": \"...\", \"sources_count\": N}"
+                }
+              ],
+              "max_rounds": 3,
+              "sys_prompt": "Execute queries against the knowledge base. For each query, use the retrieval tool to get relevant documents, then generate a response based on the retrieved content.",
+              "temperature": 0.2,
+              "message_history_window_size": 1
+            },
+            "name": "RAG Executor",
+            "label": "Agent"
+          },
+          "type": "agentNode",
+          "measured": {
+            "width": 200,
+            "height": 90
+          },
+          "position": {
+            "x": 600,
+            "y": 300
+          },
+          "selected": false,
+          "sourcePosition": "right",
+          "targetPosition": "left"
+        },
+        {
+          "id": "Agent:Judge",
+          "data": {
+            "form": {
+              "cite": false,
+              "tools": [],
+              "llm_id": "qwen2.5:32b@Ollama",
+              "outputs": {
+                "content": {
+                  "type": "string",
+                  "value": ""
+                }
+              },
+              "prompts": [
+                {
+                  "role": "user",
+                  "content": "Evaluate these RAG results:\n\n{Agent:RAGExecutor@content}\n\nProvide evaluation as JSON:\n{\n  \"evaluations\": [\n    {\n      \"query\": \"the query text\",\n      \"relevance_score\": 0.0-1.0,\n      \"accuracy_score\": 0.0-1.0,\n      \"completeness_score\": 0.0-1.0,\n      \"overall_score\": 0.0-1.0,\n      \"issues\": [\"list of issues found\"]\n    }\n  ],\n  \"summary\": {\n    \"average_relevance\": 0.0-1.0,\n    \"average_accuracy\": 0.0-1.0,\n    \"average_completeness\": 0.0-1.0,\n    \"average_overall\": 0.0-1.0,\n    \"pass_rate\": \"percentage with score >= 0.7\",\n    \"common_issues\": [\"list\"]\n  }\n}"
+                }
+              ],
+              "max_rounds": 1,
+              "sys_prompt": "You are a RAG quality evaluator. Score each result from 0.0 to 1.0 on:\n\n1. RELEVANCE: Are the retrieved chunks relevant to the query?\n   - 1.0: Highly relevant, directly answers the question\n   - 0.7: Mostly relevant with minor gaps\n   - 0.4: Partially relevant\n   - 0.0: Irrelevant\n\n2. ACCURACY: Is the response factually correct based on sources?\n   - 1.0: Fully accurate, well-supported\n   - 0.7: Mostly accurate\n   - 0.4: Some inaccuracies\n   - 0.0: Incorrect or hallucinated\n\n3. COMPLETENESS: Does the response fully address the query?\n   - 1.0: Complete and comprehensive\n   - 0.7: Mostly complete\n   - 0.4: Partial answer\n   - 0.0: Missing key information\n\nOutput ONLY valid JSON. No markdown, no code blocks, no explanations outside JSON.",
+              "temperature": 0.2,
+              "message_history_window_size": 1
+            },
+            "name": "Judge",
+            "label": "Agent"
+          },
+          "type": "agentNode",
+          "measured": {
+            "width": 200,
+            "height": 90
+          },
+          "position": {
+            "x": 900,
+            "y": 300
+          },
+          "selected": false,
+          "sourcePosition": "right",
+          "targetPosition": "left"
+        },
+        {
+          "id": "Agent:Diagnostician",
+          "data": {
+            "form": {
+              "cite": false,
+              "tools": [],
+              "llm_id": "qwen2.5:32b@Ollama",
+              "outputs": {
+                "content": {
+                  "type": "string",
+                  "value": ""
+                }
+              },
+              "prompts": [
+                {
+                  "role": "user",
+                  "content": "Analyze these evaluation results:\n\n{Agent:Judge@content}\n\nProvide diagnosis as JSON:\n{\n  \"diagnosis\": \"summary of main issues\",\n  \"root_causes\": [\"list of identified causes\"],\n  \"recommended_fixes\": [\n    {\n      \"parameter\": \"parameter name\",\n      \"current_issue\": \"what's wrong\",\n      \"action\": \"what to change\",\n      \"priority\": \"high|medium|low\",\n      \"expected_impact\": \"expected improvement\"\n    }\n  ]\n}"
+                }
+              ],
+              "max_rounds": 1,
+              "sys_prompt": "You are a RAG system diagnostician. Based on evaluation scores, identify root causes and recommend specific parameter changes.\n\nDiagnostic rules:\n- Low relevance (<0.6): Adjust similarity_threshold or top_k\n- Low accuracy (<0.7): Check LLM temperature or improve prompts\n- Low completeness (<0.7): Increase top_n or check chunking\n\nOutput ONLY valid JSON.",
+              "temperature": 0.3,
+              "message_history_window_size": 1
+            },
+            "name": "Diagnostician",
+            "label": "Agent"
+          },
+          "type": "agentNode",
+          "measured": {
+            "width": 200,
+            "height": 90
+          },
+          "position": {
+            "x": 1200,
+            "y": 300
+          },
+          "selected": false,
+          "sourcePosition": "right",
+          "targetPosition": "left"
+        },
+        {
+          "id": "Message:EvalReport",
+          "data": {
+            "form": {
+              "content": [
+                "# RAG Evaluation Report\n\n## Evaluation Scores\n{Agent:Judge@content}\n\n## Diagnosis & Recommendations\n{Agent:Diagnostician@content}\n\n---\n*Report generated automatically*"
+              ]
+            },
+            "name": "Evaluation Report",
+            "label": "Message"
+          },
+          "type": "messageNode",
+          "measured": {
+            "width": 200,
+            "height": 150
+          },
+          "position": {
+            "x": 1500,
+            "y": 300
+          },
+          "selected": false,
+          "sourcePosition": "right",
+          "targetPosition": "left"
+        },
+        {
+          "id": "Tool:CrazyDoodlesCamp",
+          "data": {
+            "form": {
+              "description": "This is an agent for a specific task.",
+              "user_prompt": "This is the order you need to send to the agent."
+            },
+            "name": "flow.tool_0",
+            "label": "Tool"
+          },
+          "type": "toolNode",
+          "measured": {
+            "width": 200,
+            "height": 50
+          },
+          "position": {
+            "x": 518,
+            "y": 440
+          },
+          "selected": false,
+          "sourcePosition": "right",
+          "targetPosition": "left"
+        }
+      ]
+    },
+    "memory": [],
+    "globals": {
+      "sys.files": [],
+      "sys.query": "",
+      "sys.user_id": "",
+      "sys.conversation_turns": 0
+    },
+    "history": [],
+    "messages": [],
+    "retrieval": [],
+    "variables": {},
+    "components": {
+      "begin": {
+        "obj": {
+          "params": {
             "mode": "conversational",
             "inputs": {},
             "outputs": {},
             "prologue": "Starting RAG evaluation cycle...",
             "enablePrologue": true
           },
-          "name": "begin",
-          "label": "Begin"
+          "component_name": "Begin"
         },
-        "type": "beginNode",
-        "measured": {
-          "width": 200,
-          "height": 82
-        },
-        "position": {
-          "x": 50,
-          "y": 300
-        },
-        "selected": false,
-        "sourcePosition": "right",
-        "targetPosition": "left"
+        "upstream": [],
+        "downstream": [
+          "Agent:QuerySampler"
+        ]
       },
-      {
-        "id": "Agent:QuerySampler",
-        "data": {
-          "form": {
+      "Agent:Judge": {
+        "obj": {
+          "params": {
             "cite": false,
             "tools": [],
             "llm_id": "qwen2.5:32b@Ollama",
@@ -97,34 +357,27 @@
             "prompts": [
               {
                 "role": "user",
-                "content": "Generate 5 test queries:\n- 2 simple factual (What is X?)\n- 2 analytical (How does X work?)\n- 1 complex multi-part\n\nOutput as JSON array:\n[{\"query\": \"...\", \"type\": \"simple|medium|complex\", \"expected_topics\": [\"...\"]}]"
+                "content": "Evaluate these RAG results:\n\n{Agent:RAGExecutor@content}\n\nProvide evaluation as JSON:\n{\n  \"evaluations\": [\n    {\n      \"query\": \"the query text\",\n      \"relevance_score\": 0.0-1.0,\n      \"accuracy_score\": 0.0-1.0,\n      \"completeness_score\": 0.0-1.0,\n      \"overall_score\": 0.0-1.0,\n      \"issues\": [\"list of issues found\"]\n    }\n  ],\n  \"summary\": {\n    \"average_relevance\": 0.0-1.0,\n    \"average_accuracy\": 0.0-1.0,\n    \"average_completeness\": 0.0-1.0,\n    \"average_overall\": 0.0-1.0,\n    \"pass_rate\": \"percentage with score >= 0.7\",\n    \"common_issues\": [\"list\"]\n  }\n}"
               }
             ],
             "max_rounds": 1,
-            "sys_prompt": "You are a test query generator. Generate diverse test queries for evaluating a RAG system. Output ONLY valid JSON, no markdown code blocks.",
-            "temperature": 0.4,
+            "sys_prompt": "You are a RAG quality evaluator. Score each result from 0.0 to 1.0 on:\n\n1. RELEVANCE: Are the retrieved chunks relevant to the query?\n   - 1.0: Highly relevant, directly answers the question\n   - 0.7: Mostly relevant with minor gaps\n   - 0.4: Partially relevant\n   - 0.0: Irrelevant\n\n2. ACCURACY: Is the response factually correct based on sources?\n   - 1.0: Fully accurate, well-supported\n   - 0.7: Mostly accurate\n   - 0.4: Some inaccuracies\n   - 0.0: Incorrect or hallucinated\n\n3. COMPLETENESS: Does the response fully address the query?\n   - 1.0: Complete and comprehensive\n   - 0.7: Mostly complete\n   - 0.4: Partial answer\n   - 0.0: Missing key information\n\nOutput ONLY valid JSON. No markdown, no code blocks, no explanations outside JSON.",
+            "temperature": 0.2,
+            "exception_goto": [],
             "message_history_window_size": 1
           },
-          "name": "Query Sampler",
-          "label": "Agent"
+          "component_name": "Agent"
         },
-        "type": "agentNode",
-        "measured": {
-          "width": 200,
-          "height": 90
-        },
-        "position": {
-          "x": 300,
-          "y": 300
-        },
-        "selected": false,
-        "sourcePosition": "right",
-        "targetPosition": "left"
+        "upstream": [
+          "Agent:RAGExecutor"
+        ],
+        "downstream": [
+          "Agent:Diagnostician"
+        ]
       },
-      {
-        "id": "Agent:RAGExecutor",
-        "data": {
-          "form": {
+      "Agent:RAGExecutor": {
+        "obj": {
+          "params": {
             "cite": true,
             "tools": [
               {
@@ -132,7 +385,7 @@
                 "name": "Retrieval_Eval",
                 "params": {
                   "top_k": 1024,
-                  "top_n": 6,
+                  "top_n": 10,
                   "kb_ids": [
                     "6f357bd7f45f11f085b53ae7a67b446b"
                   ],
@@ -143,7 +396,7 @@
                   "retrieval_from": "dataset",
                   "cross_languages": [],
                   "meta_data_filter": {},
-                  "similarity_threshold": 0.2,
+                  "similarity_threshold": 0.1,
                   "keywords_similarity_weight": 0.7
                 },
                 "component_name": "Retrieval"
@@ -165,28 +418,21 @@
             "max_rounds": 3,
             "sys_prompt": "Execute queries against the knowledge base. For each query, use the retrieval tool to get relevant documents, then generate a response based on the retrieved content.",
             "temperature": 0.2,
+            "exception_goto": [],
             "message_history_window_size": 1
           },
-          "name": "RAG Executor",
-          "label": "Agent"
+          "component_name": "Agent"
         },
-        "type": "agentNode",
-        "measured": {
-          "width": 200,
-          "height": 90
-        },
-        "position": {
-          "x": 600,
-          "y": 300
-        },
-        "selected": false,
-        "sourcePosition": "right",
-        "targetPosition": "left"
+        "upstream": [
+          "Agent:QuerySampler"
+        ],
+        "downstream": [
+          "Agent:Judge"
+        ]
       },
-      {
-        "id": "Agent:Judge",
-        "data": {
-          "form": {
+      "Agent:QuerySampler": {
+        "obj": {
+          "params": {
             "cite": false,
             "tools": [],
             "llm_id": "qwen2.5:32b@Ollama",
@@ -199,34 +445,41 @@
             "prompts": [
               {
                 "role": "user",
-                "content": "Evaluate these RAG results:\n\n{Agent:RAGExecutor@content}\n\nProvide evaluation as JSON:\n{\n  \"evaluations\": [\n    {\n      \"query\": \"the query text\",\n      \"relevance_score\": 0.0-1.0,\n      \"accuracy_score\": 0.0-1.0,\n      \"completeness_score\": 0.0-1.0,\n      \"overall_score\": 0.0-1.0,\n      \"issues\": [\"list of issues found\"]\n    }\n  ],\n  \"summary\": {\n    \"average_relevance\": 0.0-1.0,\n    \"average_accuracy\": 0.0-1.0,\n    \"average_completeness\": 0.0-1.0,\n    \"average_overall\": 0.0-1.0,\n    \"pass_rate\": \"percentage with score >= 0.7\",\n    \"common_issues\": [\"list\"]\n  }\n}"
+                "content": "Generate 5 test queries:\n- 2 simple factual (What is X?)\n- 2 analytical (How does X work?)\n- 1 complex multi-part\n\nOutput as JSON array:\n[{\"query\": \"...\", \"type\": \"simple|medium|complex\", \"expected_topics\": [\"...\"]}]"
               }
             ],
             "max_rounds": 1,
-            "sys_prompt": "You are a RAG quality evaluator. Score each result from 0.0 to 1.0 on:\n\n1. RELEVANCE: Are the retrieved chunks relevant to the query?\n   - 1.0: Highly relevant, directly answers the question\n   - 0.7: Mostly relevant with minor gaps\n   - 0.4: Partially relevant\n   - 0.0: Irrelevant\n\n2. ACCURACY: Is the response factually correct based on sources?\n   - 1.0: Fully accurate, well-supported\n   - 0.7: Mostly accurate\n   - 0.4: Some inaccuracies\n   - 0.0: Incorrect or hallucinated\n\n3. COMPLETENESS: Does the response fully address the query?\n   - 1.0: Complete and comprehensive\n   - 0.7: Mostly complete\n   - 0.4: Partial answer\n   - 0.0: Missing key information\n\nOutput ONLY valid JSON. No markdown, no code blocks, no explanations outside JSON.",
-            "temperature": 0.2,
+            "sys_prompt": "You are a test query generator. Generate diverse test queries for evaluating a RAG system. Output ONLY valid JSON, no markdown code blocks.",
+            "temperature": 0.4,
+            "exception_goto": [],
             "message_history_window_size": 1
           },
-          "name": "Judge",
-          "label": "Agent"
+          "component_name": "Agent"
         },
-        "type": "agentNode",
-        "measured": {
-          "width": 200,
-          "height": 90
-        },
-        "position": {
-          "x": 900,
-          "y": 300
-        },
-        "selected": false,
-        "sourcePosition": "right",
-        "targetPosition": "left"
+        "upstream": [
+          "begin"
+        ],
+        "downstream": [
+          "Agent:RAGExecutor"
+        ]
       },
-      {
-        "id": "Agent:Diagnostician",
-        "data": {
-          "form": {
+      "Message:EvalReport": {
+        "obj": {
+          "params": {
+            "content": [
+              "# RAG Evaluation Report\n\n## Evaluation Scores\n{Agent:Judge@content}\n\n## Diagnosis & Recommendations\n{Agent:Diagnostician@content}\n\n---\n*Report generated automatically*"
+            ]
+          },
+          "component_name": "Message"
+        },
+        "upstream": [
+          "Agent:Diagnostician"
+        ],
+        "downstream": []
+      },
+      "Agent:Diagnostician": {
+        "obj": {
+          "params": {
             "cite": false,
             "tools": [],
             "llm_id": "qwen2.5:32b@Ollama",
@@ -245,272 +498,18 @@
             "max_rounds": 1,
             "sys_prompt": "You are a RAG system diagnostician. Based on evaluation scores, identify root causes and recommend specific parameter changes.\n\nDiagnostic rules:\n- Low relevance (<0.6): Adjust similarity_threshold or top_k\n- Low accuracy (<0.7): Check LLM temperature or improve prompts\n- Low completeness (<0.7): Increase top_n or check chunking\n\nOutput ONLY valid JSON.",
             "temperature": 0.3,
+            "exception_goto": [],
             "message_history_window_size": 1
           },
-          "name": "Diagnostician",
-          "label": "Agent"
+          "component_name": "Agent"
         },
-        "type": "agentNode",
-        "measured": {
-          "width": 200,
-          "height": 90
-        },
-        "position": {
-          "x": 1200,
-          "y": 300
-        },
-        "selected": false,
-        "sourcePosition": "right",
-        "targetPosition": "left"
-      },
-      {
-        "id": "Message:EvalReport",
-        "data": {
-          "form": {
-            "content": [
-              "# RAG Evaluation Report\n\n",
-              "## Evaluation Scores\n{Agent:Judge@content}\n\n",
-              "## Diagnosis & Recommendations\n{Agent:Diagnostician@content}\n\n",
-              "---\n*Report generated automatically*"
-            ]
-          },
-          "name": "Evaluation Report",
-          "label": "Message"
-        },
-        "type": "messageNode",
-        "measured": {
-          "width": 200,
-          "height": 150
-        },
-        "position": {
-          "x": 1500,
-          "y": 300
-        },
-        "selected": false,
-        "sourcePosition": "right",
-        "targetPosition": "left"
-      },
-      {
-        "id": "Tool:CrazyDoodlesCamp",
-        "data": {
-          "form": {
-            "description": "This is an agent for a specific task.",
-            "user_prompt": "This is the order you need to send to the agent."
-          },
-          "name": "flow.tool_0",
-          "label": "Tool"
-        },
-        "type": "toolNode",
-        "measured": {
-          "width": 200,
-          "height": 50
-        },
-        "position": {
-          "x": 518,
-          "y": 440
-        },
-        "selected": true,
-        "sourcePosition": "right",
-        "targetPosition": "left"
+        "upstream": [
+          "Agent:Judge"
+        ],
+        "downstream": [
+          "Message:EvalReport"
+        ]
       }
-    ]
-  },
-  "memory": [],
-  "globals": {
-    "sys.files": [],
-    "sys.query": "",
-    "sys.user_id": "",
-    "sys.conversation_turns": 0
-  },
-  "history": [],
-  "task_id": "4012c43dfffc11f0b6bb422ebf8a2ca7",
-  "messages": [],
-  "retrieval": [],
-  "variables": {},
-  "components": {
-    "begin": {
-      "obj": {
-        "params": {
-          "mode": "conversational",
-          "inputs": {},
-          "outputs": {},
-          "prologue": "Starting RAG evaluation cycle...",
-          "enablePrologue": true
-        },
-        "component_name": "Begin"
-      },
-      "upstream": [],
-      "downstream": [
-        "Agent:QuerySampler"
-      ]
-    },
-    "Agent:Judge": {
-      "obj": {
-        "params": {
-          "cite": false,
-          "tools": [],
-          "llm_id": "qwen2.5:32b@Ollama",
-          "outputs": {
-            "content": {
-              "type": "string",
-              "value": ""
-            }
-          },
-          "prompts": [
-            {
-              "role": "user",
-              "content": "Evaluate these RAG results:\n\n{Agent:RAGExecutor@content}\n\nProvide evaluation as JSON:\n{\n  \"evaluations\": [\n    {\n      \"query\": \"the query text\",\n      \"relevance_score\": 0.0-1.0,\n      \"accuracy_score\": 0.0-1.0,\n      \"completeness_score\": 0.0-1.0,\n      \"overall_score\": 0.0-1.0,\n      \"issues\": [\"list of issues found\"]\n    }\n  ],\n  \"summary\": {\n    \"average_relevance\": 0.0-1.0,\n    \"average_accuracy\": 0.0-1.0,\n    \"average_completeness\": 0.0-1.0,\n    \"average_overall\": 0.0-1.0,\n    \"pass_rate\": \"percentage with score >= 0.7\",\n    \"common_issues\": [\"list\"]\n  }\n}"
-            }
-          ],
-          "max_rounds": 1,
-          "sys_prompt": "You are a RAG quality evaluator. Score each result from 0.0 to 1.0 on:\n\n1. RELEVANCE: Are the retrieved chunks relevant to the query?\n   - 1.0: Highly relevant, directly answers the question\n   - 0.7: Mostly relevant with minor gaps\n   - 0.4: Partially relevant\n   - 0.0: Irrelevant\n\n2. ACCURACY: Is the response factually correct based on sources?\n   - 1.0: Fully accurate, well-supported\n   - 0.7: Mostly accurate\n   - 0.4: Some inaccuracies\n   - 0.0: Incorrect or hallucinated\n\n3. COMPLETENESS: Does the response fully address the query?\n   - 1.0: Complete and comprehensive\n   - 0.7: Mostly complete\n   - 0.4: Partial answer\n   - 0.0: Missing key information\n\nOutput ONLY valid JSON. No markdown, no code blocks, no explanations outside JSON.",
-          "temperature": 0.2,
-          "exception_goto": [],
-          "message_history_window_size": 1
-        },
-        "component_name": "Agent"
-      },
-      "upstream": [
-        "Agent:RAGExecutor"
-      ],
-      "downstream": [
-        "Agent:Diagnostician"
-      ]
-    },
-    "Agent:RAGExecutor": {
-      "obj": {
-        "params": {
-          "cite": true,
-          "tools": [
-            {
-              "id": "Retrieval:EvalRetrieval",
-              "name": "Retrieval_Eval",
-              "params": {
-                "top_k": 1024,
-                "top_n": 10,
-                "kb_ids": [
-                  "6f357bd7f45f11f085b53ae7a67b446b"
-                ],
-                "use_kg": false,
-                "outputs": {},
-                "rerank_id": "bge-reranker-v2-m3@Xinference",
-                "toc_enhance": true,
-                "retrieval_from": "dataset",
-                "cross_languages": [],
-                "meta_data_filter": {},
-                "similarity_threshold": 0.1,
-                "keywords_similarity_weight": 0.7
-              },
-              "component_name": "Retrieval"
-            }
-          ],
-          "llm_id": "qwen2.5:32b@Ollama",
-          "outputs": {
-            "content": {
-              "type": "string",
-              "value": ""
-            }
-          },
-          "prompts": [
-            {
-              "role": "user",
-              "content": "Execute these test queries:\n{Agent:QuerySampler@content}\n\nFor each query:\n1. Call the retrieval tool with the query\n2. Generate a response based on retrieved documents\n3. Format output as JSON: {\"query\": \"...\", \"response\": \"...\", \"sources_count\": N}"
-            }
-          ],
-          "max_rounds": 3,
-          "sys_prompt": "Execute queries against the knowledge base. For each query, use the retrieval tool to get relevant documents, then generate a response based on the retrieved content.",
-          "temperature": 0.2,
-          "exception_goto": [],
-          "message_history_window_size": 1
-        },
-        "component_name": "Agent"
-      },
-      "upstream": [
-        "Agent:QuerySampler"
-      ],
-      "downstream": [
-        "Agent:Judge"
-      ]
-    },
-    "Agent:QuerySampler": {
-      "obj": {
-        "params": {
-          "cite": false,
-          "tools": [],
-          "llm_id": "qwen2.5:32b@Ollama",
-          "outputs": {
-            "content": {
-              "type": "string",
-              "value": ""
-            }
-          },
-          "prompts": [
-            {
-              "role": "user",
-              "content": "Generate 5 test queries:\n- 2 simple factual (What is X?)\n- 2 analytical (How does X work?)\n- 1 complex multi-part\n\nOutput as JSON array:\n[{\"query\": \"...\", \"type\": \"simple|medium|complex\", \"expected_topics\": [\"...\"]}]"
-            }
-          ],
-          "max_rounds": 1,
-          "sys_prompt": "You are a test query generator. Generate diverse test queries for evaluating a RAG system. Output ONLY valid JSON, no markdown code blocks.",
-          "temperature": 0.4,
-          "exception_goto": [],
-          "message_history_window_size": 1
-        },
-        "component_name": "Agent"
-      },
-      "upstream": [
-        "begin"
-      ],
-      "downstream": [
-        "Agent:RAGExecutor"
-      ]
-    },
-    "Message:EvalReport": {
-      "obj": {
-        "params": {
-          "content": [
-            "# RAG Evaluation Report\n\n## Evaluation Scores\n{Agent:Judge@content}\n\n## Diagnosis & Recommendations\n{Agent:Diagnostician@content}\n\n---\n*Report generated automatically*"
-          ]
-        },
-        "component_name": "Message"
-      },
-      "upstream": [
-        "Agent:Diagnostician"
-      ],
-      "downstream": []
-    },
-    "Agent:Diagnostician": {
-      "obj": {
-        "params": {
-          "cite": false,
-          "tools": [],
-          "llm_id": "qwen2.5:32b@Ollama",
-          "outputs": {
-            "content": {
-              "type": "string",
-              "value": ""
-            }
-          },
-          "prompts": [
-            {
-              "role": "user",
-              "content": "Analyze these evaluation results:\n\n{Agent:Judge@content}\n\nProvide diagnosis as JSON:\n{\n  \"diagnosis\": \"summary of main issues\",\n  \"root_causes\": [\"list of identified causes\"],\n  \"recommended_fixes\": [\n    {\n      \"parameter\": \"parameter name\",\n      \"current_issue\": \"what's wrong\",\n      \"action\": \"what to change\",\n      \"priority\": \"high|medium|low\",\n      \"expected_impact\": \"expected improvement\"\n    }\n  ]\n}"
-            }
-          ],
-          "max_rounds": 1,
-          "sys_prompt": "You are a RAG system diagnostician. Based on evaluation scores, identify root causes and recommend specific parameter changes.\n\nDiagnostic rules:\n- Low relevance (<0.6): Adjust similarity_threshold or top_k\n- Low accuracy (<0.7): Check LLM temperature or improve prompts\n- Low completeness (<0.7): Increase top_n or check chunking\n\nOutput ONLY valid JSON.",
-          "temperature": 0.3,
-          "exception_goto": [],
-          "message_history_window_size": 1
-        },
-        "component_name": "Agent"
-      },
-      "upstream": [
-        "Agent:Judge"
-      ],
-      "downstream": [
-        "Message:EvalReport"
-      ]
     }
   }
 }
