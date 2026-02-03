@@ -64,9 +64,9 @@ services:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-ragflow123}
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_SERVER_ROOT_URL=http://localhost:3001
     ports:
-      - "3000:3000"
+      - "3001:3000"
     networks:
       - ragflow
     restart: always
@@ -120,3 +120,8 @@ services:
 volumes:
   prometheus_data:
   grafana_data:
+
+networks:
+  ragflow:
+    external: true
+    name: docker_ragflow
