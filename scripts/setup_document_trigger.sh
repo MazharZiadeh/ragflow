@@ -51,25 +51,52 @@ log_info "Setting up document upload trigger..."
 log_info "Knowledge Base ID: ${KB_ID}"
 log_info "Process Agent ID: ${PROCESS_AGENT_ID}"
 
-# Update knowledge base to use Process agent as pipeline
-RESPONSE=$(curl -s -X PUT "${RAGFLOW_HOST}/api/v1/knowledgebases/${KB_ID}" \
-    -H "Authorization: Bearer ${API_KEY}" \
-    -H "Content-Type: application/json" \
-    -d "{\"pipeline_id\": \"${PROCESS_AGENT_ID}\"}")
+# MySQL connection settings (from docker/.env)
+MYSQL_CONTAINER="${MYSQL_CONTAINER:-docker-mysql-1}"
+MYSQL_USER="${MYSQL_USER:-root}"
+MYSQL_PASSWORD="${MYSQL_PASSWORD:-}"
+MYSQL_DATABASE="${MYSQL_DATABASE:-rag_flow}"
 
-# Check response
-if echo "$RESPONSE" | grep -q '"code":0'; then
-    log_info "Success! Process agent linked to knowledge base."
-    log_info ""
-    log_info "How it works now:"
-    log_info "  1. Upload document to KB ${KB_ID}"
-    log_info "  2. Process agent (${PROCESS_AGENT_ID}) runs automatically"
-    log_info "  3. Document is processed and indexed"
-    log_info ""
-    log_info "For queries, call Main agent directly:"
-    log_info "  POST ${RAGFLOW_HOST}/api/v1/agents/a0aaa8d1fc2611f0ab2ba6f4b3787fc9/completions"
+# Check if MySQL password is set
+if [ -z "${MYSQL_PASSWORD}" ]; then
+    log_warn "MYSQL_PASSWORD not set, trying to read from docker/.env"
+    SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+    ENV_FILE="${SCRIPT_DIR}/../docker/.env"
+    if [ -f "${ENV_FILE}" ]; then
+        MYSQL_PASSWORD=$(grep "^MYSQL_PASSWORD=" "${ENV_FILE}" | cut -d'=' -f2)
+    fi
+fi
+
+if [ -z "${MYSQL_PASSWORD}" ]; then
+    log_error "MYSQL_PASSWORD is required. Set it via environment variable or in docker/.env"
+    exit 1
+fi
+
+# Update knowledge base pipeline_id directly in database
+log_info "Updating database..."
+docker exec "${MYSQL_CONTAINER}" mysql -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" "${MYSQL_DATABASE}" \
+    -e "UPDATE knowledgebase SET pipeline_id='${PROCESS_AGENT_ID}' WHERE id='${KB_ID}';" 2>/dev/null
+
+if [ $? -eq 0 ]; then
+    # Verify the update
+    RESULT=$(docker exec "${MYSQL_CONTAINER}" mysql -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" "${MYSQL_DATABASE}" \
+        -N -e "SELECT pipeline_id FROM knowledgebase WHERE id='${KB_ID}';" 2>/dev/null)
+
+    if [ "${RESULT}" = "${PROCESS_AGENT_ID}" ]; then
+        log_info "Success! Process agent linked to knowledge base."
+        log_info ""
+        log_info "How it works now:"
+        log_info "  1. Upload document to KB ${KB_ID}"
+        log_info "  2. Process agent (${PROCESS_AGENT_ID}) runs automatically"
+        log_info "  3. Document is processed and indexed"
+        log_info ""
+        log_info "For queries, call Main agent directly:"
+        log_info "  POST ${RAGFLOW_HOST}/api/v1/agents/a0aaa8d1fc2611f0ab2ba6f4b3787fc9/completions"
+    else
+        log_error "Update may have failed. Current pipeline_id: ${RESULT}"
+        exit 1
+    fi
 else
     log_error "Failed to update knowledge base"
-    echo "$RESPONSE" | python3 -m json.tool 2>/dev/null || echo "$RESPONSE"
     exit 1
 fi

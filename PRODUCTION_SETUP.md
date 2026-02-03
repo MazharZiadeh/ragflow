@@ -39,7 +39,7 @@ export RAGFLOW_API_KEY="your-api-key"
 
 Or manually via API:
 ```bash
-curl -X PUT "http://localhost:9380/api/v1/knowledgebases/<kb-id>" \
+curl -X PUT "http://localhost:9380/api/v1/datasets/<kb-id>" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"pipeline_id": "35756e8bfb6d11f081a03627fe966451"}'
@@ -280,7 +280,7 @@ queryRAG("What is machine learning?").then(console.log);
 
 ```bash
 # Check if KB has pipeline_id set
-curl -s "http://localhost:9380/api/v1/knowledgebases/<kb-id>" \
+curl -s "http://localhost:9380/api/v1/datasets/<kb-id>" \
   -H "Authorization: Bearer YOUR_API_KEY" | python3 -m json.tool | grep pipeline
 ```
 
