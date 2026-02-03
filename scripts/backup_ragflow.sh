@@ -13,9 +13,9 @@ BACKUP_NAME="ragflow_backup_${TIMESTAMP}"
 BACKUP_PATH="${BACKUP_DIR}/${BACKUP_NAME}"
 
 # Container names (adjust if different)
-MYSQL_CONTAINER="mysql"
-MINIO_CONTAINER="minio"
-ES_CONTAINER="es01"
+MYSQL_CONTAINER="${MYSQL_CONTAINER:-docker-mysql-1}"
+MINIO_CONTAINER="${MINIO_CONTAINER:-docker-minio-1}"
+ES_CONTAINER="${ES_CONTAINER:-docker-es01-1}"
 
 # Retention (days)
 RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-7}"
@@ -77,19 +77,19 @@ backup_minio() {
         return 1
     fi
 
-    # Get MinIO data volume path
-    MINIO_VOLUME=$(docker inspect "${MINIO_CONTAINER}" --format '{{range .Mounts}}{{if eq .Destination "/data"}}{{.Source}}{{end}}{{end}}')
+    # Use docker cp to backup MinIO data (works without root access)
+    mkdir -p "${BACKUP_PATH}/minio"
+    log_info "Copying MinIO data from container..."
+    docker cp "${MINIO_CONTAINER}:/data/." "${BACKUP_PATH}/minio/"
 
-    if [ -z "${MINIO_VOLUME}" ]; then
-        log_warn "Could not find MinIO data volume, using docker cp instead"
-        mkdir -p "${BACKUP_PATH}/minio"
-        docker cp "${MINIO_CONTAINER}:/data" "${BACKUP_PATH}/minio/"
+    # Compress the backup
+    if [ -d "${BACKUP_PATH}/minio" ] && [ "$(ls -A ${BACKUP_PATH}/minio 2>/dev/null)" ]; then
+        tar -czf "${BACKUP_PATH}/minio_data.tar.gz" -C "${BACKUP_PATH}" minio
+        rm -rf "${BACKUP_PATH}/minio"
+        log_info "MinIO backup completed and compressed"
     else
-        log_info "MinIO volume found at: ${MINIO_VOLUME}"
-        tar -czf "${BACKUP_PATH}/minio_data.tar.gz" -C "$(dirname ${MINIO_VOLUME})" "$(basename ${MINIO_VOLUME})"
+        log_warn "MinIO data directory is empty"
     fi
-
-    log_info "MinIO backup completed"
 }
 
 # Backup Elasticsearch indices
