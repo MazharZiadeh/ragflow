@@ -670,7 +670,7 @@
           "kb_ids": [
             "6f357bd7f45f11f085b53ae7a67b446b"
           ],
-          "keywords_similarity_weight": 0.3,
+          "keywords_similarity_weight": 0.1,
           "outputs": {
             "formalized_content": {
               "type": "string",
@@ -680,10 +680,10 @@
           "query": "sys.query",
           "rerank_id": "",
           "retrieval_from": "dataset",
-          "similarity_threshold": 0.1,
+          "similarity_threshold": 0.05,
           "toc_enhance": true,
           "top_k": 1024,
-          "top_n": 8,
+          "top_n": 15,
           "use_kg": true
         }
       },
@@ -1272,7 +1272,7 @@
             "kb_ids": [
               "6f357bd7f45f11f085b53ae7a67b446b"
             ],
-            "keywords_similarity_weight": 0.3,
+            "keywords_similarity_weight": 0.1,
             "outputs": {
               "formalized_content": {
                 "type": "string",
@@ -1282,10 +1282,10 @@
             "query": "sys.query",
             "rerank_id": "",
             "retrieval_from": "dataset",
-            "similarity_threshold": 0.1,
+            "similarity_threshold": 0.05,
             "toc_enhance": true,
             "top_k": 1024,
-            "top_n": 8,
+            "top_n": 15,
             "use_kg": true
           },
           "label": "Retrieval",
