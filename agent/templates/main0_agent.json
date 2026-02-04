@@ -79,7 +79,7 @@
           "presence_penalty": 0.4,
           "prompts": [
             {
-              "content": "Query Plan: {Agent:Planner@content}\n\n=== RETRIEVED DOCUMENTS ===\n{Retrieval_Advanced@formalized_content}\n=== END DOCUMENTS ===\n\nQuestion: {sys.query}\n\nFORMAT: [Direct answer, max 5 sentences]. Citations: [ID:N][ID:M]...\n\nDO NOT ELABORATE beyond what is necessary. STOP after answering.",
+              "content": "Query Plan: {Agent:Planner@content}\n\n=== RETRIEVED DOCUMENTS ===\n{Retrieval:AdvancedKBSearch@formalized_content}\n=== END DOCUMENTS ===\n\nQuestion: {sys.query}\n\nFORMAT: [Direct answer, max 5 sentences]. Citations: [ID:N][ID:M]...\n\nDO NOT ELABORATE beyond what is necessary. STOP after answering.",
               "role": "user"
             }
           ],
@@ -87,36 +87,7 @@
           "sys_prompt": "You are a research assistant. Answer using ONLY the provided context. STOP after answering.\n\nSTRICT RULES:\n1. DIRECT ANSWER: State the main answer in 1-2 sentences.\n2. SUPPORTING DETAIL: Add 1-3 sentences of support if needed. Then STOP.\n3. MAX LENGTH: Never exceed 5 sentences total.\n4. FAITHFULNESS: Use ONLY explicit facts. Do not infer, assume, or add knowledge.\n5. CITATIONS AT END: Format: [ID:N][ID:M]... - Use the ID numbers from the retrieved documents.\n6. PARTIAL INFO: If context partially answers, state what you found and what is missing.\n\nFORBIDDEN:\n- Starting with \"Based on...\", \"According to...\", \"The documents show...\"\n- Inline citations within sentences\n- Headers, numbered lists, or structured formatting\n- Elaborating after the core answer\n- Fabricating metadata not explicitly stated",
           "temperature": 0.4,
           "temperatureEnabled": true,
-          "tools": [
-            {
-              "component_name": "Retrieval",
-              "id": "Retrieval:AdvancedKBSearch",
-              "name": "Retrieval_Advanced",
-              "params": {
-                "cross_languages": [],
-                "kb_ids": [
-                  "6f357bd7f45f11f085b53ae7a67b446b"
-                ],
-                "keywords_similarity_weight": 0.3,
-                "meta_data_filter": {},
-                "outputs": {
-                  "chunks": {
-                    "value": null
-                  },
-                  "metadata": {
-                    "value": null
-                  }
-                },
-                "rerank_id": "",
-                "retrieval_from": "dataset",
-                "similarity_threshold": 0.11,
-                "toc_enhance": true,
-                "top_k": 1024,
-                "top_n": 10,
-                "use_kg": true
-              }
-            }
-          ],
+          "tools": [],
           "topPEnabled": false,
           "top_p": 0.3,
           "user_prompt": "",
@@ -124,7 +95,7 @@
         }
       },
       "upstream": [
-        "Agent:Planner"
+        "Retrieval:AdvancedKBSearch"
       ]
     },
     "Agent:ConversationalSimple": {
@@ -227,7 +198,7 @@
     },
     "Agent:Planner": {
       "downstream": [
-        "Agent:AdvancedRetrieval"
+        "Retrieval:AdvancedKBSearch"
       ],
       "obj": {
         "component_name": "Agent",
@@ -425,7 +396,7 @@
           "presence_penalty": 0.4,
           "prompts": [
             {
-              "content": "=== RETRIEVED DOCUMENTS ===\n{Retrieval_Simple@formalized_content}\n=== END DOCUMENTS ===\n\nQuestion: {sys.query}\n\nFORMAT: [Direct answer in 1-3 sentences]. Citations: [ID:N][ID:M]...\n\nDO NOT ELABORATE. STOP after answering.",
+              "content": "=== RETRIEVED DOCUMENTS ===\n{Retrieval:SimpleKBSearch@formalized_content}\n=== END DOCUMENTS ===\n\nQuestion: {sys.query}\n\nFORMAT: [Direct answer in 1-3 sentences]. Citations: [ID:N][ID:M]...\n\nDO NOT ELABORATE. STOP after answering.",
               "role": "user"
             }
           ],
@@ -433,302 +404,7 @@
           "sys_prompt": "You are a factual Q&A assistant. Answer ONLY from the provided context. STOP after answering.\n\nSTRICT RULES:\n1. ANSWER FIRST: State the answer in 1-3 sentences. Then STOP.\n2. NO ELABORATION: Do not explain further, provide background, or add commentary.\n3. FAITHFULNESS: Use ONLY explicit facts from the context. Do not infer or assume.\n4. FORMAT: [Your answer]. Citations: [ID:N][ID:M]... - Use the ID numbers from context.\n5. NO CONTEXT = NO ANSWER: If not found, say exactly: \"This information is not available in the knowledge base.\"\n\nFORBIDDEN:\n- Starting with \"Based on...\", \"According to...\", \"The context shows...\"\n- Adding background the user did not ask for\n- Inline citations within sentences\n- Headers, bullet points, or structured formatting\n- Continuing to write after the answer",
           "temperature": 0.4,
           "temperatureEnabled": true,
-          "tools": [
-            {
-              "component_name": "Retrieval",
-              "id": "Retrieval:SimpleKBSearch",
-              "name": "Retrieval_Simple",
-              "params": {
-                "cross_languages": [],
-                "kb_ids": [
-                  "6f357bd7f45f11f085b53ae7a67b446b"
-                ],
-                "keywords_similarity_weight": 0.3,
-                "meta_data_filter": {},
-                "outputs": {
-                  "_created_time": {
-                    "type": "<class 'float'>",
-                    "value": 154058.401931585
-                  },
-                  "_elapsed_time": {
-                    "type": "<class 'float'>",
-                    "value": 1.6252406980202068
-                  },
-                  "_references": {
-                    "type": "<class 'dict'>",
-                    "value": {
-                      "chunks": [
-                        {
-                          "chunk_id": "4f273d5e46f16432",
-                          "content_with_weight": "\n\nKAUST Health and Safety Toolbox Talk / Toolbox Talk Number HSE/RF/TBT/021\n\nKAUST Road Safety\n\n1. Have a valid driving licence.\n   - For the type of vehicle driven and keep personal details up to date.\n\n2. Make sure you are insured.\n   - You will need a minimum of 3rd party insurance for any vehicle driven on KAUST Roads.\n\n3. Make sure you are medically fit to drive, or ride any vehicle.\n   - For example: Have regular eyesight tests.\n\n4. Maintain your car properly.\n   - Routinely service the vehicle & undertake regular 'checks' by a reliable dealer, or garage.\n\n5. Secure any equipment carried at the back of a pickup.\n   - Make sure everything is tied securely so that it will not fly off.\n\n6. Be aware of cyclists and pedestrians at all times.\n   - Watch out for children playing on the side of the road and for cyclists.\n\n7. Never Speed!\n   - Obey the speed limits in KAUST.\n   - It's a speed limited... not a speed target.\n\n8. Don't use your mobile phone while driving.\n   - Also Avoid other distractions eating and smoking, and drinking.\n\n9. Always wear your seatbelt & make sure passengers do too.\n   - Cross your heart, not your fingers.\n\n10. Maintain a safe distance from other road users.\n    - Report any incidents, or accidents, immediately to KAUST Security on 912 292 921.\n\nGot suggestions or questions? healthandsafetymatters@kaust.edu.sa\n\n--- Page 1 ---",
-                          "doc_id": "75f3cdfcfd0b11f0b778164a69504768",
-                          "doc_type_kwd": "",
-                          "docnm_kwd": "KAUST-Health-and-Safety-Toolbox-Talk_KAUST-Road-Safety_HSE_RF_TBT_021.pdf",
-                          "image_id": "",
-                          "important_kwd": [],
-                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                          "mom_id": "",
-                          "positions": [],
-                          "similarity": 0.4859629466450206,
-                          "term_similarity": 0.1804333460881545,
-                          "vector_similarity": 0.6169042040265347
-                        },
-                        {
-                          "chunk_id": "13bf07e21d0373bf",
-                          "content_with_weight": "\n\nDocument Number HSE-OHSMS-M-01\nIssue Date Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\nHealth, Safety and Environment\n\n1. Purpose, Scope and Users\nThe purpose of this document is to define the process of determining, documenting, and conducting control of operations according to the hazard control hierarchy related to significant hazards in the work place, Health and Safety (H&S) Policy, and OH&S Objectives of KAUST.\nThis document is applied to all activities of KAUST within the scope of the Occupational Health & Safety Management System (OH&SMS) where significant occupational health and safety hazards emerge.\nUsers of this document are KAUST employees, service providers and contractors.\n\n2. Reference Documents\n- KAUST Health and Safety Policy\n- KAUST OH&SMS Manual\n- KAUST Traffic and Vehicle Safety Policy\n- Procedure for Risk Assessment and Hazard Identification\n- Procedure Management of Change (MOC)\n- SOP Confined Space Entry and Gas Testing\n- SOP Work Permit\n- SOP Work Permit Training\n- SOP for Contractor Health and Safety\n- SOP for Isolation Lockout and Use of Hold Tags Process\n- SOP for KAUST Driving Permit and Training Program\n- SOP for First Aid Training Program\n\n3. Roles and Responsibilities\n3.1. HSE Director\nEstablish and maintain governance over the implementation of the KAUST OH&SMS.\n3.2. Health and Safety Manager\nThe Health and Safety (H&S) Manager is responsible for monitoring KAUST OH&S performance and leading OH&S continuous improvement plans.\n3.3. Directors and Department Managers\nIn addition to the responsibilities outlined in this document, Department M is responsible to:\n3.3.1. Know the OH&S risks associated with his/her business and how they are managed.\n3.3.2. Demonstrate visible leadership and through measurable actions, such as planning and making worksite visits to engage with staff.\n3.3.3. Lead and participate actively in OH&S meetings.\n\nOccupational Health and Safety Management System Manual Rev 04 This document\nPage\nwhen printed 68\nis uncontrolled",
-                          "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                          "doc_type_kwd": "",
-                          "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                          "image_id": "",
-                          "important_kwd": [],
-                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                          "mom_id": "",
-                          "positions": [],
-                          "similarity": 0.46628656412878067,
-                          "term_similarity": 0.28970889994306726,
-                          "vector_similarity": 0.5419627059226578
-                        },
-                        {
-                          "chunk_id": "4f31b1bd8370f114",
-                          "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n| Ensure that contractors and service providers under his or her authority has an approved written procedure for incident and near-miss reporting and investigation which is aligned with the requirements of this procedure.\n| Ensure competent persons lead incident investigations.\n| Investigate the incident as soon as possible after it occurred and ensure appropriate corrective actions are implemented within a specified timeframe.\n| Track corrective actions to closure.\n| Communicate lessons learnt and implement of corrective actions.\nEmployees, Students, Community, Visitors\n| Report incidents and near-misses as soon as possible to their Person in Charge, Supervisor, Department Manager, Safety Representative or Manager, but no later than within 24 hours of the incident occurring.\n| Immediately report emergency situations such as fire, security or medical incidents by calling 911 from a KAUST landline or 012 808 0911 on a mobile.\n| Cooperate with incident investigations if needed.\n\n4. Definitions\nSee Appendix A, Definitions.\n\n5. Incidents\n5.1. Incident and Near-Miss Notification and Reporting\n5.1.1. Persons in KAUST are required to report all incidents and near-misses as soon as possible, but not later than within 24 hours of it occurring using the online REPORTIT system (http://reportit.kaust.edu.sa).\n5.1.2. Emergency situations (e.g. fire, gas leak, chemical spill, medical emergency, suspicious person, driving violation, etc.) shall be reported by first calling 911 from a KAUST landline or 012 808 0911 from a mobile, and then using the REPORTIT system as soon as possible, but not later than the end of the shift or work day.\n5.1.3. KAUST Senior Leadership team will immediately be notified of Major incidents.\n5.1.4. The Relevant Department Manager or the Person in Charge shall immediately be notified of Moderate, Minor and Near-Miss incidents.\n\nNote: REPORTIT is not a punitive tool. It is a record system that is used by KAUST to report, record, categorize, investigate, assign and track to closure incidents and near-misses.\n\n5.2. Incident Classification\n5.2.1. The Relevant Department shall use REPORTIT to provide KAUST HSE with the preliminary incident investigation report, and provide an initial incident classification in the incident description.\n5.2.2. Relevant Departments and KAUST HSE shall use the incident classification outlined in Table 2.\n5.2.3. KAUST HSE may change the classification upon review of the incident details.\n\n--- Page 84 -",
-                          "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                          "doc_type_kwd": "",
-                          "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                          "image_id": "",
-                          "important_kwd": [],
-                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                          "mom_id": "",
-                          "positions": [],
-                          "similarity": 0.45682605606476673,
-                          "term_similarity": 0.1804333460881545,
-                          "vector_similarity": 0.575280074626172
-                        },
-                        {
-                          "chunk_id": "3e8826884b60353c",
-                          "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n- Legal requirements;\n- OH&S risk management throughout the life cycle of the project;\n- Potential liabilities from OH&S risks; and\n- Identifying and engaging with interested parties.\n\nKAUST Health and Safety Department shall ensure that the department who is responsible for overseeing construction work in KAUST has an effective system in place to manage contractor safety, and this shall be verified within the following limitations:\n\n- That a selection process is implemented prior to contract award;\n- KAUST health and safety requirements are included in the contractual requirements that include the KAUST HSE and the KAUST Vehicle and Traffic Safety Policies;\n- Health and safety induction that includes the KAUST HSE Policy is provided to the workforce before work starts;\n- A written program for site inspections is available and implemented;\n- A system to track corrective actions is implemented; and\n- Incident investigations are conducted following KAUST approved procedures.\n\nKAUST Health and Safety will recognize Contractor companies that show good H&S performance\n\n4.6. Control of Vehicle and Traffic Safety\n\nDepartment Managers are accountable for:\n\n- Challenging the need for people to drive.\n- Ensuring that drivers of KAUST owned or contracted vehicles have a current driving license that is valid for the location and vehicle and where applicable, the cargo.\n- Ensuring vehicles used for KAUST business are equipped with seatbelts and anti-lock braking systems and airbags.\n- Ensuring drivers and passengers use seatbelts and vehicle safety devices, such as air bags, are not tampered with.\n- Instructing and ensuring that personnel do not make a call or answer a hand-held mobile phone or send or read a text message while driving a vehicle. Hands-free devices are allowed only when road and traffic conditions are assessed as safe.\n- Maintaining and equipping KAUST owned, contracted or leased vehicles so that they are fit for purpose, kept in safe working order in line with manufacturer's specifications and local legislative requirements and equipped as described above.\n- Ensuring their staff adhere to KAUST driving rules and regulations as stipulated in the KAUST Traffic and Vehicle Safety Policy.\n\n4.7. Hazard Identification and Risk Assessment\n\nOccupational Health and Safety Management System Manual Rev 04 This document | Page\n--- Page 73 ---",
-                          "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                          "doc_type_kwd": "",
-                          "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                          "image_id": "",
-                          "important_kwd": [],
-                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                          "mom_id": "",
-                          "positions": [],
-                          "similarity": 0.4546418505669354,
-                          "term_similarity": 0.2185511087098255,
-                          "vector_similarity": 0.5558235970771254
-                        },
-                        {
-                          "chunk_id": "38d63d787792da72",
-                          "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n4.3. Planning\n\n4.3.1. Hazard Identification, Risk Assessment and Determining Controls\n\nHazard identification, risk assessment and determining controls are defined in Procedure for Hazard Identification and Risk Assessment, HSE-OHSMS-PR07.\n\n4.3.2. Legal and Other Requirements\n\nIn accordance with the nature of its business activities, KAUST complies with a certain number of legal and other requirements relating to OH&SMS. KAUST is required to comply with Saudi Arabian legal requirements, standards and guidelines related to OH&S whenever applicable. The KAUST H&S Manager shall perform a comprehensive review, and where required, consultation with the KAUST Government Affairs, KAUST Legal office and Regulatory Authorities to determine the relevant legal requirements. The H&S Manager in consultation with Relevant Departments shall identify and record the activities regulated by relevant laws and regulations in the List of Legal and Other Requirements.\n\nThe process of identification and periodic evaluation of compliance with these requirements is described in the Procedure for Identification & Evaluation of Legal and Other Requirements, HSE-OHSMS-PR03.\n\n4.3.3. Objectives and Programs\n\nMeasurable and timed OH&S objectives for the relevant functions and levels within KAUST is defined and demonstrate a commitment to continual improvement in OH&S performance. The objectives and programs are set and monitored by the KAUST H&S Manager in the context of monitoring and measurement and management review.\n\nOH&S objectives are consistent with the KAUST H&S Policy and prescribed to all levels and functions in KAUST, including commitment to prevention of injuries and impairment of health, compliance with requirements of the law and regulations and continual improvement.\n\nThe program for realization is made for each defined OH&S objective.\n\nActivities in programs' realization, responsibilities, deadlines, and resources for the realization of the objectives are defined and documented in Procedure for Management Review, HSE-OHSMS-PR05. Realization of programs is regularly reviewed by the KAUST H&S Manr in orders, during re against planned actions, and to include new or modified situationor at lea toss regu management review.\n\n---\n\nPage 13 -",
-                          "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                          "doc_type_kwd": "",
-                          "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                          "image_id": "",
-                          "important_kwd": [],
-                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                          "mom_id": "",
-                          "positions": [],
-                          "similarity": 0.45419320993467854,
-                          "term_similarity": 0.2350711230156109,
-                          "vector_similarity": 0.5481026757571361
-                        },
-                        {
-                          "chunk_id": "d9b2c4001be36383",
-                          "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n1. About King Abdullah University of Science and Technology\nKing Abdullah University of Science and Technology (KAUST hereafter) is a private research university located on the shores of the Red Sea in Thuwal, Saudi Arabia. It was founded in 2009 and provides research and graduate training programs using English as the official language of instruction. KAUST aspires to be a destination for scientific and technological education and research and to be a catalyst for innovation, economic development and social prosperity in Saudi Arabia and the world.\n\nAlso referred to as the KAUST Community, a large number of faculty and staff reside on University grounds with their families. KAUST faculty, staff, researchers, students and community members represent over 100 nationalities, making KAUST a truly international destination. KAUST has partnered with contractors and service providers to provide core services and teams that serve the KAUST community and support the provision of essential services at KAUST, which are KAUST Health, the KAUST School, Community Services (Recreation, Food & Retail, Transport, Travel & Logistics), and Accommodation Services. The KAUST community continually grows regarding research facilities and also through the building and maintenance of facilities and various other building projects.\n\n2. Purpose, Scope and Users\nThe Occupational Health & Safety Management System (OH&SMS hereafter) describes how KAUST will implement its Health and Safety Policy (hereafter H&S Policy) and manage Occupational Health and Safety (hereafter OH&S) risks. It provides safety governance, which is a set of management practices and decision rights that administer and control how OH&S risk is evaluated, reduced, and managed. KAUST H&S Policy describes its overall intentions and direction as it relates to KAUST OH&S performance. KAUST recognizes that an effective safety management system is critical to the success of KAUST and improves its overall safety culture. Elements of success are summarized as follows:\n\nA strong management commitment to health and safety is expressed not only through stated policy and adequate financial support, but also through active involvement and demonstrated concern for worker well-being;\n\nEfficient hazard identification, engineering control, job-safety training, and safety evaluation programs designed to anticipate and manage hazards, not just count and investigate incidents;\n\nAn effective employee communication, feedback, and involvement program designed to motivate management and employees to deal with one another and safety matters positive and\n\nwa ||\n, hys;\n\nA health and safety program that is intrinsic part of day to day operations.\n\nThe scope of this OH&SMS includes construction safety within defined limitations, and all routine and non-routine operations of KAUST Facility Management and Community Life departments. The OH&SMS shall be complemented by a range of supporting documents and information.\n\nThis OH&SMS manual shall be an evergreen document subject to regular reviews and improvement. Furthermore, the OH&SMS has been prepared in line with international Occupational Health and\nOccupational Health and Safety Management System Manual Rev 04 This document is uncontrolled when printed 8 | Page\n--- Page 8 ---",
-                          "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                          "doc_type_kwd": "",
-                          "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                          "image_id": "",
-                          "important_kwd": [],
-                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                          "mom_id": "",
-                          "positions": [],
-                          "similarity": 0.45358288859497303,
-                          "term_similarity": 0.28970889994306726,
-                          "vector_similarity": 0.5238145980172184
-                        },
-                        {
-                          "chunk_id": "9b2bc3ad2fb4e4a3",
-                          "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\nHealth, Safety and Environment\n\n1. Purpose, Scope and Users\nThe purpose of this procedure is to define the process of health, safety and environmental (HSE) incident and near-miss reporting and investigation in KAUST. HSE incidents and near-misses that occur in KAUST Research Laboratories will follow the Research Safety Incident Reporting Procedure. Emergency situations that could impact KAUST are out of scope and are covered by the KAUST Emergency Management Plan.\n\nThis procedure is applied to one of more of the scenario's below:\n- An incident that causes injury to students, faculty, staff, contractors, service providers, community members or visitors; or\n- An incident that causes damages to equipment or property; or\n- An uncontrolled spill or release of a harmful pollutant or dangerous substance into the workplace or the environment; or\n- A near-miss.\n\nThe reporting process described within this procedure is intended to be used by all individuals working, living or visiting the University. The investigation process is designed to be used by KAUST HSE, employees, faculty, service providers, and contractors.\n\n2. Reference Documents\n- KAUST Occupational Health and Safety Management System (OH&SMS) Manual\n- KAUST Environmental Management System (EMS) Manual\n- KAUST Procedure for the Management of Nonconformities and Corrective Actions\n\n3. Roles and Responsibilities\nTable 1: Roles & Responsibilities\nDesignation | Responsibility\nKAUST HSE | Establishing a system to report, record, categorize, investigate, assign, and track to closure incidents and near-misses in KAUST. Obtain quarterly updates from relevant department director. Provide training and awareness in relation to this procedure. Ensure a review of incident and near-miss management meeting.\nRelevant Department Manager | Instruct members, service providers and contractors of their organizations to report all incidents, including near-misses in accordance with section 5.1. of this procedure. Emphasize that each person in his or her organization has the right to take action if a task is unsafe or life threatening.\n\n--- Page 83 ---",
-                          "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                          "doc_type_kwd": "",
-                          "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                          "image_id": "",
-                          "important_kwd": [],
-                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                          "mom_id": "",
-                          "positions": [],
-                          "similarity": 0.4491410190574548,
-                          "term_similarity": 0.1804333460881545,
-                          "vector_similarity": 0.5643014503300121
-                        },
-                        {
-                          "chunk_id": "f56f4348d60acfe1",
-                          "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\nHealth, Safety and Environment\n\n5.3.6.1. Major Incidents\n- In the event of a Major incident, and depending of the area where the incident occurred, the VP Facilities Management or VP Community Life, together with other relevant parties shall immediately be informed (including Government Affairs, Risk Management, and Human Resources).\n- The VP of the affected area shall form an independent Major Investigation Committee within one day of the incident.\n- The Chairman of the Major Investigation Committee shall be appointed by the relevant VP.\n- A report with findings and recommendations shall be prepared by the Chairman of the Major Investigation Committee, and approved by the VP.\n\n5.3.6.2. Moderate, Minor and Near-Miss Incidents\nRelevant Departments\n- Issue a preliminary incident report to KAUST HSE within 24 hours of the incident happening using the REPORTIT system.\n- Include a REPORTIT notification number in the final incident investigation report.\n- The Manager or Person in Charge assigns one or more competent persons in their organization to conduct the internal incident investigation. Team makeup shall be based on competencies that may be required.\n- Issue a final incident investigation report to KAUST HSE within seven (7) working days of the preliminary report.\n- The final incident investigation report shall identify direct, indirect, root cause(s), and corrective actions and include evidence such as photographs, witness statements as needed.\n- The relevant KAUST Proponent, or Department Manager, or Person in Charge, should approve the final report before issue to KAUST HSE.\n- Track corrective actions to closure.\n\nKAUST HSE\n- Depending on the circumstances and classification of the incident, KAUST HSE can launch an investigation into the incident.\n- The KAUST HSE investigation team shall collect factual and objective evidence such as photographs, witness statements and other data as needed. (KAUST Health and Safety uses the Incident Investigation Report Form -HSE-OHSMS-PR09-F01)\n- A preliminary report may be issued until such time that the final report is complete.\n- The final KAUST HSE incident investigation report, approved by the relevant KAUST HSE Manager, shall identify direct and root cause(s), corrective actions and include evidence such as photographs, witness statements, and other data as needed.\n- The final report will be distributed to the person in charge of Relevan, for closing.\n- Corrective actions will be uploaded to the REPORTIT system tracking.\n- KAUST HSE may issue a Safety Bulletin to raise awareness of the incident.\n- KAUST HSE will issue a monthly dashboard to KAUST Proponents with open corrective actions.\n\n5.4. Incident and Near-Miss Analysis\n5.4.1. Root Causes\nThe root cause is the underlying system weaknesses that have somehow contributed to the existence of hazardous conditions and unsafe behaviors that represent immediate causes of accidents. Root causes are uncontrolled when printed\n\n--- Page 86 -",
-                          "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                          "doc_type_kwd": "",
-                          "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                          "image_id": "",
-                          "important_kwd": [],
-                          "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                          "mom_id": "",
-                          "positions": [],
-                          "similarity": 0.4489881487400805,
-                          "term_similarity": 0.28970889994306726,
-                          "vector_similarity": 0.5172506839388005
-                        }
-                      ],
-                      "doc_aggs": [],
-                      "total": 64
-                    }
-                  },
-                  "chunks": {
-                    "value": null
-                  },
-                  "formalized_content": {
-                    "type": "<class 'str'>",
-                    "value": "\nID: 248\n├── Title: KAUST-Health-and-Safety-Toolbox-Talk_KAUST-Road-Safety_HSE_RF_TBT_021.pdf\n└── Content:\n\n\nKAUST Health and Safety Toolbox Talk / Toolbox Talk Number HSE/RF/TBT/021\n\nKAUST Road Safety\n\n1. Have a valid driving licence.\n   - For the type of vehicle driven and keep personal details up to date.\n\n2. Make sure you are insured.\n   - You will need a minimum of 3rd party insurance for any vehicle driven on KAUST Roads.\n\n3. Make sure you are medically fit to drive, or ride any vehicle.\n   - For example: Have regular eyesight tests.\n\n4. Maintain your car properly.\n   - Routinely service the vehicle & undertake regular 'checks' by a reliable dealer, or garage.\n\n5. Secure any equipment carried at the back of a pickup.\n   - Make sure everything is tied securely so that it will not fly off.\n\n6. Be aware of cyclists and pedestrians at all times.\n   - Watch out for children playing on the side of the road and for cyclists.\n\n7. Never Speed!\n   - Obey the speed limits in KAUST.\n   - It's a speed limited... not a speed target.\n\n8. Don't use your mobile phone while driving.\n   - Also Avoid other distractions eating and smoking, and drinking.\n\n9. Always wear your seatbelt & make sure passengers do too.\n   - Cross your heart, not your fingers.\n\n10. Maintain a safe distance from other road users.\n    - Report any incidents, or accidents, immediately to KAUST Security on 912 292 921.\n\nGot suggestions or questions? healthandsafetymatters@kaust.edu.sa\n\n--- Page 1 ---\n\nID: 351\n├── Title: kaust-occupational-health-and-safety-management-system-manual-(1).pdf\n└── Content:\n\n\nDocument Number HSE-OHSMS-M-01\nIssue Date Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\nHealth, Safety and Environment\n\n1. Purpose, Scope and Users\nThe purpose of this document is to define the process of determining, documenting, and conducting control of operations according to the hazard control hierarchy related to significant hazards in the work place, Health and Safety (H&S) Policy, and OH&S Objectives of KAUST.\nThis document is applied to all activities of KAUST within the scope of the Occupational Health & Safety Management System (OH&SMS) where significant occupational health and safety hazards emerge.\nUsers of this document are KAUST employees, service providers and contractors.\n\n2. Reference Documents\n- KAUST Health and Safety Policy\n- KAUST OH&SMS Manual\n- KAUST Traffic and Vehicle Safety Policy\n- Procedure for Risk Assessment and Hazard Identification\n- Procedure Management of Change (MOC)\n- SOP Confined Space Entry and Gas Testing\n- SOP Work Permit\n- SOP Work Permit Training\n- SOP for Contractor Health and Safety\n- SOP for Isolation Lockout and Use of Hold Tags Process\n- SOP for KAUST Driving Permit and Training Program\n- SOP for First Aid Training Program\n\n3. Roles and Responsibilities\n3.1. HSE Director\nEstablish and maintain governance over the implementation of the KAUST OH&SMS.\n3.2. Health and Safety Manager\nThe Health and Safety (H&S) Manager is responsible for monitoring KAUST OH&S performance and leading OH&S continuous improvement plans.\n3.3. Directors and Department Managers\nIn addition to the responsibilities outlined in this document, Department M is responsible to:\n3.3.1. Know the OH&S risks associated with his/her business and how they are managed.\n3.3.2. Demonstrate visible leadership and through measurable actions, such as planning and making worksite visits to engage with staff.\n3.3.3. Lead and participate actively in OH&S meetings.\n\nOccupational Health and Safety Management System Manual Rev 04 This document\nPage\nwhen printed 68\nis uncontrolled\n\nID: 33\n├── Title: kaust-occupational-health-and-safety-management-system-manual-(1).pdf\n└── Content:\n\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n| Ensure that contractors and service providers under his or her authority has an approved written procedure for incident and near-miss reporting and investigation which is aligned with the requirements of this procedure.\n| Ensure competent persons lead incident investigations.\n| Investigate the incident as soon as possible after it occurred and ensure appropriate corrective actions are implemented within a specified timeframe.\n| Track corrective actions to closure.\n| Communicate lessons learnt and implement of corrective actions.\nEmployees, Students, Community, Visitors\n| Report incidents and near-misses as soon as possible to their Person in Charge, Supervisor, Department Manager, Safety Representative or Manager, but no later than within 24 hours of the incident occurring.\n| Immediately report emergency situations such as fire, security or medical incidents by calling 911 from a KAUST landline or 012 808 0911 on a mobile.\n| Cooperate with incident investigations if needed.\n\n4. Definitions\nSee Appendix A, Definitions.\n\n5. Incidents\n5.1. Incident and Near-Miss Notification and Reporting\n5.1.1. Persons in KAUST are required to report all incidents and near-misses as soon as possible, but not later than within 24 hours of it occurring using the online REPORTIT system (http://reportit.kaust.edu.sa).\n5.1.2. Emergency situations (e.g. fire, gas leak, chemical spill, medical emergency, suspicious person, driving violation, etc.) shall be reported by first calling 911 from a KAUST landline or 012 808 0911 from a mobile, and then using the REPORTIT system as soon as possible, but not later than the end of the shift or work day.\n5.1.3. KAUST Senior Leadership team will immediately be notified of Major incidents.\n5.1.4. The Relevant Department Manager or the Person in Charge shall immediately be notified of Moderate, Minor and Near-Miss incidents.\n\nNote: REPORTIT is not a punitive tool. It is a record system that is used by KAUST to report, record, categorize, investigate, assign and track to closure incidents and near-misses.\n\n5.2. Incident Classification\n5.2.1. The Relevant Department shall use REPORTIT to provide KAUST HSE with the preliminary incident investigation report, and provide an initial incident classification in the incident description.\n5.2.2. Relevant Departments and KAUST HSE shall use the incident classification outlined in Table 2.\n5.2.3. KAUST HSE may change the classification upon review of the incident details.\n\n--- Page 84 -\n\nID: 2\n├── Title: kaust-occupational-health-and-safety-management-system-manual-(1).pdf\n└── Content:\n\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n- Legal requirements;\n- OH&S risk management throughout the life cycle of the project;\n- Potential liabilities from OH&S risks; and\n- Identifying and engaging with interested parties.\n\nKAUST Health and Safety Department shall ensure that the department who is responsible for overseeing construction work in KAUST has an effective system in place to manage contractor safety, and this shall be verified within the following limitations:\n\n- That a selection process is implemented prior to contract award;\n- KAUST health and safety requirements are included in the contractual requirements that include the KAUST HSE and the KAUST Vehicle and Traffic Safety Policies;\n- Health and safety induction that includes the KAUST HSE Policy is provided to the workforce before work starts;\n- A written program for site inspections is available and implemented;\n- A system to track corrective actions is implemented; and\n- Incident investigations are conducted following KAUST approved procedures.\n\nKAUST Health and Safety will recognize Contractor companies that show good H&S performance\n\n4.6. Control of Vehicle and Traffic Safety\n\nDepartment Managers are accountable for:\n\n- Challenging the need for people to drive.\n- Ensuring that drivers of KAUST owned or contracted vehicles have a current driving license that is valid for the location and vehicle and where applicable, the cargo.\n- Ensuring vehicles used for KAUST business are equipped with seatbelts and anti-lock braking systems and airbags.\n- Ensuring drivers and passengers use seatbelts and vehicle safety devices, such as air bags, are not tampered with.\n- Instructing and ensuring that personnel do not make a call or answer a hand-held mobile phone or send or read a text message while driving a vehicle. Hands-free devices are allowed only when road and traffic conditions are assessed as safe.\n- Maintaining and equipping KAUST owned, contracted or leased vehicles so that they are fit for purpose, kept in safe working order in line with manufacturer's specifications and local legislative requirements and equipped as described above.\n- Ensuring their staff adhere to KAUST driving rules and regulations as stipulated in the KAUST Traffic and Vehicle Safety Policy.\n\n4.7. Hazard Identification and Risk Assessment\n\nOccupational Health and Safety Management System Manual Rev 04 This document | Page\n--- Page 73 ---\n\nID: 449\n├── Title: kaust-occupational-health-and-safety-management-system-manual-(1).pdf\n└── Content:\n\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n4.3. Planning\n\n4.3.1. Hazard Identification, Risk Assessment and Determining Controls\n\nHazard identification, risk assessment and determining controls are defined in Procedure for Hazard Identification and Risk Assessment, HSE-OHSMS-PR07.\n\n4.3.2. Legal and Other Requirements\n\nIn accordance with the nature of its business activities, KAUST complies with a certain number of legal and other requirements relating to OH&SMS. KAUST is required to comply with Saudi Arabian legal requirements, standards and guidelines related to OH&S whenever applicable. The KAUST H&S Manager shall perform a comprehensive review, and where required, consultation with the KAUST Government Affairs, KAUST Legal office and Regulatory Authorities to determine the relevant legal requirements. The H&S Manager in consultation with Relevant Departments shall identify and record the activities regulated by relevant laws and regulations in the List of Legal and Other Requirements.\n\nThe process of identification and periodic evaluation of compliance with these requirements is described in the Procedure for Identification & Evaluation of Legal and Other Requirements, HSE-OHSMS-PR03.\n\n4.3.3. Objectives and Programs\n\nMeasurable and timed OH&S objectives for the relevant functions and levels within KAUST is defined and demonstrate a commitment to continual improvement in OH&S performance. The objectives and programs are set and monitored by the KAUST H&S Manager in the context of monitoring and measurement and management review.\n\nOH&S objectives are consistent with the KAUST H&S Policy and prescribed to all levels and functions in KAUST, including commitment to prevention of injuries and impairment of health, compliance with requirements of the law and regulations and continual improvement.\n\nThe program for realization is made for each defined OH&S objective.\n\nActivities in programs' realization, responsibilities, deadlines, and resources for the realization of the objectives are defined and documented in Procedure for Management Review, HSE-OHSMS-PR05. Realization of programs is regularly reviewed by the KAUST H&S Manr in orders, during re against planned actions, and to include new or modified situationor at lea toss regu management review.\n\n---\n\nPage 13 -\n\nID: 16\n├── Title: kaust-occupational-health-and-safety-management-system-manual-(1).pdf\n└── Content:\n\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n1. About King Abdullah University of Science and Technology\nKing Abdullah University of Science and Technology (KAUST hereafter) is a private research university located on the shores of the Red Sea in Thuwal, Saudi Arabia. It was founded in 2009 and provides research and graduate training programs using English as the official language of instruction. KAUST aspires to be a destination for scientific and technological education and research and to be a catalyst for innovation, economic development and social prosperity in Saudi Arabia and the world.\n\nAlso referred to as the KAUST Community, a large number of faculty and staff reside on University grounds with their families. KAUST faculty, staff, researchers, students and community members represent over 100 nationalities, making KAUST a truly international destination. KAUST has partnered with contractors and service providers to provide core services and teams that serve the KAUST community and support the provision of essential services at KAUST, which are KAUST Health, the KAUST School, Community Services (Recreation, Food & Retail, Transport, Travel & Logistics), and Accommodation Services. The KAUST community continually grows regarding research facilities and also through the building and maintenance of facilities and various other building projects.\n\n2. Purpose, Scope and Users\nThe Occupational Health & Safety Management System (OH&SMS hereafter) describes how KAUST will implement its Health and Safety Policy (hereafter H&S Policy) and manage Occupational Health and Safety (hereafter OH&S) risks. It provides safety governance, which is a set of management practices and decision rights that administer and control how OH&S risk is evaluated, reduced, and managed. KAUST H&S Policy describes its overall intentions and direction as it relates to KAUST OH&S performance. KAUST recognizes that an effective safety management system is critical to the success of KAUST and improves its overall safety culture. Elements of success are summarized as follows:\n\nA strong management commitment to health and safety is expressed not only through stated policy and adequate financial support, but also through active involvement and demonstrated concern for worker well-being;\n\nEfficient hazard identification, engineering control, job-safety training, and safety evaluation programs designed to anticipate and manage hazards, not just count and investigate incidents;\n\nAn effective employee communication, feedback, and involvement program designed to motivate management and employees to deal with one another and safety matters positive and\n\nwa ||\n, hys;\n\nA health and safety program that is intrinsic part of day to day operations.\n\nThe scope of this OH&SMS includes construction safety within defined limitations, and all routine and non-routine operations of KAUST Facility Management and Community Life departments. The OH&SMS shall be complemented by a range of supporting documents and information.\n\nThis OH&SMS manual shall be an evergreen document subject to regular reviews and improvement. Furthermore, the OH&SMS has been prepared in line with international Occupational Health and\nOccupational Health and Safety Management System Manual Rev 04 This document is uncontrolled when printed 8 | Page\n--- Page 8 ---\n\nID: 389\n├── Title: kaust-occupational-health-and-safety-management-system-manual-(1).pdf\n└── Content:\n\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\nHealth, Safety and Environment\n\n1. Purpose, Scope and Users\nThe purpose of this procedure is to define the process of health, safety and environmental (HSE) incident and near-miss reporting and investigation in KAUST. HSE incidents and near-misses that occur in KAUST Research Laboratories will follow the Research Safety Incident Reporting Procedure. Emergency situations that could impact KAUST are out of scope and are covered by the KAUST Emergency Management Plan.\n\nThis procedure is applied to one of more of the scenario's below:\n- An incident that causes injury to students, faculty, staff, contractors, service providers, community members or visitors; or\n- An incident that causes damages to equipment or property; or\n- An uncontrolled spill or release of a harmful pollutant or dangerous substance into the workplace or the environment; or\n- A near-miss.\n\nThe reporting process described within this procedure is intended to be used by all individuals working, living or visiting the University. The investigation process is designed to be used by KAUST HSE, employees, faculty, service providers, and contractors.\n\n2. Reference Documents\n- KAUST Occupational Health and Safety Management System (OH&SMS) Manual\n- KAUST Environmental Management System (EMS) Manual\n- KAUST Procedure for the Management of Nonconformities and Corrective Actions\n\n3. Roles and Responsibilities\nTable 1: Roles & Responsibilities\nDesignation | Responsibility\nKAUST HSE | Establishing a system to report, record, categorize, investigate, assign, and track to closure incidents and near-misses in KAUST. Obtain quarterly updates from relevant department director. Provide training and awareness in relation to this procedure. Ensure a review of incident and near-miss management meeting.\nRelevant Department Manager | Instruct members, service providers and contractors of their organizations to report all incidents, including near-misses in accordance with section 5.1. of this procedure. Emphasize that each person in his or her organization has the right to take action if a task is unsafe or life threatening.\n\n--- Page 83 ---\n\nID: 1\n├── Title: kaust-occupational-health-and-safety-management-system-manual-(1).pdf\n└── Content:\n\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\nHealth, Safety and Environment\n\n5.3.6.1. Major Incidents\n- In the event of a Major incident, and depending of the area where the incident occurred, the VP Facilities Management or VP Community Life, together with other relevant parties shall immediately be informed (including Government Affairs, Risk Management, and Human Resources).\n- The VP of the affected area shall form an independent Major Investigation Committee within one day of the incident.\n- The Chairman of the Major Investigation Committee shall be appointed by the relevant VP.\n- A report with findings and recommendations shall be prepared by the Chairman of the Major Investigation Committee, and approved by the VP.\n\n5.3.6.2. Moderate, Minor and Near-Miss Incidents\nRelevant Departments\n- Issue a preliminary incident report to KAUST HSE within 24 hours of the incident happening using the REPORTIT system.\n- Include a REPORTIT notification number in the final incident investigation report.\n- The Manager or Person in Charge assigns one or more competent persons in their organization to conduct the internal incident investigation. Team makeup shall be based on competencies that may be required.\n- Issue a final incident investigation report to KAUST HSE within seven (7) working days of the preliminary report.\n- The final incident investigation report shall identify direct, indirect, root cause(s), and corrective actions and include evidence such as photographs, witness statements as needed.\n- The relevant KAUST Proponent, or Department Manager, or Person in Charge, should approve the final report before issue to KAUST HSE.\n- Track corrective actions to closure.\n\nKAUST HSE\n- Depending on the circumstances and classification of the incident, KAUST HSE can launch an investigation into the incident.\n- The KAUST HSE investigation team shall collect factual and objective evidence such as photographs, witness statements and other data as needed. (KAUST Health and Safety uses the Incident Investigation Report Form -HSE-OHSMS-PR09-F01)\n- A preliminary report may be issued until such time that the final report is complete.\n- The final KAUST HSE incident investigation report, approved by the relevant KAUST HSE Manager, shall identify direct and root cause(s), corrective actions and include evidence such as photographs, witness statements, and other data as needed.\n- The final report will be distributed to the person in charge of Relevan, for closing.\n- Corrective actions will be uploaded to the REPORTIT system tracking.\n- KAUST HSE may issue a Safety Bulletin to raise awareness of the incident.\n- KAUST HSE will issue a monthly dashboard to KAUST Proponents with open corrective actions.\n\n5.4. Incident and Near-Miss Analysis\n5.4.1. Root Causes\nThe root cause is the underlying system weaknesses that have somehow contributed to the existence of hazardous conditions and unsafe behaviors that represent immediate causes of accidents. Root causes are uncontrolled when printed\n\n--- Page 86 -"
-                  },
-                  "json": {
-                    "type": "<class 'list'>",
-                    "value": [
-                      {
-                        "chunk_id": "4f273d5e46f16432",
-                        "content_with_weight": "\n\nKAUST Health and Safety Toolbox Talk / Toolbox Talk Number HSE/RF/TBT/021\n\nKAUST Road Safety\n\n1. Have a valid driving licence.\n   - For the type of vehicle driven and keep personal details up to date.\n\n2. Make sure you are insured.\n   - You will need a minimum of 3rd party insurance for any vehicle driven on KAUST Roads.\n\n3. Make sure you are medically fit to drive, or ride any vehicle.\n   - For example: Have regular eyesight tests.\n\n4. Maintain your car properly.\n   - Routinely service the vehicle & undertake regular 'checks' by a reliable dealer, or garage.\n\n5. Secure any equipment carried at the back of a pickup.\n   - Make sure everything is tied securely so that it will not fly off.\n\n6. Be aware of cyclists and pedestrians at all times.\n   - Watch out for children playing on the side of the road and for cyclists.\n\n7. Never Speed!\n   - Obey the speed limits in KAUST.\n   - It's a speed limited... not a speed target.\n\n8. Don't use your mobile phone while driving.\n   - Also Avoid other distractions eating and smoking, and drinking.\n\n9. Always wear your seatbelt & make sure passengers do too.\n   - Cross your heart, not your fingers.\n\n10. Maintain a safe distance from other road users.\n    - Report any incidents, or accidents, immediately to KAUST Security on 912 292 921.\n\nGot suggestions or questions? healthandsafetymatters@kaust.edu.sa\n\n--- Page 1 ---",
-                        "doc_id": "75f3cdfcfd0b11f0b778164a69504768",
-                        "doc_type_kwd": "",
-                        "docnm_kwd": "KAUST-Health-and-Safety-Toolbox-Talk_KAUST-Road-Safety_HSE_RF_TBT_021.pdf",
-                        "image_id": "",
-                        "important_kwd": [],
-                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                        "mom_id": "",
-                        "positions": [],
-                        "similarity": 0.4859629466450206,
-                        "term_similarity": 0.1804333460881545,
-                        "vector_similarity": 0.6169042040265347
-                      },
-                      {
-                        "chunk_id": "13bf07e21d0373bf",
-                        "content_with_weight": "\n\nDocument Number HSE-OHSMS-M-01\nIssue Date Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\nHealth, Safety and Environment\n\n1. Purpose, Scope and Users\nThe purpose of this document is to define the process of determining, documenting, and conducting control of operations according to the hazard control hierarchy related to significant hazards in the work place, Health and Safety (H&S) Policy, and OH&S Objectives of KAUST.\nThis document is applied to all activities of KAUST within the scope of the Occupational Health & Safety Management System (OH&SMS) where significant occupational health and safety hazards emerge.\nUsers of this document are KAUST employees, service providers and contractors.\n\n2. Reference Documents\n- KAUST Health and Safety Policy\n- KAUST OH&SMS Manual\n- KAUST Traffic and Vehicle Safety Policy\n- Procedure for Risk Assessment and Hazard Identification\n- Procedure Management of Change (MOC)\n- SOP Confined Space Entry and Gas Testing\n- SOP Work Permit\n- SOP Work Permit Training\n- SOP for Contractor Health and Safety\n- SOP for Isolation Lockout and Use of Hold Tags Process\n- SOP for KAUST Driving Permit and Training Program\n- SOP for First Aid Training Program\n\n3. Roles and Responsibilities\n3.1. HSE Director\nEstablish and maintain governance over the implementation of the KAUST OH&SMS.\n3.2. Health and Safety Manager\nThe Health and Safety (H&S) Manager is responsible for monitoring KAUST OH&S performance and leading OH&S continuous improvement plans.\n3.3. Directors and Department Managers\nIn addition to the responsibilities outlined in this document, Department M is responsible to:\n3.3.1. Know the OH&S risks associated with his/her business and how they are managed.\n3.3.2. Demonstrate visible leadership and through measurable actions, such as planning and making worksite visits to engage with staff.\n3.3.3. Lead and participate actively in OH&S meetings.\n\nOccupational Health and Safety Management System Manual Rev 04 This document\nPage\nwhen printed 68\nis uncontrolled",
-                        "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                        "doc_type_kwd": "",
-                        "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                        "image_id": "",
-                        "important_kwd": [],
-                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                        "mom_id": "",
-                        "positions": [],
-                        "similarity": 0.46628656412878067,
-                        "term_similarity": 0.28970889994306726,
-                        "vector_similarity": 0.5419627059226578
-                      },
-                      {
-                        "chunk_id": "4f31b1bd8370f114",
-                        "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n| Ensure that contractors and service providers under his or her authority has an approved written procedure for incident and near-miss reporting and investigation which is aligned with the requirements of this procedure.\n| Ensure competent persons lead incident investigations.\n| Investigate the incident as soon as possible after it occurred and ensure appropriate corrective actions are implemented within a specified timeframe.\n| Track corrective actions to closure.\n| Communicate lessons learnt and implement of corrective actions.\nEmployees, Students, Community, Visitors\n| Report incidents and near-misses as soon as possible to their Person in Charge, Supervisor, Department Manager, Safety Representative or Manager, but no later than within 24 hours of the incident occurring.\n| Immediately report emergency situations such as fire, security or medical incidents by calling 911 from a KAUST landline or 012 808 0911 on a mobile.\n| Cooperate with incident investigations if needed.\n\n4. Definitions\nSee Appendix A, Definitions.\n\n5. Incidents\n5.1. Incident and Near-Miss Notification and Reporting\n5.1.1. Persons in KAUST are required to report all incidents and near-misses as soon as possible, but not later than within 24 hours of it occurring using the online REPORTIT system (http://reportit.kaust.edu.sa).\n5.1.2. Emergency situations (e.g. fire, gas leak, chemical spill, medical emergency, suspicious person, driving violation, etc.) shall be reported by first calling 911 from a KAUST landline or 012 808 0911 from a mobile, and then using the REPORTIT system as soon as possible, but not later than the end of the shift or work day.\n5.1.3. KAUST Senior Leadership team will immediately be notified of Major incidents.\n5.1.4. The Relevant Department Manager or the Person in Charge shall immediately be notified of Moderate, Minor and Near-Miss incidents.\n\nNote: REPORTIT is not a punitive tool. It is a record system that is used by KAUST to report, record, categorize, investigate, assign and track to closure incidents and near-misses.\n\n5.2. Incident Classification\n5.2.1. The Relevant Department shall use REPORTIT to provide KAUST HSE with the preliminary incident investigation report, and provide an initial incident classification in the incident description.\n5.2.2. Relevant Departments and KAUST HSE shall use the incident classification outlined in Table 2.\n5.2.3. KAUST HSE may change the classification upon review of the incident details.\n\n--- Page 84 -",
-                        "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                        "doc_type_kwd": "",
-                        "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                        "image_id": "",
-                        "important_kwd": [],
-                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                        "mom_id": "",
-                        "positions": [],
-                        "similarity": 0.45682605606476673,
-                        "term_similarity": 0.1804333460881545,
-                        "vector_similarity": 0.575280074626172
-                      },
-                      {
-                        "chunk_id": "3e8826884b60353c",
-                        "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n- Legal requirements;\n- OH&S risk management throughout the life cycle of the project;\n- Potential liabilities from OH&S risks; and\n- Identifying and engaging with interested parties.\n\nKAUST Health and Safety Department shall ensure that the department who is responsible for overseeing construction work in KAUST has an effective system in place to manage contractor safety, and this shall be verified within the following limitations:\n\n- That a selection process is implemented prior to contract award;\n- KAUST health and safety requirements are included in the contractual requirements that include the KAUST HSE and the KAUST Vehicle and Traffic Safety Policies;\n- Health and safety induction that includes the KAUST HSE Policy is provided to the workforce before work starts;\n- A written program for site inspections is available and implemented;\n- A system to track corrective actions is implemented; and\n- Incident investigations are conducted following KAUST approved procedures.\n\nKAUST Health and Safety will recognize Contractor companies that show good H&S performance\n\n4.6. Control of Vehicle and Traffic Safety\n\nDepartment Managers are accountable for:\n\n- Challenging the need for people to drive.\n- Ensuring that drivers of KAUST owned or contracted vehicles have a current driving license that is valid for the location and vehicle and where applicable, the cargo.\n- Ensuring vehicles used for KAUST business are equipped with seatbelts and anti-lock braking systems and airbags.\n- Ensuring drivers and passengers use seatbelts and vehicle safety devices, such as air bags, are not tampered with.\n- Instructing and ensuring that personnel do not make a call or answer a hand-held mobile phone or send or read a text message while driving a vehicle. Hands-free devices are allowed only when road and traffic conditions are assessed as safe.\n- Maintaining and equipping KAUST owned, contracted or leased vehicles so that they are fit for purpose, kept in safe working order in line with manufacturer's specifications and local legislative requirements and equipped as described above.\n- Ensuring their staff adhere to KAUST driving rules and regulations as stipulated in the KAUST Traffic and Vehicle Safety Policy.\n\n4.7. Hazard Identification and Risk Assessment\n\nOccupational Health and Safety Management System Manual Rev 04 This document | Page\n--- Page 73 ---",
-                        "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                        "doc_type_kwd": "",
-                        "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                        "image_id": "",
-                        "important_kwd": [],
-                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                        "mom_id": "",
-                        "positions": [],
-                        "similarity": 0.4546418505669354,
-                        "term_similarity": 0.2185511087098255,
-                        "vector_similarity": 0.5558235970771254
-                      },
-                      {
-                        "chunk_id": "38d63d787792da72",
-                        "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n4.3. Planning\n\n4.3.1. Hazard Identification, Risk Assessment and Determining Controls\n\nHazard identification, risk assessment and determining controls are defined in Procedure for Hazard Identification and Risk Assessment, HSE-OHSMS-PR07.\n\n4.3.2. Legal and Other Requirements\n\nIn accordance with the nature of its business activities, KAUST complies with a certain number of legal and other requirements relating to OH&SMS. KAUST is required to comply with Saudi Arabian legal requirements, standards and guidelines related to OH&S whenever applicable. The KAUST H&S Manager shall perform a comprehensive review, and where required, consultation with the KAUST Government Affairs, KAUST Legal office and Regulatory Authorities to determine the relevant legal requirements. The H&S Manager in consultation with Relevant Departments shall identify and record the activities regulated by relevant laws and regulations in the List of Legal and Other Requirements.\n\nThe process of identification and periodic evaluation of compliance with these requirements is described in the Procedure for Identification & Evaluation of Legal and Other Requirements, HSE-OHSMS-PR03.\n\n4.3.3. Objectives and Programs\n\nMeasurable and timed OH&S objectives for the relevant functions and levels within KAUST is defined and demonstrate a commitment to continual improvement in OH&S performance. The objectives and programs are set and monitored by the KAUST H&S Manager in the context of monitoring and measurement and management review.\n\nOH&S objectives are consistent with the KAUST H&S Policy and prescribed to all levels and functions in KAUST, including commitment to prevention of injuries and impairment of health, compliance with requirements of the law and regulations and continual improvement.\n\nThe program for realization is made for each defined OH&S objective.\n\nActivities in programs' realization, responsibilities, deadlines, and resources for the realization of the objectives are defined and documented in Procedure for Management Review, HSE-OHSMS-PR05. Realization of programs is regularly reviewed by the KAUST H&S Manr in orders, during re against planned actions, and to include new or modified situationor at lea toss regu management review.\n\n---\n\nPage 13 -",
-                        "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                        "doc_type_kwd": "",
-                        "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                        "image_id": "",
-                        "important_kwd": [],
-                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                        "mom_id": "",
-                        "positions": [],
-                        "similarity": 0.45419320993467854,
-                        "term_similarity": 0.2350711230156109,
-                        "vector_similarity": 0.5481026757571361
-                      },
-                      {
-                        "chunk_id": "d9b2c4001be36383",
-                        "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\n\n1. About King Abdullah University of Science and Technology\nKing Abdullah University of Science and Technology (KAUST hereafter) is a private research university located on the shores of the Red Sea in Thuwal, Saudi Arabia. It was founded in 2009 and provides research and graduate training programs using English as the official language of instruction. KAUST aspires to be a destination for scientific and technological education and research and to be a catalyst for innovation, economic development and social prosperity in Saudi Arabia and the world.\n\nAlso referred to as the KAUST Community, a large number of faculty and staff reside on University grounds with their families. KAUST faculty, staff, researchers, students and community members represent over 100 nationalities, making KAUST a truly international destination. KAUST has partnered with contractors and service providers to provide core services and teams that serve the KAUST community and support the provision of essential services at KAUST, which are KAUST Health, the KAUST School, Community Services (Recreation, Food & Retail, Transport, Travel & Logistics), and Accommodation Services. The KAUST community continually grows regarding research facilities and also through the building and maintenance of facilities and various other building projects.\n\n2. Purpose, Scope and Users\nThe Occupational Health & Safety Management System (OH&SMS hereafter) describes how KAUST will implement its Health and Safety Policy (hereafter H&S Policy) and manage Occupational Health and Safety (hereafter OH&S) risks. It provides safety governance, which is a set of management practices and decision rights that administer and control how OH&S risk is evaluated, reduced, and managed. KAUST H&S Policy describes its overall intentions and direction as it relates to KAUST OH&S performance. KAUST recognizes that an effective safety management system is critical to the success of KAUST and improves its overall safety culture. Elements of success are summarized as follows:\n\nA strong management commitment to health and safety is expressed not only through stated policy and adequate financial support, but also through active involvement and demonstrated concern for worker well-being;\n\nEfficient hazard identification, engineering control, job-safety training, and safety evaluation programs designed to anticipate and manage hazards, not just count and investigate incidents;\n\nAn effective employee communication, feedback, and involvement program designed to motivate management and employees to deal with one another and safety matters positive and\n\nwa ||\n, hys;\n\nA health and safety program that is intrinsic part of day to day operations.\n\nThe scope of this OH&SMS includes construction safety within defined limitations, and all routine and non-routine operations of KAUST Facility Management and Community Life departments. The OH&SMS shall be complemented by a range of supporting documents and information.\n\nThis OH&SMS manual shall be an evergreen document subject to regular reviews and improvement. Furthermore, the OH&SMS has been prepared in line with international Occupational Health and\nOccupational Health and Safety Management System Manual Rev 04 This document is uncontrolled when printed 8 | Page\n--- Page 8 ---",
-                        "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                        "doc_type_kwd": "",
-                        "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                        "image_id": "",
-                        "important_kwd": [],
-                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                        "mom_id": "",
-                        "positions": [],
-                        "similarity": 0.45358288859497303,
-                        "term_similarity": 0.28970889994306726,
-                        "vector_similarity": 0.5238145980172184
-                      },
-                      {
-                        "chunk_id": "9b2bc3ad2fb4e4a3",
-                        "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\nHealth, Safety and Environment\n\n1. Purpose, Scope and Users\nThe purpose of this procedure is to define the process of health, safety and environmental (HSE) incident and near-miss reporting and investigation in KAUST. HSE incidents and near-misses that occur in KAUST Research Laboratories will follow the Research Safety Incident Reporting Procedure. Emergency situations that could impact KAUST are out of scope and are covered by the KAUST Emergency Management Plan.\n\nThis procedure is applied to one of more of the scenario's below:\n- An incident that causes injury to students, faculty, staff, contractors, service providers, community members or visitors; or\n- An incident that causes damages to equipment or property; or\n- An uncontrolled spill or release of a harmful pollutant or dangerous substance into the workplace or the environment; or\n- A near-miss.\n\nThe reporting process described within this procedure is intended to be used by all individuals working, living or visiting the University. The investigation process is designed to be used by KAUST HSE, employees, faculty, service providers, and contractors.\n\n2. Reference Documents\n- KAUST Occupational Health and Safety Management System (OH&SMS) Manual\n- KAUST Environmental Management System (EMS) Manual\n- KAUST Procedure for the Management of Nonconformities and Corrective Actions\n\n3. Roles and Responsibilities\nTable 1: Roles & Responsibilities\nDesignation | Responsibility\nKAUST HSE | Establishing a system to report, record, categorize, investigate, assign, and track to closure incidents and near-misses in KAUST. Obtain quarterly updates from relevant department director. Provide training and awareness in relation to this procedure. Ensure a review of incident and near-miss management meeting.\nRelevant Department Manager | Instruct members, service providers and contractors of their organizations to report all incidents, including near-misses in accordance with section 5.1. of this procedure. Emphasize that each person in his or her organization has the right to take action if a task is unsafe or life threatening.\n\n--- Page 83 ---",
-                        "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                        "doc_type_kwd": "",
-                        "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                        "image_id": "",
-                        "important_kwd": [],
-                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                        "mom_id": "",
-                        "positions": [],
-                        "similarity": 0.4491410190574548,
-                        "term_similarity": 0.1804333460881545,
-                        "vector_similarity": 0.5643014503300121
-                      },
-                      {
-                        "chunk_id": "f56f4348d60acfe1",
-                        "content_with_weight": "\n\nDocument Number | HSE-OHSMS-M-01\nIssue Date | Jan 2018\nOccupational Health & Safety Management System (OHSMS) Manual\nHealth, Safety and Environment\n\n5.3.6.1. Major Incidents\n- In the event of a Major incident, and depending of the area where the incident occurred, the VP Facilities Management or VP Community Life, together with other relevant parties shall immediately be informed (including Government Affairs, Risk Management, and Human Resources).\n- The VP of the affected area shall form an independent Major Investigation Committee within one day of the incident.\n- The Chairman of the Major Investigation Committee shall be appointed by the relevant VP.\n- A report with findings and recommendations shall be prepared by the Chairman of the Major Investigation Committee, and approved by the VP.\n\n5.3.6.2. Moderate, Minor and Near-Miss Incidents\nRelevant Departments\n- Issue a preliminary incident report to KAUST HSE within 24 hours of the incident happening using the REPORTIT system.\n- Include a REPORTIT notification number in the final incident investigation report.\n- The Manager or Person in Charge assigns one or more competent persons in their organization to conduct the internal incident investigation. Team makeup shall be based on competencies that may be required.\n- Issue a final incident investigation report to KAUST HSE within seven (7) working days of the preliminary report.\n- The final incident investigation report shall identify direct, indirect, root cause(s), and corrective actions and include evidence such as photographs, witness statements as needed.\n- The relevant KAUST Proponent, or Department Manager, or Person in Charge, should approve the final report before issue to KAUST HSE.\n- Track corrective actions to closure.\n\nKAUST HSE\n- Depending on the circumstances and classification of the incident, KAUST HSE can launch an investigation into the incident.\n- The KAUST HSE investigation team shall collect factual and objective evidence such as photographs, witness statements and other data as needed. (KAUST Health and Safety uses the Incident Investigation Report Form -HSE-OHSMS-PR09-F01)\n- A preliminary report may be issued until such time that the final report is complete.\n- The final KAUST HSE incident investigation report, approved by the relevant KAUST HSE Manager, shall identify direct and root cause(s), corrective actions and include evidence such as photographs, witness statements, and other data as needed.\n- The final report will be distributed to the person in charge of Relevan, for closing.\n- Corrective actions will be uploaded to the REPORTIT system tracking.\n- KAUST HSE may issue a Safety Bulletin to raise awareness of the incident.\n- KAUST HSE will issue a monthly dashboard to KAUST Proponents with open corrective actions.\n\n5.4. Incident and Near-Miss Analysis\n5.4.1. Root Causes\nThe root cause is the underlying system weaknesses that have somehow contributed to the existence of hazardous conditions and unsafe behaviors that represent immediate causes of accidents. Root causes are uncontrolled when printed\n\n--- Page 86 -",
-                        "doc_id": "76048ee1fd0b11f0959b164a69504768",
-                        "doc_type_kwd": "",
-                        "docnm_kwd": "kaust-occupational-health-and-safety-management-system-manual-(1).pdf",
-                        "image_id": "",
-                        "important_kwd": [],
-                        "kb_id": "6f357bd7f45f11f085b53ae7a67b446b",
-                        "mom_id": "",
-                        "positions": [],
-                        "similarity": 0.4489881487400805,
-                        "term_similarity": 0.28970889994306726,
-                        "vector_similarity": 0.5172506839388005
-                      }
-                    ]
-                  },
-                  "metadata": {
-                    "value": null
-                  }
-                },
-                "rerank_id": "",
-                "retrieval_from": "dataset",
-                "similarity_threshold": 0.1,
-                "toc_enhance": true,
-                "top_k": 1024,
-                "top_n": 8,
-                "use_kg": true
-              }
-            }
-          ],
+          "tools": [],
           "topPEnabled": false,
           "top_p": 0.3,
           "user_prompt": "",
@@ -736,13 +412,13 @@
         }
       },
       "upstream": [
-        "Categorize:QueryRouter"
+        "Retrieval:SimpleKBSearch"
       ]
     },
     "Categorize:QueryRouter": {
       "downstream": [
         "Agent:ConversationalSimple",
-        "Agent:SimpleRetrieval",
+        "Retrieval:SimpleKBSearch",
         "Agent:Planner"
       ],
       "obj": {
@@ -981,6 +657,72 @@
         }
       },
       "upstream": []
+    },
+    "Retrieval:SimpleKBSearch": {
+      "downstream": [
+        "Agent:SimpleRetrieval"
+      ],
+      "obj": {
+        "component_name": "Retrieval",
+        "params": {
+          "cross_languages": [],
+          "empty_response": "No relevant information found in the knowledge base for this query.",
+          "kb_ids": [
+            "6f357bd7f45f11f085b53ae7a67b446b"
+          ],
+          "keywords_similarity_weight": 0.3,
+          "outputs": {
+            "formalized_content": {
+              "type": "string",
+              "value": ""
+            }
+          },
+          "query": "sys.query",
+          "rerank_id": "",
+          "retrieval_from": "dataset",
+          "similarity_threshold": 0.1,
+          "toc_enhance": true,
+          "top_k": 1024,
+          "top_n": 8,
+          "use_kg": true
+        }
+      },
+      "upstream": [
+        "Categorize:QueryRouter"
+      ]
+    },
+    "Retrieval:AdvancedKBSearch": {
+      "downstream": [
+        "Agent:AdvancedRetrieval"
+      ],
+      "obj": {
+        "component_name": "Retrieval",
+        "params": {
+          "cross_languages": [],
+          "empty_response": "No relevant information found in the knowledge base for this query.",
+          "kb_ids": [
+            "6f357bd7f45f11f085b53ae7a67b446b"
+          ],
+          "keywords_similarity_weight": 0.3,
+          "outputs": {
+            "formalized_content": {
+              "type": "string",
+              "value": ""
+            }
+          },
+          "query": "sys.query",
+          "rerank_id": "",
+          "retrieval_from": "dataset",
+          "similarity_threshold": 0.1,
+          "toc_enhance": true,
+          "top_k": 1024,
+          "top_n": 8,
+          "use_kg": true
+        }
+      },
+      "upstream": [
+        "Agent:Planner"
+      ]
     }
   },
   "globals": {
@@ -3156,5 +2898,6 @@
     }
   ],
   "task_id": "c71adc4d002011f18467121cbe6b8155",
-  "variables": {}
+  "variables": {},
+  "edges": []
 }
