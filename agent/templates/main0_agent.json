@@ -757,11 +757,19 @@
         "data": {
           "isHovered": false
         },
-        "id": "e3-simple",
+        "id": "xy-edge__Categorize:QueryRouter-Retrieval:SimpleKBSearch",
         "source": "Categorize:QueryRouter",
         "sourceHandle": "uuid-simple-lookup-002",
+        "target": "Retrieval:SimpleKBSearch",
+        "targetHandle": "Retrieval:SimpleKBSearchstart"
+      },
+      {
+        "id": "xy-edge__Retrieval:SimpleKBSearch-Agent:SimpleRetrieval",
+        "source": "Retrieval:SimpleKBSearch",
+        "sourceHandle": "Retrieval:SimpleKBSearchend",
         "target": "Agent:SimpleRetrieval",
-        "targetHandle": "end"
+        "targetHandle": "Agent:SimpleRetrievalstart",
+        "type": "buttonEdge"
       },
       {
         "data": {
@@ -777,11 +785,19 @@
         "data": {
           "isHovered": false
         },
-        "id": "e5",
+        "id": "xy-edge__Agent:Planner-Retrieval:AdvancedKBSearch",
         "source": "Agent:Planner",
         "sourceHandle": "start",
+        "target": "Retrieval:AdvancedKBSearch",
+        "targetHandle": "Retrieval:AdvancedKBSearchstart"
+      },
+      {
+        "id": "xy-edge__Retrieval:AdvancedKBSearch-Agent:AdvancedRetrieval",
+        "source": "Retrieval:AdvancedKBSearch",
+        "sourceHandle": "Retrieval:AdvancedKBSearchend",
         "target": "Agent:AdvancedRetrieval",
-        "targetHandle": "end"
+        "targetHandle": "Agent:AdvancedRetrievalstart",
+        "type": "buttonEdge"
       },
       {
         "data": {
@@ -1004,39 +1020,14 @@
             "presence_penalty": 0.4,
             "prompts": [
               {
-                "content": "=== RETRIEVED DOCUMENTS ===\n{Retrieval_Simple@formalized_content}\n=== END DOCUMENTS ===\n\nQuestion: {sys.query}\n\nFORMAT: [Direct answer in 1-3 sentences]. Citations: [ID:N][ID:M]...\n\nDO NOT ELABORATE. STOP after answering.",
+                "content": "=== RETRIEVED DOCUMENTS ===\n{Retrieval:SimpleKBSearch@formalized_content}\n=== END DOCUMENTS ===\n\nQuestion: {sys.query}\n\nFORMAT: [Direct answer in 1-3 sentences]. Citations: [ID:N][ID:M]...\n\nDO NOT ELABORATE. STOP after answering.",
                 "role": "user"
               }
             ],
             "sys_prompt": "You are a factual Q&A assistant. Answer ONLY from the provided context. STOP after answering.\n\nSTRICT RULES:\n1. ANSWER FIRST: State the answer in 1-3 sentences. Then STOP.\n2. NO ELABORATION: Do not explain further, provide background, or add commentary.\n3. FAITHFULNESS: Use ONLY explicit facts from the context. Do not infer or assume.\n4. FORMAT: [Your answer]. Citations: [ID:N][ID:M]... - Use the ID numbers from context.\n5. NO CONTEXT = NO ANSWER: If not found, say exactly: \"This information is not available in the knowledge base.\"\n\nFORBIDDEN:\n- Starting with \"Based on...\", \"According to...\", \"The context shows...\"\n- Adding background the user did not ask for\n- Inline citations within sentences\n- Headers, bullet points, or structured formatting\n- Continuing to write after the answer",
             "temperature": 0.4,
             "temperatureEnabled": true,
-            "tools": [
-              {
-                "component_name": "Retrieval",
-                "id": "Retrieval:SimpleKBSearch",
-                "name": "Retrieval_Simple",
-                "params": {
-                  "cross_languages": [],
-                  "kb_ids": [
-                    "6f357bd7f45f11f085b53ae7a67b446b"
-                  ],
-                  "keywords_similarity_weight": 0.3,
-                  "meta_data_filter": {},
-                  "outputs": {
-                    "chunks": {},
-                    "metadata": {}
-                  },
-                  "rerank_id": "",
-                  "retrieval_from": "dataset",
-                  "similarity_threshold": 0.1,
-                  "toc_enhance": true,
-                  "top_k": 1024,
-                  "top_n": 8,
-                  "use_kg": true
-                }
-              }
-            ],
+            "tools": [],
             "topPEnabled": false,
             "top_p": 0.3
           },
@@ -1130,39 +1121,14 @@
             "presence_penalty": 0.4,
             "prompts": [
               {
-                "content": "Query Plan: {Agent:Planner@content}\n\n=== RETRIEVED DOCUMENTS ===\n{Retrieval_Advanced@formalized_content}\n=== END DOCUMENTS ===\n\nQuestion: {sys.query}\n\nFORMAT: [Direct answer, max 5 sentences]. Citations: [ID:N][ID:M]...\n\nDO NOT ELABORATE beyond what is necessary. STOP after answering.",
+                "content": "Query Plan: {Agent:Planner@content}\n\n=== RETRIEVED DOCUMENTS ===\n{Retrieval:AdvancedKBSearch@formalized_content}\n=== END DOCUMENTS ===\n\nQuestion: {sys.query}\n\nFORMAT: [Direct answer, max 5 sentences]. Citations: [ID:N][ID:M]...\n\nDO NOT ELABORATE beyond what is necessary. STOP after answering.",
                 "role": "user"
               }
             ],
             "sys_prompt": "You are a research assistant. Answer using ONLY the provided context. STOP after answering.\n\nSTRICT RULES:\n1. DIRECT ANSWER: State the main answer in 1-2 sentences.\n2. SUPPORTING DETAIL: Add 1-3 sentences of support if needed. Then STOP.\n3. MAX LENGTH: Never exceed 5 sentences total.\n4. FAITHFULNESS: Use ONLY explicit facts. Do not infer, assume, or add knowledge.\n5. CITATIONS AT END: Format: [ID:N][ID:M]... - Use the ID numbers from the retrieved documents.\n6. PARTIAL INFO: If context partially answers, state what you found and what is missing.\n\nFORBIDDEN:\n- Starting with \"Based on...\", \"According to...\", \"The documents show...\"\n- Inline citations within sentences\n- Headers, numbered lists, or structured formatting\n- Elaborating after the core answer\n- Fabricating metadata not explicitly stated",
             "temperature": 0.4,
             "temperatureEnabled": true,
-            "tools": [
-              {
-                "component_name": "Retrieval",
-                "id": "Retrieval:AdvancedKBSearch",
-                "name": "Retrieval_Advanced",
-                "params": {
-                  "cross_languages": [],
-                  "kb_ids": [
-                    "6f357bd7f45f11f085b53ae7a67b446b"
-                  ],
-                  "keywords_similarity_weight": 0.3,
-                  "meta_data_filter": {},
-                  "outputs": {
-                    "chunks": {},
-                    "metadata": {}
-                  },
-                  "rerank_id": "",
-                  "retrieval_from": "dataset",
-                  "similarity_threshold": 0.11,
-                  "toc_enhance": true,
-                  "top_k": 1024,
-                  "top_n": 10,
-                  "use_kg": true
-                }
-              }
-            ],
+            "tools": [],
             "topPEnabled": false,
             "top_p": 0.3
           },
@@ -1297,6 +1263,86 @@
         "sourcePosition": "right",
         "targetPosition": "left",
         "type": "toolNode"
+      },
+      {
+        "data": {
+          "form": {
+            "cross_languages": [],
+            "empty_response": "No relevant information found in the knowledge base for this query.",
+            "kb_ids": [
+              "6f357bd7f45f11f085b53ae7a67b446b"
+            ],
+            "keywords_similarity_weight": 0.3,
+            "outputs": {
+              "formalized_content": {
+                "type": "string",
+                "value": ""
+              }
+            },
+            "query": "sys.query",
+            "rerank_id": "",
+            "retrieval_from": "dataset",
+            "similarity_threshold": 0.1,
+            "toc_enhance": true,
+            "top_k": 1024,
+            "top_n": 8,
+            "use_kg": true
+          },
+          "label": "Retrieval",
+          "name": "Simple KB Search"
+        },
+        "id": "Retrieval:SimpleKBSearch",
+        "measured": {
+          "height": 90,
+          "width": 200
+        },
+        "position": {
+          "x": -150,
+          "y": 75
+        },
+        "sourcePosition": "right",
+        "targetPosition": "left",
+        "type": "retrievalNode"
+      },
+      {
+        "data": {
+          "form": {
+            "cross_languages": [],
+            "empty_response": "No relevant information found in the knowledge base for this query.",
+            "kb_ids": [
+              "6f357bd7f45f11f085b53ae7a67b446b"
+            ],
+            "keywords_similarity_weight": 0.3,
+            "outputs": {
+              "formalized_content": {
+                "type": "string",
+                "value": ""
+              }
+            },
+            "query": "sys.query",
+            "rerank_id": "",
+            "retrieval_from": "dataset",
+            "similarity_threshold": 0.1,
+            "toc_enhance": true,
+            "top_k": 1024,
+            "top_n": 8,
+            "use_kg": true
+          },
+          "label": "Retrieval",
+          "name": "Advanced KB Search"
+        },
+        "id": "Retrieval:AdvancedKBSearch",
+        "measured": {
+          "height": 90,
+          "width": 200
+        },
+        "position": {
+          "x": 150,
+          "y": 225
+        },
+        "sourcePosition": "right",
+        "targetPosition": "left",
+        "type": "retrievalNode"
       }
     ]
   },
