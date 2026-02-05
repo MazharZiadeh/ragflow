@@ -127,6 +127,11 @@ def kb_prompt(kbinfos, max_tokens, hash_id=False):
     for i, ck in enumerate(kbinfos["chunks"][:chunks_num]):
         cnt = "\nID: {}".format(i if not hash_id else hash_str2int(get_value(ck, "id", "chunk_id"), 500))
         cnt += draw_node("Title", get_value(ck, "docnm_kwd", "document_name"))
+        positions = get_value(ck, "positions", "position_int")
+        if positions and len(positions) > 0:
+            page_num = positions[0][0] if len(positions[0]) > 0 else None
+            if page_num is not None and isinstance(page_num, (int, float)):
+                cnt += draw_node("Page", str(int(page_num)))
         cnt += draw_node("URL", ck['url']) if "url" in ck else ""
         for k, v in docs.get(get_value(ck, "doc_id", "document_id"), {}).items():
             cnt += draw_node(k, v)
@@ -338,7 +343,7 @@ def tool_schema(tools_description: list[dict], complete_task=False):
             "type": "function",
             "function": {
                 "name": COMPLETE_TASK,
-                "description": "Call this with your final answer. Be CONCISE — 1-4 sentences for simple questions. No preamble, no filler, no headers. Place all [ID:N] citations at the END of the answer, not inline. If documents are unrelated, say so.",
+                "description": "Call this with your final answer. MUST ANSWER if retrieved content contains ANY relevant information—never claim 'no information' when content exists. Lead with the direct answer. Use exact terminology from sources. Citations at END using EXACT document names from chunk Title field: Sources: <exact_title>, page <N>.",
                 "parameters": {
                     "type": "object",
                     "properties": {

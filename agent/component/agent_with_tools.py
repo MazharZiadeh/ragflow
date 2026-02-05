@@ -323,7 +323,7 @@ class Agent(LLM, ToolBase):
             if hist and hist[0]["role"] == "system":
                 if schema_prompt:
                     hist[0]["content"] += "\n" + schema_prompt
-                if need2cite and len(hist) < 7:
+                if need2cite and len(hist) < 25:
                     hist[0]["content"] += citation_prompt()
                     cited = True
             yield "", token_count
