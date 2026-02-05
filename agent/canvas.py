@@ -343,13 +343,11 @@ class Canvas(Graph):
 
         self.retrieval = self.dsl["retrieval"]
         self.memory = self.dsl.get("memory", [])
-        self.kv_memory = self.dsl.get("kv_memory", {})
 
     def __str__(self):
         self.dsl["history"] = self.history
         self.dsl["retrieval"] = self.retrieval
         self.dsl["memory"] = self.memory
-        self.dsl["kv_memory"] = self.kv_memory
         return super().__str__()
 
     def reset(self, mem=False):
@@ -358,7 +356,6 @@ class Canvas(Graph):
             self.history = []
             self.retrieval = []
             self.memory = []
-            self.kv_memory = {}
         for k in self.globals.keys():
             if k.startswith("sys."):
                 if isinstance(self.globals[k], str):
@@ -818,37 +815,6 @@ class Canvas(Graph):
 
     def get_memory(self) -> list[Tuple]:
         return self.memory
-
-    # Key-value memory methods for Memory component
-    def set_kv_memory(self, key: str, value: Any) -> bool:
-        """Store a key-value pair in canvas kv_memory."""
-        if not hasattr(self, 'kv_memory'):
-            self.kv_memory = {}
-        self.kv_memory[key] = value
-        return True
-
-    def get_kv_memory(self, key: str) -> Any:
-        """Retrieve a value by key from canvas kv_memory."""
-        if not hasattr(self, 'kv_memory'):
-            self.kv_memory = {}
-        return self.kv_memory.get(key)
-
-    def clear_kv_memory(self, key: str = None) -> bool:
-        """Clear all or specific key from canvas kv_memory."""
-        if not hasattr(self, 'kv_memory'):
-            self.kv_memory = {}
-            return True
-        if key is None:
-            self.kv_memory = {}
-        elif key in self.kv_memory:
-            del self.kv_memory[key]
-        return True
-
-    def get_all_kv_keys(self) -> list:
-        """Get all keys stored in kv_memory."""
-        if not hasattr(self, 'kv_memory'):
-            self.kv_memory = {}
-        return list(self.kv_memory.keys())
 
     def get_component_thoughts(self, cpn_id) -> str:
         return self.components.get(cpn_id)["obj"].thoughts()

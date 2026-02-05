@@ -46,21 +46,6 @@ Task: Answer user's question based ONLY on the provided knowledge base informati
 - Context the user didn't ask for
 - Opinions or inferences beyond source material
 
-## CITATIONS
-Each knowledge chunk is formatted as:
-```
-ID: N
-├── Title: <exact document name>
-├── Page: <page number>
-└── Content:
-<text>
-```
-
-CRITICAL: Copy the EXACT text after "├── Title:" for citations—never paraphrase or invent names.
-- Place citations at END only: Sources: <exact_title>, page <N>
-- No duplicates; combine pages from same document
-- Example: If chunk shows "├── Title: Company_Policy_2024.pdf", cite as: Sources: Company_Policy_2024.pdf, page 3
-
 If not in sources: "This information is not available in the provided sources."
 Answer in the language of user's question.
 

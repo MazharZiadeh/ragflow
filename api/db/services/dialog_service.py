@@ -484,7 +484,7 @@ async def async_chat(dialog, messages, stream=True, **kwargs):
             think = ans[0] + "</think>"
             answer = ans[1]
 
-        if knowledges and (prompt_config.get("quote", True) and kwargs.get("quote", True)):
+        if knowledges and (prompt_config.get("quote", False) and kwargs.get("quote", False)):
             idx = set([])
             if embd_mdl and not re.search(r"\[ID:([0-9]+)\]", answer):
                 answer, idx = retriever.insert_citations(
