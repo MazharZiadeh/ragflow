@@ -464,7 +464,7 @@ async def async_chat(dialog, messages, stream=True, **kwargs):
     prompt4citation = ""
     if knowledges:
         msg[0]["content"] += "\n\nIMPORTANT RESPONSE RULES:\n1. Answer ONLY the specific question asked — nothing more.\n2. If retrieved content is COMPLETELY unrelated to the question, say \"No relevant information found.\" But if it contains any useful information, use it to answer.\n3. Match response length to question complexity: simple question = 1-3 sentences.\n4. Never start with \"Based on the provided information...\" or similar preamble."
-        if prompt_config.get("quote", True) and kwargs.get("quote", True):
+        if prompt_config.get("quote", False) and kwargs.get("quote", False):
             prompt4citation = citation_prompt()
     msg.extend([{"role": m["role"], "content": re.sub(r"##\d+\$\$", "", m["content"])} for m in messages if m["role"] != "system"])
     used_token_count, msg = message_fit_in(msg, int(max_tokens * 0.95))
@@ -881,9 +881,10 @@ async def async_ask(question, kb_ids, tenant_id, chat_llm_name=None, search_conf
 
     def decorate_answer(answer):
         nonlocal knowledges, kbinfos, sys_prompt
-        answer, idx = retriever.insert_citations(answer, [ck["content_ltks"] for ck in kbinfos["chunks"]], [ck["vector"] for ck in kbinfos["chunks"]],
-                                                 embd_mdl, tkweight=0.7, vtweight=0.3)
-        idx = set([kbinfos["chunks"][int(i)]["doc_id"] for i in idx])
+        # Citations disabled - skip insert_citations to remove [ID:N] markers
+        # answer, idx = retriever.insert_citations(answer, [ck["content_ltks"] for ck in kbinfos["chunks"]], [ck["vector"] for ck in kbinfos["chunks"]],
+        #                                          embd_mdl, tkweight=0.7, vtweight=0.3)
+        idx = set([kbinfos["chunks"][int(i)]["doc_id"] for i in range(len(kbinfos["chunks"]))])
         recall_docs = [d for d in kbinfos["doc_aggs"] if d["doc_id"] in idx]
         if not recall_docs:
             recall_docs = kbinfos["doc_aggs"]

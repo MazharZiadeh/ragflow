@@ -46,7 +46,7 @@ class LLMParam(ComponentParamBase):
         self.presence_penalty = 0
         self.frequency_penalty = 0
         self.output_structure = None
-        self.cite = True
+        self.cite = False
         self.visual_files_var = None
 
     def check(self):
