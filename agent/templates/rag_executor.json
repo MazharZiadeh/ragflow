@@ -67,7 +67,7 @@
             "temperature": 0,
             "top_p": 0.9,
             "max_tokens": 4096,
-            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. NO inline citations - place ALL citations at the END only\n3. Synthesize information across chunks, don't just quote\n\nThen, list sources at the end (no duplicates):\nSources: <exact_title>, page <N>\n\nUse EXACT document names from chunk \"Title:\" field.\n\n=== RETRIEVED CONTEXT ===\n{Retrieval_Eval@formalized_content}",
+            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. NO inline citations - place ALL citations at the END only\n3. Synthesize information across chunks, don't just quote\n\nChunks are formatted as:\n  ID: N\n  ├── Title: <exact document name>\n  ├── Page: <page number>\n  └── Content: ...\n\nCRITICAL: Copy the EXACT text after \"├── Title:\" for citations—never paraphrase or invent names.\nSources: <exact_title>, page <N>\n\n=== RETRIEVED CONTEXT ===\n{Retrieval_Eval@formalized_content}",
             "prompts": [{"role": "user", "content": "Question: {sys.query}"}],
             "message_history_window_size": 13,
             "outputs": {

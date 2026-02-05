@@ -343,7 +343,7 @@ def tool_schema(tools_description: list[dict], complete_task=False):
             "type": "function",
             "function": {
                 "name": COMPLETE_TASK,
-                "description": "Call this with your final answer. MUST ANSWER if retrieved content contains ANY relevant information—never claim 'no information' when content exists. Lead with the direct answer. Use exact terminology from sources. Citations at END using EXACT document names from chunk Title field: Sources: <exact_title>, page <N>.",
+                "description": "Call this with your final answer. MUST ANSWER if retrieved content contains ANY relevant information—never claim 'no information' when content exists. Lead with the direct answer. Use exact terminology from sources. Citations at END: copy the EXACT text after '├── Title:' from chunks—never paraphrase. Format: Sources: <exact_title>, page <N>.",
                 "parameters": {
                     "type": "object",
                     "properties": {

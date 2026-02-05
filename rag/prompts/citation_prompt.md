@@ -5,7 +5,11 @@ IMPORTANT RULES:
 2. NO inline citations - place ALL citations at the END only
 3. Synthesize information across chunks, don't just quote
 
-Then, list sources at the end (no duplicates):
-Sources: <exact_title>, page <N>
+Each chunk shows metadata like:
+  ID: N
+  ├── Title: <exact document name>
+  ├── Page: <page number>
+  └── Content: ...
 
-Use EXACT document names from chunk "Title:" field.
+CRITICAL: Copy the EXACT text after "├── Title:" for citations—never paraphrase or invent names.
+Sources: <exact_title>, page <N>
