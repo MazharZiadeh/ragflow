@@ -49,6 +49,9 @@ def strip_inline_citations(text: str) -> str:
     text = re.sub(r'\s*\[Document[^\]]*\]', '', text, flags=re.IGNORECASE)
     # Remove [Source: ...] or [Reference: ...]
     text = re.sub(r'\s*\[(Source|Reference|Ref)[^\]]*\]', '', text, flags=re.IGNORECASE)
+    # Remove LLM-invented bracketed references like [OH&SMS Manual], [KAUST Policy], [PPE Standard]
+    # Matches [...] containing uppercase words, &, or common doc-name patterns
+    text = re.sub(r'\s*\[[A-Z][A-Za-z&\s\-\.\']{2,}(?:Manual|Policy|Standard|Guide|Procedure|Document|Report|Code|Plan|Handbook|Regulation|Act)\]', '', text)
     # Remove standalone citation lines like "[1] Author, Title, Year"
     text = re.sub(r'\n\s*\[\d+\][^\n]+', '', text)
     # Clean up extra whitespace
