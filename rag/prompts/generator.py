@@ -59,6 +59,43 @@ def chunks_format(reference):
     ]
 
 
+def format_sources_section(chunks: list) -> str:
+    """Format a human-readable Sources section with document names and page numbers."""
+    if not chunks:
+        return ""
+
+    # Collect documents and their page numbers
+    docs = {}
+    for ck in chunks:
+        # Handle both dict formats (list of chunks or dict of chunks)
+        if isinstance(ck, dict):
+            name = ck.get("docnm_kwd") or ck.get("document_name") or ""
+            if not name:
+                continue
+            if name not in docs:
+                docs[name] = set()
+            # Extract page numbers from positions
+            pos = ck.get("positions") or ck.get("position_int") or []
+            if pos and isinstance(pos, list) and len(pos) > 0:
+                if isinstance(pos[0], list) and len(pos[0]) > 0:
+                    docs[name].add(int(pos[0][0]))
+                elif isinstance(pos[0], (int, float)):
+                    docs[name].add(int(pos[0]))
+
+    if not docs:
+        return ""
+
+    # Format as "Sources: doc1 (p. 1, 2), doc2 (p. 5)"
+    parts = []
+    for name, pages in docs.items():
+        if pages:
+            parts.append(f"{name} (p. {', '.join(map(str, sorted(pages)))})")
+        else:
+            parts.append(name)
+
+    return "\n\nSources: " + ", ".join(parts)
+
+
 def message_fit_in(msg, max_length=4000):
     def count():
         nonlocal msg

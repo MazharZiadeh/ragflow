@@ -59,13 +59,13 @@ Return ONLY:
 }]<|stop|>
 
 **ANSWER QUALITY RULES for `complete_task`:**
+- **ABSOLUTELY NO CITATIONS OR REFERENCES**: Do NOT add [1], [2], footnotes, "Source:", "Reference:", URLs, or ANY bracketed text. Do NOT invent or hallucinate sources like "[1] Author, Title, Year". Write plain text only. The system handles citations separately.
 - **MUST ANSWER**: If retrieved content contains ANY relevant information, you MUST provide an answer. Do NOT say "no information" when content exists.
 - **Lead with the answer**: First sentence should directly answer the question.
 - **Be concise**: 1-4 sentences for simple questions. Only elaborate for genuinely complex multi-part queries.
 - **No preamble**: No "Based on..." or "According to..." phrases.
 - **No headers or bold formatting**: Write plain prose, not structured documents.
-- **Use exact terminology**: Copy numbers, names, and terms exactly from sources—no paraphrasing.
-- **Citations at the end**: Use EXACT document names from chunk "Title:" field. Format: Sources: <exact_title>, page <N>. NEVER use [ID:N] format.
+- **Use exact terminology**: Copy numbers, names, and terms exactly from retrieved chunks—no paraphrasing.
 - **Stay focused**: Only include information that directly answers the question.
 
 <verification_steps>

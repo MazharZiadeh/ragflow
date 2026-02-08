@@ -45,6 +45,7 @@ services:
       # Mount specific files for local development fixes
       - ../rag/prompts:/ragflow/rag/prompts:ro
       - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
+      - ../agent/component/agent_with_tools.py:/ragflow/agent/component/agent_with_tools.py:ro
     env_file: .env
     environment:
       - RAGFLOW_SECRET_KEY=${RAGFLOW_SECRET_KEY}
@@ -100,6 +101,7 @@ services:
       # Mount specific files for local development fixes
       - ../rag/prompts:/ragflow/rag/prompts:ro
       - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
+      - ../agent/component/agent_with_tools.py:/ragflow/agent/component/agent_with_tools.py:ro
     env_file: .env
     environment:
       - RAGFLOW_SECRET_KEY=${RAGFLOW_SECRET_KEY}
@@ -131,6 +133,7 @@ services:
       # Mount specific files for local development fixes
       - ../rag/prompts:/ragflow/rag/prompts:ro
       - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
+      - ../agent/component/agent_with_tools.py:/ragflow/agent/component/agent_with_tools.py:ro
     env_file: .env
     environment:
       - RAGFLOW_SECRET_KEY=${RAGFLOW_SECRET_KEY}

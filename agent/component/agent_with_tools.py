@@ -30,9 +30,30 @@ from api.db.services.tenant_llm_service import TenantLLMService
 from api.db.services.mcp_server_service import MCPServerService
 from common.connection_utils import timeout
 from rag.prompts.generator import next_step_async, COMPLETE_TASK, \
-    citation_prompt, kb_prompt, citation_plus, full_question, message_fit_in, structured_output_prompt
+    citation_prompt, kb_prompt, citation_plus, full_question, message_fit_in, structured_output_prompt, format_sources_section
 from common.mcp_tool_call_conn import MCPToolCallSession, mcp_tool_metadata_to_openai_tool
 from agent.component.llm import LLMParam, LLM
+
+
+def strip_inline_citations(text: str) -> str:
+    """Remove inline citations that LLMs add despite instructions not to."""
+    if not text:
+        return text
+    # Remove [page N], [p. N], [pg N] style references
+    text = re.sub(r'\s*\[page\s*\d+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\s*\[p\.?\s*\d+\]', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\s*\[pg\.?\s*\d+\]', '', text, flags=re.IGNORECASE)
+    # Remove [1], [2], [Document 1], [Source], [N], etc.
+    text = re.sub(r'\s*\[[^\]]*\d+[^\]]*\]', '', text)
+    # Remove [Document Name] style references
+    text = re.sub(r'\s*\[Document[^\]]*\]', '', text, flags=re.IGNORECASE)
+    # Remove [Source: ...] or [Reference: ...]
+    text = re.sub(r'\s*\[(Source|Reference|Ref)[^\]]*\]', '', text, flags=re.IGNORECASE)
+    # Remove standalone citation lines like "[1] Author, Title, Year"
+    text = re.sub(r'\n\s*\[\d+\][^\n]+', '', text)
+    # Clean up extra whitespace
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
 
 
 class AgentParam(LLMParam, ToolParamBase):
@@ -333,10 +354,10 @@ class Agent(LLM, ToolBase):
                 _hist = [hist[0], hist[1], *hist[-10:]]
             entire_txt = ""
             async for delta_ans in self._generate_streamly(_hist):
-                if not need2cite or cited:
-                    yield delta_ans, 0
                 entire_txt += delta_ans
+            # Strip citations and yield clean text
             if not need2cite or cited:
+                yield strip_inline_citations(entire_txt), 0
                 return
 
             st = timer()
@@ -413,17 +434,33 @@ class Agent(LLM, ToolBase):
                     if name == COMPLETE_TASK:
                         answer = args.get("answer", "")
                         if answer:
+                            # Strip any inline citations the LLM added despite instructions
+                            answer = strip_inline_citations(answer)
                             need2cite = self._param.cite and self._canvas.get_reference()["chunks"] and self._id.find("-->") < 0
                             if need2cite:
                                 async for delta_ans in self._gen_citations_async(answer):
                                     yield delta_ans, 0
                             else:
                                 yield answer, 0
+                            # Append human-readable sources section with document names
+                            retrievals = self._canvas.get_reference()
+                            chunk_count = len(retrievals.get("chunks", {}))
+                            logging.info(f"[SOURCES] complete_task: chunks={chunk_count}")
+                            if retrievals.get("chunks"):
+                                sources_text = format_sources_section(list(retrievals["chunks"].values()))
+                                if sources_text:
+                                    yield sources_text, 0
                             return
                         # Fallback: no answer text, re-generate
                         append_user_content(hist, f"Respond with a formal answer. FORGET(DO NOT mention) about `{COMPLETE_TASK}`. The language for the response MUST be as the same as the first user request.\n")
                         async for txt, tkcnt in complete():
                             yield txt, tkcnt
+                        # Append sources after fallback generation
+                        retrievals = self._canvas.get_reference()
+                        if retrievals.get("chunks"):
+                            sources_text = format_sources_section(list(retrievals["chunks"].values()))
+                            if sources_text:
+                                yield sources_text, 0
                         return
 
                     tool_tasks.append(asyncio.create_task(use_tool_async(name, args)))
@@ -450,6 +487,12 @@ Give your final answer now. Be concise (1-4 sentences for simple questions). Sta
 
         async for txt, tkcnt in complete():
             yield txt, tkcnt
+        # Append sources after max rounds generation
+        retrievals = self._canvas.get_reference()
+        if retrievals.get("chunks"):
+            sources_text = format_sources_section(list(retrievals["chunks"].values()))
+            if sources_text:
+                yield sources_text, 0
 
 #     async def _react_with_tools_streamly_async(self, prompt, history: list[dict], use_tools, user_defined_prompt={}, schema_prompt: str = ""):
 #         token_count = 0
@@ -584,10 +627,14 @@ Give your final answer now. Be concise (1-4 sentences for simple questions). Sta
         retrievals = self._canvas.get_reference()
         retrievals = {"chunks": list(retrievals["chunks"].values()), "doc_aggs": list(retrievals["doc_aggs"].values())}
         formated_refer = kb_prompt(retrievals, self.chat_mdl.max_length, True)
+        # Collect full response then strip citations
+        full_response = ""
         async for delta_ans in self._generate_streamly([{"role": "system", "content": citation_plus("\n\n".join(formated_refer))},
                                                   {"role": "user", "content": text}
                                                   ]):
-            yield delta_ans
+            full_response += delta_ans
+        # Strip any citations the LLM added and yield clean text
+        yield strip_inline_citations(full_response)
 
     def reset(self, only_output=False):
         """
