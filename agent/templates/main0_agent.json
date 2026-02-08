@@ -84,7 +84,7 @@
             }
           ],
           "reasoning": null,
-          "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. NO inline citations - place ALL citations at the END only\n3. Synthesize information across chunks, don't just quote\n\nThen, list sources at the end (no duplicates):\nSources: <exact_title>, page <N>\n\nUse EXACT document names from chunk \"Title:\" field.",
+          "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. Do NOT add any citations, references, source attributions, or bracketed numbers - the system adds sources automatically\n3. Synthesize information across chunks, don't just quote\n4. Only use information found in the retrieved chunks - if the answer is not in the chunks, say so",
           "temperature": 0.2,
           "temperatureEnabled": true,
           "tools": [
@@ -96,9 +96,9 @@
                 "kb_ids": [
                   "6f357bd7f45f11f085b53ae7a67b446b"
                 ],
-                "similarity_threshold": 0.05,
-                "keywords_similarity_weight": 0.1,
-                "top_n": 15,
+                "similarity_threshold": 0.2,
+                "keywords_similarity_weight": 0.3,
+                "top_n": 8,
                 "top_k": 1024
               }
             }
@@ -393,7 +393,7 @@
             }
           ],
           "reasoning": null,
-          "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. NO inline citations - place ALL citations at the END only\n3. Synthesize information across chunks, don't just quote\n\nThen, list sources at the end (no duplicates):\nSources: <exact_title>, page <N>\n\nUse EXACT document names from chunk \"Title:\" field.",
+          "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. Do NOT add any citations, references, source attributions, or bracketed numbers - the system adds sources automatically\n3. Synthesize information across chunks, don't just quote\n4. Only use information found in the retrieved chunks - if the answer is not in the chunks, say so",
           "temperature": 0.2,
           "temperatureEnabled": true,
           "tools": [
@@ -405,9 +405,9 @@
                 "kb_ids": [
                   "6f357bd7f45f11f085b53ae7a67b446b"
                 ],
-                "similarity_threshold": 0.05,
-                "keywords_similarity_weight": 0.1,
-                "top_n": 15,
+                "similarity_threshold": 0.2,
+                "keywords_similarity_weight": 0.3,
+                "top_n": 8,
                 "top_k": 1024
               }
             }
@@ -949,7 +949,7 @@
                 "role": "user"
               }
             ],
-            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. NO inline citations - place ALL citations at the END only\n3. Synthesize information across chunks, don't just quote\n\nThen, list sources at the end (no duplicates):\nSources: <exact_title>, page <N>\n\nUse EXACT document names from chunk \"Title:\" field.",
+            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. Do NOT add any citations, references, source attributions, or bracketed numbers - the system adds sources automatically\n3. Synthesize information across chunks, don't just quote\n4. Only use information found in the retrieved chunks - if the answer is not in the chunks, say so",
             "temperature": 0.2,
             "temperatureEnabled": true,
             "tools": [
@@ -961,9 +961,9 @@
                   "kb_ids": [
                     "6f357bd7f45f11f085b53ae7a67b446b"
                   ],
-                  "similarity_threshold": 0.05,
-                  "keywords_similarity_weight": 0.1,
-                  "top_n": 15,
+                  "similarity_threshold": 0.2,
+                  "keywords_similarity_weight": 0.3,
+                  "top_n": 8,
                   "top_k": 1024
                 }
               }
@@ -1065,7 +1065,7 @@
                 "role": "user"
               }
             ],
-            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. NO inline citations - place ALL citations at the END only\n3. Synthesize information across chunks, don't just quote\n\nThen, list sources at the end (no duplicates):\nSources: <exact_title>, page <N>\n\nUse EXACT document names from chunk \"Title:\" field.",
+            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. Do NOT add any citations, references, source attributions, or bracketed numbers - the system adds sources automatically\n3. Synthesize information across chunks, don't just quote\n4. Only use information found in the retrieved chunks - if the answer is not in the chunks, say so",
             "temperature": 0.2,
             "temperatureEnabled": true,
             "tools": [
@@ -1077,9 +1077,9 @@
                   "kb_ids": [
                     "6f357bd7f45f11f085b53ae7a67b446b"
                   ],
-                  "similarity_threshold": 0.05,
-                  "keywords_similarity_weight": 0.1,
-                  "top_n": 15,
+                  "similarity_threshold": 0.2,
+                  "keywords_similarity_weight": 0.3,
+                  "top_n": 8,
                   "top_k": 1024
                 }
               }

@@ -59,10 +59,38 @@ def chunks_format(reference):
     ]
 
 
-def format_sources_section(chunks: list) -> str:
-    """Format a human-readable Sources section with document names and page numbers."""
+def _filter_by_similarity(chunks: list, threshold_ratio: float = 0.9) -> list:
+    """Keep only chunks whose similarity score is within threshold_ratio of the best score.
+
+    For example, with threshold_ratio=0.9 and a top score of 0.82, only chunks
+    with similarity >= 0.738 are kept. This filters out marginally relevant documents.
+    """
+    scored = [(ck, ck.get("similarity") or 0) for ck in chunks]
+    if not scored:
+        return chunks
+    max_score = max(s for _, s in scored)
+    if max_score <= 0:
+        return chunks
+    cutoff = max_score * threshold_ratio
+    kept = [ck for ck, s in scored if s >= cutoff]
+    if len(kept) < len(scored):
+        dropped = [(ck.get("docnm_kwd") or ck.get("document_name", "?"), round(s, 4))
+                    for ck, s in scored if s < cutoff]
+        logging.info(f"[SOURCES_FILTER] max={max_score:.4f} cutoff={cutoff:.4f} "
+                     f"kept={len(kept)}/{len(scored)} dropped={dropped}")
+    return kept
+
+
+def format_sources_section(chunks: list, answer: str = "") -> str:
+    """Format a human-readable Sources section with document names and page numbers.
+
+    Filters chunks by similarity score to only include highly relevant sources.
+    """
     if not chunks:
         return ""
+
+    # Filter to only chunks with similarity close to the best match
+    chunks = _filter_by_similarity(chunks)
 
     # Collect documents and their page numbers
     docs = {}
