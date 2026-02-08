@@ -19,6 +19,7 @@ services:
       - cluster.routing.allocation.disk.watermark.low=5gb
       - cluster.routing.allocation.disk.watermark.high=3gb
       - cluster.routing.allocation.disk.watermark.flood_stage=2gb
+      - indices.queries.cache.size=20%
     mem_limit: ${MEM_LIMIT}
     ulimits:
       memlock:
