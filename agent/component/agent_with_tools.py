@@ -354,7 +354,20 @@ class Agent(LLM, ToolBase):
 
             _hist = hist
             if len(hist) > 12:
-                _hist = [hist[0], hist[1], *hist[-10:]]
+                # Preserve observation messages (contain retrieved chunks) to
+                # prevent hallucination when generating fallback answers.
+                head = [hist[0], hist[1]]
+                rest = hist[2:]
+                observations = [m for m in rest if m.get("role") == "user"
+                                and "Observation:" in m.get("content", "")]
+                others = [m for m in rest if m not in observations]
+                budget = 10
+                kept_obs = observations[-budget:]
+                remaining = budget - len(kept_obs)
+                kept_others = others[-remaining:] if remaining > 0 else []
+                tail = kept_obs + kept_others
+                tail.sort(key=lambda m: rest.index(m))
+                _hist = head + tail
             entire_txt = ""
             async for delta_ans in self._generate_streamly(_hist):
                 entire_txt += delta_ans
@@ -382,9 +395,16 @@ class Agent(LLM, ToolBase):
                 return ""
 
             lines = ["Observation:"]
+            chunk_count = 0
             for name, result in tool_call_res:
                 lines.append(f"[{name} result]")
-                lines.append(str(result))
+                result_str = str(result)
+                lines.append(result_str)
+                chunk_count += result_str.count("\nID:")
+
+            lines.append("")
+            lines.append(f"=== END OF RETRIEVED DATA ({chunk_count} chunks total) ===")
+            lines.append("The above is ALL available information. Do NOT add, extrapolate, or infer additional items beyond what is explicitly shown.")
 
             return "\n".join(lines)
 
@@ -476,14 +496,23 @@ class Agent(LLM, ToolBase):
 
             except Exception as e:
                 logging.exception(msg=f"Wrong JSON argument format in LLM ReAct response: {e}")
+                # If the LLM returned substantial non-JSON text and we already have
+                # observation data, skip to complete() instead of wasting rounds.
+                has_observation = any(
+                    m.get("role") == "user" and "Observation:" in m.get("content", "")
+                    for m in hist
+                )
+                if has_observation and response and len(response.strip()) > 50:
+                    logging.warning("Non-JSON response after successful retrieval — skipping to complete()")
+                    break
                 e = f"\nTool call error, please correct the input parameter of response format and call it again.\n *** Exception ***\n{e}"
                 append_user_content(hist, str(e))
 
         logging.warning( f"Exceed max rounds: {self._param.max_rounds}")
         final_instruction = f"""
 {user_request}
-Give your final answer now. Be concise (1-4 sentences for simple questions). Stay grounded in retrieved documents. Cite sources briefly. If information is incomplete, say so.
-        """
+Give your final answer now based ONLY on the retrieved chunks above. Be concise (1-4 sentences for simple questions). Include ONLY information that appears in the retrieved data. Do NOT extend lists, invent document numbers, or add items not present in the chunks. If information is incomplete, say so.
+"""
         if self.check_if_canceled("Agent final instruction"):
             return
         append_user_content(hist, final_instruction)

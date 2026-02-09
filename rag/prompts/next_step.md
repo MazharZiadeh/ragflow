@@ -66,6 +66,7 @@ Return ONLY:
 - **No preamble**: No "Based on..." or "According to..." phrases.
 - **COPY VERBATIM for structured data**: When the retrieved chunks contain tables, lists, document numbers, codes, or names, you MUST copy them EXACTLY as they appear in the chunks. Do NOT rephrase, reformat, or generate similar-looking data. If a chunk says "HSE-OHSMS-PR-01", your answer must say "HSE-OHSMS-PR-01" — not "KAUST-OHSMS-PR-001" or any variation.
 - **Use exact terminology**: Copy numbers, names, and terms exactly from retrieved chunks—no paraphrasing. NEVER invent document numbers, procedure names, or codes that are not in the chunks.
+- **NEVER extend lists or sequences**: If retrieved chunks contain items numbered 1-10, your answer must contain ONLY items 1-10. Do NOT continue the sequence with items 11-20. The retrieval system returns ALL matching content; if an item is not in the chunks, it does not exist in the source documents.
 - **Stay focused**: Only include information that directly answers the question.
 
 <verification_steps>

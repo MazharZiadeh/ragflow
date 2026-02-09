@@ -37,6 +37,14 @@ def get_value(d, k1, k2):
     return d.get(k1, d.get(k2))
 
 
+def _html_table_to_markdown(content: str) -> str:
+    """Convert HTML table content to compact markdown for better LLM comprehension."""
+    if not content or not re.search(r'<table[\s>]', content, re.IGNORECASE):
+        return content
+    from markdownify import markdownify
+    return markdownify(content).strip()
+
+
 def chunks_format(reference):
     if not reference or not isinstance(reference, dict):
         return []
@@ -200,8 +208,10 @@ def kb_prompt(kbinfos, max_tokens, hash_id=False):
         cnt += draw_node("URL", ck['url']) if "url" in ck else ""
         for k, v in docs.get(get_value(ck, "doc_id", "document_id"), {}).items():
             cnt += draw_node(k, v)
+        content = get_value(ck, "content", "content_with_weight")
+        content = _html_table_to_markdown(content) if content else ""
         cnt += "\n└── Content:\n"
-        cnt += get_value(ck, "content", "content_with_weight")
+        cnt += content
         knowledges.append(cnt)
 
     return knowledges
@@ -472,6 +482,7 @@ async def next_step_async(chat_mdl, history: list, tools_description: list[dict]
         template.render(task_analysis=task_desc, desc=desc, today=datetime.datetime.now().strftime("%Y-%m-%d")),
         hist[1:],
         stop=["<|stop|>"],
+        response_format={"type": "json_object"},
     )
     tk_cnt = num_tokens_from_string(json_str)
     json_str = re.sub(r"^.*</think>", "", json_str, flags=re.DOTALL)

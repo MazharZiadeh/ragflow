@@ -1685,6 +1685,17 @@ class LiteLLMBase(ABC):
                 }
             )
 
+        # For Ollama, pass num_ctx so the model allocates enough context window.
+        # Without this, Ollama defaults to 2048-4096 tokens and silently
+        # truncates long observations, causing empty/garbage responses.
+        # NOTE: extra_body does NOT work — litellm nests it as options.extra_body
+        # which Ollama ignores. Setting the class attribute on OllamaChatConfig
+        # flows through get_config() → optional_params → data["options"]["num_ctx"].
+        if self.provider == SupportedLiteLLMProvider.Ollama:
+            max_len = getattr(self, "_max_length", None)
+            if max_len:
+                litellm.OllamaChatConfig.num_ctx = int(max_len)
+
         # Ollama deployments commonly sit behind a reverse proxy that enforces
         # Bearer auth. Ensure the Authorization header is set when an API key
         # is provided, while respecting any user-supplied headers. #11350

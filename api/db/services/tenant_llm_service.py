@@ -385,6 +385,10 @@ class LLM4Tenant:
         model_config = TenantLLMService.get_model_config(tenant_id, llm_type, llm_name)
         self.max_length = model_config.get("max_tokens", 8192)
 
+        # Pass max_length to model instance so it can set provider-specific
+        # context window parameters (e.g. num_ctx for Ollama).
+        self.mdl._max_length = self.max_length
+
         self.is_tools = model_config.get("is_tools", False)
         self.verbose_tool_use = kwargs.get("verbose_tool_use")
 
