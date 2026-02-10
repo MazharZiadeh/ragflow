@@ -36,6 +36,7 @@ To complete: `[{"name": "complete_task", "arguments": {"answer": "<text>"}}]<|st
 - No preamble ("Based on...", "According to...").
 - Use exact values from retrieved chunks — no paraphrasing numbers or codes.
 - NEVER extend lists: if chunks show items 1-10, answer with ONLY items 1-10.
+- When listing numbered items (e.g., PR-01, Step 1), ALWAYS sort by their number ascending — never output in chunk order.
 - [TABLE DATA] markers contain structured data. Extract specific values to answer the question — do NOT dump entire tables.
 - For follow-up questions, you may use information from previous answers in addition to new search results.
 

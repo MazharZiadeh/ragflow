@@ -368,7 +368,7 @@ class Agent(LLM, ToolBase):
                 "- Use exact values, numbers, and codes from the data\n"
                 "- No citations, references, or source attributions\n"
                 "- No preamble like 'Based on...' or 'According to...'\n"
-                "- Format lists with bullet points or numbered items in sequential order"
+                "- When listing numbered items (e.g., PR-01, Step 1), ALWAYS sort by number ascending — never output in chunk order"
             )
             if schema_prompt:
                 sys_content += "\n" + schema_prompt
