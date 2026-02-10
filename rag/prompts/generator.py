@@ -45,6 +45,80 @@ def _html_table_to_markdown(content: str) -> str:
     return markdownify(content).strip()
 
 
+def _annotate_plain_text_tables(content: str) -> str:
+    """Detect plain-text scored/rated tables and wrap with [TABLE DATA] markers.
+
+    Catches patterns like:
+        WI - Work injuries
+        Points Description
+        25 There have been no work injuries in last 5 years.
+        15 There were some minor injuries...
+
+    These are NOT pipe tables or HTML tables, so _annotate_markdown_tables misses them.
+    """
+    if not content:
+        return content
+    lines = content.split('\n')
+    result = []
+    i = 0
+    while i < len(lines):
+        stripped = lines[i].strip()
+        # Check if current line starts with a number followed by a space and text
+        if re.match(r'^\d{1,3}\s+[A-Z]', stripped):
+            # Count consecutive number-description lines
+            j = i
+            while j < len(lines) and re.match(r'^\d{1,3}\s+\S', lines[j].strip()):
+                j += 1
+            if j - i >= 3:  # At least 3 consecutive rows = likely a table
+                # Look for a header line right before (e.g., "Points Description")
+                header = "Points | Description"
+                if i > 0 and lines[i - 1].strip() and not lines[i - 1].strip().startswith('['):
+                    header = lines[i - 1].strip()
+                    result.pop()  # Remove the header we already appended
+                result.append('[TABLE DATA]')
+                cols = header.split(None, 1) if ' ' in header else [header]
+                result.append('| ' + ' | '.join(cols) + ' |')
+                result.append('| ' + ' | '.join(['---'] * len(cols)) + ' |')
+                for k in range(i, j):
+                    parts = lines[k].strip().split(None, 1)
+                    if len(parts) == 2:
+                        result.append(f'| {parts[0]} | {parts[1]} |')
+                    else:
+                        result.append(f'| {parts[0]} | |')
+                result.append('[END TABLE]')
+                i = j
+                continue
+        result.append(lines[i])
+        i += 1
+    return '\n'.join(result)
+
+
+def _annotate_markdown_tables(content: str) -> str:
+    """Wrap markdown pipe tables with markers for LLM grounding."""
+    if not content or '|' not in content:
+        return content
+    lines = content.split('\n')
+    result = []
+    in_table = False
+    for line in lines:
+        stripped = line.strip()
+        is_table_line = bool(stripped) and stripped.startswith('|') and stripped.endswith('|')
+        if is_table_line and not in_table:
+            in_table = True
+            result.append('[TABLE DATA]')
+            result.append(line)
+        elif is_table_line and in_table:
+            result.append(line)
+        else:
+            if in_table:
+                in_table = False
+                result.append('[END TABLE]')
+            result.append(line)
+    if in_table:
+        result.append('[END TABLE]')
+    return '\n'.join(result)
+
+
 def chunks_format(reference):
     if not reference or not isinstance(reference, dict):
         return []
@@ -210,6 +284,8 @@ def kb_prompt(kbinfos, max_tokens, hash_id=False):
             cnt += draw_node(k, v)
         content = get_value(ck, "content", "content_with_weight")
         content = _html_table_to_markdown(content) if content else ""
+        content = _annotate_markdown_tables(content) if content else ""
+        content = _annotate_plain_text_tables(content) if content else ""
         cnt += "\n└── Content:\n"
         cnt += content
         knowledges.append(cnt)
@@ -418,7 +494,7 @@ def tool_schema(tools_description: list[dict], complete_task=False):
             "type": "function",
             "function": {
                 "name": COMPLETE_TASK,
-                "description": "Call this with your final answer. MUST ANSWER if retrieved content contains ANY relevant information—never claim 'no information' when content exists. Lead with the direct answer. Use exact terminology from sources. Citations at END: copy the EXACT text after '├── Title:' from chunks—never paraphrase. Format: Sources: <exact_title>, page <N>.",
+                "description": "Call this with your final answer. MUST ANSWER if retrieved content contains ANY relevant information. Lead with the direct answer, not raw data. Use exact values from sources but answer the question concisely — do NOT dump tables or document metadata. No citations — system handles them separately.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -481,8 +557,7 @@ async def next_step_async(chat_mdl, history: list, tools_description: list[dict]
     json_str = await chat_mdl.async_chat(
         template.render(task_analysis=task_desc, desc=desc, today=datetime.datetime.now().strftime("%Y-%m-%d")),
         hist[1:],
-        stop=["<|stop|>"],
-        response_format={"type": "json_object"},
+        {"stop": ["<|stop|>"], "response_format": {"type": "json_object"}},
     )
     tk_cnt = num_tokens_from_string(json_str)
     json_str = re.sub(r"^.*</think>", "", json_str, flags=re.DOTALL)

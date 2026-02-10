@@ -7,7 +7,7 @@
       "obj": {
         "component_name": "Agent",
         "params": {
-          "cite": true,
+          "cite": false,
           "context": null,
           "debug_inputs": {},
           "delay_after_error": 2.0,
@@ -42,10 +42,10 @@
           "llm_id": "gemma3:27b@Ollama",
           "maxTokensEnabled": false,
           "max_retries": 2,
-          "max_rounds": 3,
+          "max_rounds": 1,
           "max_tokens": 4096,
           "mcp": [],
-          "message_history_window_size": 12,
+          "message_history_window_size": 6,
           "meta": {
             "description": "This is an agent for a specific task.",
             "name": "agent",
@@ -84,7 +84,7 @@
             }
           ],
           "reasoning": null,
-          "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. Do NOT add any citations, references, source attributions, or bracketed numbers - the system adds sources automatically\n3. Synthesize information across chunks, don't just quote\n4. Only use information found in the retrieved chunks - if the answer is not in the chunks, say so\n5. When chunks contain tables, lists, or structured data, EXTRACT and REPRODUCE the actual data - never say you cannot provide it when it is in the chunks",
+          "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nRules:\n1. Lead with the direct answer — first sentence must answer the question\n2. Be concise — 1-3 sentences for factual questions\n3. Use bullet points when listing multiple items, sorted sequentially\n4. Use **bold** for key values, document numbers, and important terms\n5. No citations, references, or bracketed numbers — the system adds sources\n6. Use exact values from the data — no paraphrasing numbers or codes\n7. When data contains tables, extract the specific answer — don't dump the table",
           "temperature": 0.2,
           "temperatureEnabled": true,
           "tools": [
@@ -98,8 +98,8 @@
                 ],
                 "similarity_threshold": 0.2,
                 "keywords_similarity_weight": 0.3,
-                "top_n": 5,
-                "top_k": 1024
+                "top_n": 8,
+                "top_k": 128
               }
             }
           ],
@@ -253,7 +253,7 @@
           "llm_id": "phi4:latest@Ollama",
           "maxTokensEnabled": false,
           "max_retries": 1,
-          "max_rounds": 3,
+          "max_rounds": 1,
           "max_tokens": 512,
           "mcp": [],
           "message_history_window_size": 1,
@@ -316,7 +316,7 @@
       "obj": {
         "component_name": "Agent",
         "params": {
-          "cite": true,
+          "cite": false,
           "context": null,
           "debug_inputs": [],
           "delay_after_error": 2.0,
@@ -351,10 +351,10 @@
           "llm_id": "gemma3:27b@Ollama",
           "maxTokensEnabled": false,
           "max_retries": 2,
-          "max_rounds": 3,
+          "max_rounds": 1,
           "max_tokens": 2048,
           "mcp": [],
-          "message_history_window_size": 12,
+          "message_history_window_size": 6,
           "meta": {
             "description": "This is an agent for a specific task.",
             "name": "agent",
@@ -393,7 +393,7 @@
             }
           ],
           "reasoning": null,
-          "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. Do NOT add any citations, references, source attributions, or bracketed numbers - the system adds sources automatically\n3. Synthesize information across chunks, don't just quote\n4. Only use information found in the retrieved chunks - if the answer is not in the chunks, say so\n5. When chunks contain tables, lists, or structured data, EXTRACT and REPRODUCE the actual data - never say you cannot provide it when it is in the chunks",
+          "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nRules:\n1. Lead with the direct answer — first sentence must answer the question\n2. Be concise — 1-3 sentences for factual questions\n3. Use bullet points when listing multiple items, sorted sequentially\n4. Use **bold** for key values, document numbers, and important terms\n5. No citations, references, or bracketed numbers — the system adds sources\n6. Use exact values from the data — no paraphrasing numbers or codes\n7. When data contains tables, extract the specific answer — don't dump the table",
           "temperature": 0.2,
           "temperatureEnabled": true,
           "tools": [
@@ -407,8 +407,8 @@
                 ],
                 "similarity_threshold": 0.2,
                 "keywords_similarity_weight": 0.3,
-                "top_n": 5,
-                "top_k": 1024
+                "top_n": 8,
+                "top_k": 128
               }
             }
           ],
@@ -926,15 +926,15 @@
       {
         "data": {
           "form": {
-            "cite": true,
+            "cite": false,
             "frequencyPenaltyEnabled": false,
             "frequency_penalty": 0.7,
             "llm_id": "gemma3:27b@Ollama",
             "maxTokensEnabled": false,
             "max_retries": 2,
-            "max_rounds": 3,
+            "max_rounds": 1,
             "max_tokens": 2048,
-            "message_history_window_size": 12,
+            "message_history_window_size": 6,
             "outputs": {
               "content": {
                 "type": "string",
@@ -949,7 +949,7 @@
                 "role": "user"
               }
             ],
-            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. Do NOT add any citations, references, source attributions, or bracketed numbers - the system adds sources automatically\n3. Synthesize information across chunks, don't just quote\n4. Only use information found in the retrieved chunks - if the answer is not in the chunks, say so\n5. When chunks contain tables, lists, or structured data, EXTRACT and REPRODUCE the actual data - never say you cannot provide it when it is in the chunks",
+            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nRules:\n1. Lead with the direct answer — first sentence must answer the question\n2. Be concise — 1-3 sentences for factual questions\n3. Use bullet points when listing multiple items, sorted sequentially\n4. Use **bold** for key values, document numbers, and important terms\n5. No citations, references, or bracketed numbers — the system adds sources\n6. Use exact values from the data — no paraphrasing numbers or codes\n7. When data contains tables, extract the specific answer — don't dump the table",
             "temperature": 0.2,
             "temperatureEnabled": true,
             "tools": [
@@ -963,8 +963,8 @@
                   ],
                   "similarity_threshold": 0.2,
                   "keywords_similarity_weight": 0.3,
-                  "top_n": 5,
-                  "top_k": 1024
+                  "top_n": 8,
+                  "top_k": 128
                 }
               }
             ],
@@ -998,7 +998,7 @@
             "llm_id": "phi4:latest@Ollama",
             "maxTokensEnabled": false,
             "max_retries": 1,
-            "max_rounds": 3,
+            "max_rounds": 1,
             "max_tokens": 512,
             "message_history_window_size": 1,
             "outputs": {
@@ -1042,15 +1042,15 @@
       {
         "data": {
           "form": {
-            "cite": true,
+            "cite": false,
             "frequencyPenaltyEnabled": false,
             "frequency_penalty": 0.7,
             "llm_id": "gemma3:27b@Ollama",
             "maxTokensEnabled": false,
             "max_retries": 2,
-            "max_rounds": 3,
+            "max_rounds": 1,
             "max_tokens": 4096,
-            "message_history_window_size": 12,
+            "message_history_window_size": 6,
             "outputs": {
               "content": {
                 "type": "string",
@@ -1065,7 +1065,7 @@
                 "role": "user"
               }
             ],
-            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nIMPORTANT RULES:\n1. Be CONCISE - answer in 2-4 sentences unless the question requires more detail\n2. Do NOT add any citations, references, source attributions, or bracketed numbers - the system adds sources automatically\n3. Synthesize information across chunks, don't just quote\n4. Only use information found in the retrieved chunks - if the answer is not in the chunks, say so\n5. When chunks contain tables, lists, or structured data, EXTRACT and REPRODUCE the actual data - never say you cannot provide it when it is in the chunks",
+            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nRules:\n1. Lead with the direct answer — first sentence must answer the question\n2. Be concise — 1-3 sentences for factual questions\n3. Use bullet points when listing multiple items, sorted sequentially\n4. Use **bold** for key values, document numbers, and important terms\n5. No citations, references, or bracketed numbers — the system adds sources\n6. Use exact values from the data — no paraphrasing numbers or codes\n7. When data contains tables, extract the specific answer — don't dump the table",
             "temperature": 0.2,
             "temperatureEnabled": true,
             "tools": [
@@ -1079,8 +1079,8 @@
                   ],
                   "similarity_threshold": 0.2,
                   "keywords_similarity_weight": 0.3,
-                  "top_n": 5,
-                  "top_k": 1024
+                  "top_n": 8,
+                  "top_k": 128
                 }
               }
             ],

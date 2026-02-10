@@ -54,6 +54,14 @@ def strip_inline_citations(text: str) -> str:
     text = re.sub(r'\s*\[[A-Z][A-Za-z&\s\-\.\']{2,}(?:Manual|Policy|Standard|Guide|Procedure|Document|Report|Code|Plan|Handbook|Regulation|Act)\]', '', text)
     # Remove standalone citation lines like "[1] Author, Title, Year"
     text = re.sub(r'\n\s*\[\d+\][^\n]+', '', text)
+    # Remove internal chunk ID references like "document ID 489", "ID 327", "chunk 3"
+    text = re.sub(r',?\s*(?:according to |from |per |in |see )?(?:document |chunk |record )?ID\s*\d+', '', text, flags=re.IGNORECASE)
+    # Remove table annotation markers that leak into answers (all variants)
+    text = re.sub(r'\[/?(?:TABLE DATA|END TABLE|TABLE)[^\]]*\]\n?', '', text)
+    # Remove pipe-table rows (lines that start and end with |)
+    text = re.sub(r'^\|.+\|[  ]*$\n?', '', text, flags=re.MULTILINE)
+    # Remove separator rows (| --- | --- |)
+    text = re.sub(r'^\|[\s\-:|]+\|[  ]*$\n?', '', text, flags=re.MULTILINE)
     # Clean up extra whitespace
     text = re.sub(r'\n{3,}', '\n\n', text)
     return text.strip()
@@ -344,33 +352,58 @@ class Agent(LLM, ToolBase):
             if schema_prompt:
                 need2cite = False
             cited = False
-            if hist and hist[0]["role"] == "system":
-                if schema_prompt:
-                    hist[0]["content"] += "\n" + schema_prompt
-                if need2cite and len(hist) < 25:
-                    hist[0]["content"] += citation_prompt()
-                    cited = True
+
+            # Build a CLEAN history for answer generation.
+            # The ReAct hist contains raw JSON tool calls as assistant messages
+            # (e.g. [{"name":"search_kb_0",...}]) which confuse the model into
+            # asking for context instead of answering.  We keep ONLY:
+            #   1. A minimal system prompt (no rules to acknowledge)
+            #   2. Observation messages (contain retrieved chunks)
+            #   3. A clear answering directive with the user's question
+            sys_content = (
+                "You are an expert assistant. Answer based ONLY on the provided data.\n"
+                "Rules:\n"
+                "- Lead with the direct answer in the first sentence\n"
+                "- Be concise: 1-3 sentences for simple questions, bullet list for multiple items\n"
+                "- Use exact values, numbers, and codes from the data\n"
+                "- No citations, references, or source attributions\n"
+                "- No preamble like 'Based on...' or 'According to...'\n"
+                "- Format lists with bullet points or numbered items in sequential order"
+            )
+            if schema_prompt:
+                sys_content += "\n" + schema_prompt
+            if need2cite and len(hist) < 25:
+                sys_content += citation_prompt()
+                cited = True
+
+            # Collect observation data from hist (user messages with "Observation:")
+            observations = [
+                m for m in hist
+                if m.get("role") == "user" and "Observation:" in m.get("content", "")
+            ]
+
+            # Build the clean _hist: system + observations + answering directive
+            _hist = [{"role": "system", "content": sys_content}]
+            for obs in observations[-3:]:  # keep last 3 observations max
+                _hist.append(obs)
+            # Add a clear answering directive with the user's question
+            # Use the raw last user message when available — full_question()
+            # can contaminate the query in multi-turn sessions by mixing in
+            # context from prior turns (e.g., "procedures" leaking into a
+            # "points" question).
+            raw_question = history[-1]["content"] if history else user_request
+            question_text = raw_question if raw_question == user_request else f"{user_request}\n\nOriginal question: {raw_question}"
+            _hist.append({"role": "user", "content": f"Based on the data above, answer this question: {question_text}"})
+            logging.info(f"[COMPLETE] Built clean hist: {len(_hist)} messages, {len(observations)} observations, question='{user_request[:80]}'")
+
             yield "", token_count
 
-            _hist = hist
-            if len(hist) > 12:
-                # Preserve observation messages (contain retrieved chunks) to
-                # prevent hallucination when generating fallback answers.
-                head = [hist[0], hist[1]]
-                rest = hist[2:]
-                observations = [m for m in rest if m.get("role") == "user"
-                                and "Observation:" in m.get("content", "")]
-                others = [m for m in rest if m not in observations]
-                budget = 10
-                kept_obs = observations[-budget:]
-                remaining = budget - len(kept_obs)
-                kept_others = others[-remaining:] if remaining > 0 else []
-                tail = kept_obs + kept_others
-                tail.sort(key=lambda m: rest.index(m))
-                _hist = head + tail
             entire_txt = ""
             async for delta_ans in self._generate_streamly(_hist):
                 entire_txt += delta_ans
+
+            logging.info(f"[COMPLETE] answer ({len(entire_txt)} chars): {entire_txt[:200]}")
+
             # Strip citations and yield clean text
             if not need2cite or cited:
                 yield strip_inline_citations(entire_txt), 0
@@ -403,8 +436,8 @@ class Agent(LLM, ToolBase):
                 chunk_count += result_str.count("\nID:")
 
             lines.append("")
-            lines.append(f"=== END OF RETRIEVED DATA ({chunk_count} chunks total) ===")
-            lines.append("The above is ALL available information. Do NOT add, extrapolate, or infer additional items beyond what is explicitly shown.")
+            lines.append(f"=== END OF DATA ({chunk_count} chunks) ===")
+            lines.append("Answer from this data ONLY. Use exact values. Do NOT add items beyond what's shown. If insufficient, search with different keywords.")
 
             return "\n".join(lines)
 
@@ -421,19 +454,24 @@ class Agent(LLM, ToolBase):
             if self.check_if_canceled("Agent streaming"):
                 return
             response, tk = await next_step_async(self.chat_mdl, hist, tool_metas, task_desc, user_defined_prompt)
-            # self.callback("next_step", {}, str(response)[:256]+"...")
             token_count += tk or 0
+            logging.info(f"[REACT round {_}] response ({len(response)} chars): {response[:200]}")
             hist.append({"role": "assistant", "content": response})
             try:
                 functions = json_repair.loads(re.sub(r"```.*", "", response))
                 if isinstance(functions, dict):
                     # Normalize a single dict response into a list
                     # Handle alternate keys: tool_code/tool_name -> name, reasoning -> answer
-                    name = functions.get("name") or functions.get("tool_code") or functions.get("tool_name", "")
+                    name = functions.get("name") or functions.get("tool_code") or functions.get("tool_name") or functions.get("tool_to_call") or functions.get("tool", "")
                     args = functions.get("arguments", {})
                     if not args and name == COMPLETE_TASK:
                         # LLM may put the answer in 'reasoning' or other fields
-                        answer = functions.get("reasoning") or functions.get("answer") or functions.get("result", "")
+                        answer = functions.get("reasoning") or functions.get("answer") or functions.get("response") or functions.get("result", "")
+                        args = {"answer": answer} if answer else {}
+                    if not name and ("answer" in functions or "response" in functions or "reasoning" in functions or "result" in functions):
+                        # Model returned bare {"answer": "..."} without tool name wrapper — treat as complete_task
+                        name = COMPLETE_TASK
+                        answer = functions.get("answer") or functions.get("response") or functions.get("reasoning") or functions.get("result", "")
                         args = {"answer": answer} if answer else {}
                     if name:
                         functions = [{"name": name, "arguments": args}]
@@ -451,31 +489,49 @@ class Agent(LLM, ToolBase):
                         f["arguments"] = f.pop("params", f.pop("parameters", {}))
 
                 tool_tasks = []
+                has_searched = any(
+                    m.get("role") == "user" and "Observation:" in m.get("content", "")
+                    for m in hist
+                )
                 for func in functions:
                     name = func["name"]
                     args = func["arguments"]
                     if name == COMPLETE_TASK:
+                        # Search-first guard: reject complete_task if no search
+                        # was done this turn and tools are available. Forces the
+                        # model to retrieve fresh data instead of answering from
+                        # stale conversation history.
+                        if not has_searched and tool_metas:
+                            logging.info("[GUARD] complete_task rejected: no search this turn — forcing retrieval")
+                            append_user_content(hist, "You MUST search the knowledge base before answering. Call search_kb_0 with relevant keywords first.")
+                            break  # back to next round of the ReAct loop
                         answer = args.get("answer", "")
                         if answer:
                             # Strip any inline citations the LLM added despite instructions
                             answer = strip_inline_citations(answer)
-                            need2cite = self._param.cite and self._canvas.get_reference()["chunks"] and self._id.find("-->") < 0
-                            if need2cite:
-                                async for delta_ans in self._gen_citations_async(answer):
-                                    yield delta_ans, 0
-                            else:
-                                yield answer, 0
-                            # Append human-readable sources section with document names
+                            yield answer, 0
+                            # Append sources from current retrieval or conversation history
                             retrievals = self._canvas.get_reference()
                             chunk_count = len(retrievals.get("chunks", {}))
-                            logging.info(f"[SOURCES] complete_task: chunks={chunk_count}")
+                            logging.info(f"[SOURCES] complete_task: chunks={chunk_count} has_searched={has_searched}")
                             if retrievals.get("chunks"):
                                 sources_text = format_sources_section(list(retrievals["chunks"].values()))
                                 if sources_text:
                                     yield sources_text, 0
+                            elif not has_searched:
+                                # No fresh retrieval — carry forward sources from
+                                # conversation history so follow-up answers still
+                                # show document attribution.
+                                for m in reversed(history):
+                                    content = m.get("content", "")
+                                    if "\nSources: " in content or content.startswith("Sources: "):
+                                        match = re.search(r'(?:\n|^)(Sources: .+?)$', content, re.MULTILINE)
+                                        if match:
+                                            logging.info(f"[SOURCES] Carried forward from history: {match.group(1)}")
+                                            yield "\n\n" + match.group(1), 0
+                                            break
                             return
-                        # Fallback: no answer text, re-generate
-                        append_user_content(hist, f"Respond with a formal answer. FORGET(DO NOT mention) about `{COMPLETE_TASK}`. The language for the response MUST be as the same as the first user request.\n")
+                        # Fallback: no answer text, re-generate via complete()
                         async for txt, tkcnt in complete():
                             yield txt, tkcnt
                         # Append sources after fallback generation
@@ -509,10 +565,9 @@ class Agent(LLM, ToolBase):
                 append_user_content(hist, str(e))
 
         logging.warning( f"Exceed max rounds: {self._param.max_rounds}")
-        final_instruction = f"""
-{user_request}
-Give your final answer now based ONLY on the retrieved chunks above. Be concise (1-4 sentences for simple questions). Include ONLY information that appears in the retrieved data. Do NOT extend lists, invent document numbers, or add items not present in the chunks. If information is incomplete, say so.
-"""
+        final_instruction = f"""ANSWER THIS QUESTION NOW: {user_request}
+
+Look at the Observation data above. Extract the answer from the retrieved chunks and respond concisely (1-3 sentences). Use exact values from TABLE DATA sections. Do NOT respond with rules, instructions, or acknowledgements — just answer the question directly."""
         if self.check_if_canceled("Agent final instruction"):
             return
         append_user_content(hist, final_instruction)

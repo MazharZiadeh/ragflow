@@ -1693,8 +1693,12 @@ class LiteLLMBase(ABC):
         # flows through get_config() → optional_params → data["options"]["num_ctx"].
         if self.provider == SupportedLiteLLMProvider.Ollama:
             max_len = getattr(self, "_max_length", None)
-            if max_len:
-                litellm.OllamaChatConfig.num_ctx = int(max_len)
+            if not max_len:
+                # Fallback: _max_length should be propagated from LLM4Tenant.
+                # If missing, use env var or default 32768 to prevent truncation.
+                max_len = int(os.environ.get("OLLAMA_NUM_CTX", 32768))
+            litellm.OllamaChatConfig.num_ctx = int(max_len)
+            logging.debug(f"[OLLAMA] num_ctx={int(max_len)} for {self.model_name}")
 
         # Ollama deployments commonly sit behind a reverse proxy that enforces
         # Bearer auth. Ensure the Authorization header is set when an API key

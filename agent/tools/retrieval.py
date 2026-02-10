@@ -32,6 +32,7 @@ from api.db.joint_services import memory_message_service
 from common import settings
 from common.connection_utils import timeout
 from rag.app.tag import label_question
+from rag.nlp.search import index_name
 from rag.prompts.generator import cross_languages, kb_prompt, memory_prompt
 
 
@@ -59,7 +60,7 @@ class RetrievalParam(ToolParamBase):
         self.similarity_threshold = 0.1  # Low threshold to prevent over-filtering
         self.keywords_similarity_weight = 0.3  # 30% keywords, 70% vector (semantic-heavy for factual Q&A)
         self.top_n = 10  # More context for the LLM
-        self.top_k = 1024
+        self.top_k = 128
         self.kb_ids = []
         self.memory_ids = []
         self.kb_vars = []
@@ -176,10 +177,12 @@ class Retrieval(ToolBase, ABC):
 
         if kbs:
             query = re.sub(r"^user[:：\s]*", "", query, flags=re.IGNORECASE)
+            logging.info(f"[SEARCH_QUERY] '{query[:120]}' (top_n={self._param.top_n})")
+            tenant_ids = [kb.tenant_id for kb in kbs]
             kbinfos = settings.retriever.retrieval(
                 query,
                 embd_mdl,
-                [kb.tenant_id for kb in kbs],
+                tenant_ids,
                 filtered_kb_ids,
                 1,
                 self._param.top_n,
@@ -192,6 +195,95 @@ class Retrieval(ToolBase, ABC):
             )
             if self.check_if_canceled("Retrieval processing"):
                 return
+
+            # Log per-chunk scores from primary retrieval (before dual-pass)
+            for ci, ck in enumerate(kbinfos["chunks"]):
+                logging.info(
+                    f"[PRIMARY {ci}] sim={ck.get('similarity',0):.4f} "
+                    f"vec={ck.get('vector_similarity',0):.4f} "
+                    f"term={ck.get('term_similarity',0):.4f} "
+                    f"doc={ck.get('docnm_kwd','')} "
+                    f"content={str(ck.get('content_with_weight',''))[:80]}"
+                )
+
+            # Dual-pass: supplementary BM25-only search to catch chunks that
+            # are keyword-relevant but have low vector similarity.  ES fusion
+            # is 5%/95% keyword/vector, so keyword-heavy chunks get buried.
+            # Uses search() directly (not retrieval()) to avoid rerank crash
+            # with empty vectors when embd_mdl=None.
+            try:
+                kw_req = {
+                    "kb_ids": filtered_kb_ids,
+                    "doc_ids": doc_ids,
+                    "page": 1,
+                    "size": self._param.top_n,
+                    "question": query,
+                    "vector": True,
+                    "topk": 128,
+                    "similarity": 0.0,
+                    "available_int": 1,
+                }
+                sres = settings.retriever.search(
+                    kw_req,
+                    [index_name(tid) for tid in tenant_ids],
+                    filtered_kb_ids,
+                    emb_mdl=None,
+                    highlight=False,
+                    rank_feature=label_question(query, kbs),
+                )
+                # Convert SearchResult to chunk dicts
+                kw_chunks = []
+                for chunk_id in sres.ids:
+                    field = sres.field[chunk_id]
+                    kw_chunks.append({
+                        "chunk_id": chunk_id,
+                        "content_with_weight": field.get("content_with_weight", ""),
+                        "content_ltks": field.get("content_ltks", ""),
+                        "doc_id": field.get("doc_id", ""),
+                        "docnm_kwd": field.get("docnm_kwd", ""),
+                        "kb_id": field.get("kb_id", ""),
+                        "important_kwd": field.get("important_kwd", []),
+                        "image_id": field.get("img_id", ""),
+                        "similarity": float(field.get("_score", 0.0)),
+                        "vector_similarity": 0.0,
+                        "term_similarity": float(field.get("_score", 0.0)),
+                        "positions": field.get("position_int", []),
+                    })
+                # Merge unique keyword chunks into primary results
+                primary_ids = {ck.get("chunk_id") or ck.get("id", "") for ck in kbinfos["chunks"]}
+                kw_unique = [ck for ck in kw_chunks
+                             if ck["chunk_id"] not in primary_ids]
+                max_supplement = max(3, self._param.top_n // 2)
+                if kw_unique:
+                    # Replace lowest-scoring primary chunks with keyword hits
+                    kw_added = kw_unique[:max_supplement]
+                    # Normalize BM25 scores: raw ES _score (e.g. 5.4) is not
+                    # on the same [0,1] scale as primary cosine similarity.
+                    # Set BM25 chunks slightly below the min primary score so
+                    # they supplement but don't dominate sorting/filtering.
+                    min_primary_sim = min((c.get("similarity", 0) for c in kbinfos["chunks"]), default=0.1)
+                    bm25_sim = max(min_primary_sim * 0.95, 0.05)
+                    for ck in kw_added:
+                        ck["_raw_score"] = ck["similarity"]  # preserve raw ES score for logging
+                        ck["similarity"] = bm25_sim
+                        ck["term_similarity"] = bm25_sim
+                        ck["vector_similarity"] = 0.0
+                    # Sort primary by similarity ascending so we drop the worst
+                    kbinfos["chunks"].sort(key=lambda c: c.get("similarity", 0))
+                    slots = min(len(kw_added), len(kbinfos["chunks"]))
+                    kbinfos["chunks"] = kbinfos["chunks"][slots:] + kw_added
+                    # Re-sort descending for presentation
+                    kbinfos["chunks"].sort(key=lambda c: c.get("similarity", 0), reverse=True)
+                    logging.info(f"[DUAL-PASS] Added {len(kw_added)} keyword chunks (norm_sim={bm25_sim:.4f}), dropped {slots} lowest-scored primary chunks")
+                    for ki, kc in enumerate(kw_added):
+                        logging.info(
+                            f"[BM25 {ki}] raw_es_score={kc.get('_raw_score', '?')} "
+                            f"norm_sim={kc.get('similarity',0):.4f} "
+                            f"doc={kc.get('docnm_kwd','')} "
+                            f"content={str(kc.get('content_with_weight',''))[:80]}"
+                        )
+            except Exception as e:
+                logging.warning(f"[DUAL-PASS] Keyword search failed: {e}")
 
             if self._param.toc_enhance:
                 chat_mdl = LLMBundle(self._canvas._tenant_id, LLMType.CHAT)
