@@ -273,7 +273,7 @@ class Retrieval(ToolBase, ABC):
                     kbinfos["chunks"] = kbinfos["chunks"][slots:] + kw_added
                     # Re-sort descending for presentation
                     kbinfos["chunks"].sort(key=lambda c: c.get("similarity", 0), reverse=True)
-                    logging.info(f"[DUAL-PASS] Added {len(kw_added)} keyword chunks (norm_sim={bm25_sim:.4f}), dropped {slots} lowest-scored primary chunks")
+                    logging.info(f"[DUAL-PASS] Added {len(kw_added)} keyword chunks (bm25_ceiling={bm25_ceiling:.4f}), dropped {slots} lowest-scored primary chunks")
                     for ki, kc in enumerate(kw_added):
                         logging.debug(
                             f"[BM25 {ki}] raw_es_score={kc.get('_raw_score', '?')} "
@@ -282,7 +282,8 @@ class Retrieval(ToolBase, ABC):
                             f"content={str(kc.get('content_with_weight',''))[:80]}"
                         )
             except Exception as e:
-                logging.warning(f"[DUAL-PASS] Keyword search failed: {e}")
+                import traceback
+                logging.warning(f"[DUAL-PASS] Keyword search failed: {type(e).__name__}: {e}\n{traceback.format_exc()}")
 
             if self._param.toc_enhance:
                 chat_mdl = LLMBundle(self._canvas._tenant_id, LLMType.CHAT)

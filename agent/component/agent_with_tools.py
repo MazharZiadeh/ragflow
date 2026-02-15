@@ -497,10 +497,11 @@ class Agent(LLM, ToolBase):
                     m.get("role") == "user" and "Observation:" in m.get("content", "")
                     for m in hist
                 )
-                # Check if conversation history has recent observations (for follow-ups)
-                has_recent_obs = any(
-                    m.get("role") == "user" and "Observation:" in m.get("content", "")
-                    for m in history[-4:]  # within last 2 user-assistant turn pairs
+                # Check if conversation history has recent context (for follow-ups)
+                # Prior assistant answers contain relevant data the model can reuse
+                has_recent_context = any(
+                    m.get("role") == "assistant" and len(m.get("content", "")) > 20
+                    for m in history[-6:]
                 ) if len(history) > 3 else False
                 for func in functions:
                     name = func["name"]
@@ -512,7 +513,7 @@ class Agent(LLM, ToolBase):
                         # stale conversation history.
                         # Exception: allow for follow-ups where recent observations
                         # exist in conversation history (within last 2 turns).
-                        if not has_searched and tool_metas and not has_recent_obs:
+                        if not has_searched and tool_metas and not has_recent_context:
                             logging.info("[GUARD] complete_task rejected: no search this turn — forcing retrieval")
                             append_user_content(hist, "You MUST search the knowledge base before answering. Call search_kb_0 with relevant keywords first.")
                             break  # back to next round of the ReAct loop
