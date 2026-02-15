@@ -309,23 +309,13 @@ class Agent(LLM, ToolBase):
         tool_metas = self.tool_meta
         hist = deepcopy(history)
         last_calling = ""
-        if len(hist) > 3:
-            st = timer()
-            user_request = await full_question(messages=history, chat_mdl=self.chat_mdl)
-            self.callback("Multi-turn conversation optimization", {}, user_request, elapsed_time=timer()-st)
-        else:
-            user_request = history[-1]["content"]
+        user_request = history[-1]["content"]
 
         def build_task_desc(prompt: str, user_request: str, user_defined_prompt: dict | None = None) -> str:
-            """Build a minimal task_desc by concatenating prompt, query, and tool schemas."""
+            """Build a minimal task_desc with just the user request (sys_prompt is already in system message)."""
             user_defined_prompt = user_defined_prompt or {}
 
-            task_desc = (
-                "### Agent Prompt\n"
-                f"{prompt}\n\n"
-                "### User Request\n"
-                f"{user_request}\n\n"
-            )
+            task_desc = f"### User Request\n{user_request}\n"
 
             if user_defined_prompt:
                 udp_json = json.dumps(user_defined_prompt, ensure_ascii=False, indent=2)
@@ -364,11 +354,11 @@ class Agent(LLM, ToolBase):
                 "You are an expert assistant. Answer based ONLY on the provided data.\n"
                 "Rules:\n"
                 "- Lead with the direct answer in the first sentence\n"
-                "- Be concise: 1-3 sentences for simple questions, bullet list for multiple items\n"
+                "- Be concise: 1-3 sentences for simple questions; bullet/numbered lists for multiple items\n"
                 "- Use exact values, numbers, and codes from the data\n"
                 "- No citations, references, or source attributions\n"
                 "- No preamble like 'Based on...' or 'According to...'\n"
-                "- When listing numbered items (e.g., PR-01, Step 1), ALWAYS sort by number ascending — never output in chunk order"
+                "- When listing numbered items, sort by number ascending but ONLY include items explicitly present in the data — do NOT infer missing numbers"
             )
             if schema_prompt:
                 sys_content += "\n" + schema_prompt
@@ -382,9 +372,19 @@ class Agent(LLM, ToolBase):
                 if m.get("role") == "user" and "Observation:" in m.get("content", "")
             ]
 
-            # Build the clean _hist: system + observations + answering directive
+            # Build the clean _hist: system + observations (token-budgeted)
             _hist = [{"role": "system", "content": sys_content}]
-            for obs in observations[-3:]:  # keep last 3 observations max
+            # Use up to 60% of model context for observations, keeping room for answer
+            obs_token_budget = int(self.chat_mdl.max_length * 0.6)
+            obs_tokens_used = 0
+            selected_obs = []
+            for obs in reversed(observations):  # most recent first
+                obs_len = len(obs.get("content", "")) // 3  # rough token estimate
+                if obs_tokens_used + obs_len > obs_token_budget and selected_obs:
+                    break
+                selected_obs.append(obs)
+                obs_tokens_used += obs_len
+            for obs in reversed(selected_obs):  # restore chronological order
                 _hist.append(obs)
             # Add a clear answering directive with the user's question
             # Use the raw last user message when available — full_question()
@@ -493,6 +493,11 @@ class Agent(LLM, ToolBase):
                     m.get("role") == "user" and "Observation:" in m.get("content", "")
                     for m in hist
                 )
+                # Check if conversation history has recent observations (for follow-ups)
+                has_recent_obs = any(
+                    m.get("role") == "user" and "Observation:" in m.get("content", "")
+                    for m in history[-4:]  # within last 2 user-assistant turn pairs
+                ) if len(history) > 3 else False
                 for func in functions:
                     name = func["name"]
                     args = func["arguments"]
@@ -501,7 +506,9 @@ class Agent(LLM, ToolBase):
                         # was done this turn and tools are available. Forces the
                         # model to retrieve fresh data instead of answering from
                         # stale conversation history.
-                        if not has_searched and tool_metas:
+                        # Exception: allow for follow-ups where recent observations
+                        # exist in conversation history (within last 2 turns).
+                        if not has_searched and tool_metas and not has_recent_obs:
                             logging.info("[GUARD] complete_task rejected: no search this turn — forcing retrieval")
                             append_user_content(hist, "You MUST search the knowledge base before answering. Call search_kb_0 with relevant keywords first.")
                             break  # back to next round of the ReAct loop

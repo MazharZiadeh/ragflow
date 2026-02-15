@@ -179,26 +179,44 @@ class Retrieval(ToolBase, ABC):
             query = re.sub(r"^user[:：\s]*", "", query, flags=re.IGNORECASE)
             logging.info(f"[SEARCH_QUERY] '{query[:120]}' (top_n={self._param.top_n})")
             tenant_ids = [kb.tenant_id for kb in kbs]
-            kbinfos = settings.retriever.retrieval(
-                query,
-                embd_mdl,
-                tenant_ids,
-                filtered_kb_ids,
-                1,
-                self._param.top_n,
-                self._param.similarity_threshold,
-                1 - self._param.keywords_similarity_weight,
-                doc_ids=doc_ids,
-                aggs=False,
-                rerank_mdl=rerank_mdl,
-                rank_feature=label_question(query, kbs),
+            rank_feat = label_question(query, kbs)
+
+            # Run primary hybrid search and supplemental BM25 search concurrently
+            loop = asyncio.get_event_loop()
+
+            def _primary_search():
+                return settings.retriever.retrieval(
+                    query, embd_mdl, tenant_ids, filtered_kb_ids,
+                    1, self._param.top_n, self._param.similarity_threshold,
+                    1 - self._param.keywords_similarity_weight,
+                    doc_ids=doc_ids, aggs=False, rerank_mdl=rerank_mdl,
+                    rank_feature=rank_feat,
+                )
+
+            def _bm25_search():
+                kw_req = {
+                    "kb_ids": filtered_kb_ids, "doc_ids": doc_ids,
+                    "page": 1, "size": self._param.top_n, "question": query,
+                    "vector": True, "topk": 128, "similarity": 0.0,
+                    "available_int": 1,
+                }
+                return settings.retriever.search(
+                    kw_req, [index_name(tid) for tid in tenant_ids],
+                    filtered_kb_ids, emb_mdl=None, highlight=False,
+                    rank_feature=rank_feat,
+                )
+
+            primary_task = loop.run_in_executor(None, _primary_search)
+            bm25_task = loop.run_in_executor(None, _bm25_search)
+            kbinfos, sres_or_err = await asyncio.gather(
+                primary_task, bm25_task, return_exceptions=True
             )
             if self.check_if_canceled("Retrieval processing"):
                 return
 
             # Log per-chunk scores from primary retrieval (before dual-pass)
             for ci, ck in enumerate(kbinfos["chunks"]):
-                logging.info(
+                logging.debug(
                     f"[PRIMARY {ci}] sim={ck.get('similarity',0):.4f} "
                     f"vec={ck.get('vector_similarity',0):.4f} "
                     f"term={ck.get('term_similarity',0):.4f} "
@@ -206,31 +224,11 @@ class Retrieval(ToolBase, ABC):
                     f"content={str(ck.get('content_with_weight',''))[:80]}"
                 )
 
-            # Dual-pass: supplementary BM25-only search to catch chunks that
-            # are keyword-relevant but have low vector similarity.  ES fusion
-            # is 5%/95% keyword/vector, so keyword-heavy chunks get buried.
-            # Uses search() directly (not retrieval()) to avoid rerank crash
-            # with empty vectors when embd_mdl=None.
+            # Dual-pass: merge BM25 results if available
             try:
-                kw_req = {
-                    "kb_ids": filtered_kb_ids,
-                    "doc_ids": doc_ids,
-                    "page": 1,
-                    "size": self._param.top_n,
-                    "question": query,
-                    "vector": True,
-                    "topk": 128,
-                    "similarity": 0.0,
-                    "available_int": 1,
-                }
-                sres = settings.retriever.search(
-                    kw_req,
-                    [index_name(tid) for tid in tenant_ids],
-                    filtered_kb_ids,
-                    emb_mdl=None,
-                    highlight=False,
-                    rank_feature=label_question(query, kbs),
-                )
+                if isinstance(sres_or_err, Exception):
+                    raise sres_or_err
+                sres = sres_or_err
                 # Convert SearchResult to chunk dicts
                 kw_chunks = []
                 for chunk_id in sres.ids:
@@ -259,14 +257,15 @@ class Retrieval(ToolBase, ABC):
                     kw_added = kw_unique[:max_supplement]
                     # Normalize BM25 scores: raw ES _score (e.g. 5.4) is not
                     # on the same [0,1] scale as primary cosine similarity.
-                    # Set BM25 chunks slightly below the min primary score so
-                    # they supplement but don't dominate sorting/filtering.
+                    # Linear mapping preserves relative BM25 ordering while
+                    # keeping scores below the min primary score.
                     min_primary_sim = min((c.get("similarity", 0) for c in kbinfos["chunks"]), default=0.1)
-                    bm25_sim = max(min_primary_sim * 0.95, 0.05)
+                    bm25_ceiling = max(min_primary_sim * 0.95, 0.05)
+                    max_raw_bm25 = max((ck.get("similarity", 0) for ck in kw_added), default=1.0) or 1.0
                     for ck in kw_added:
                         ck["_raw_score"] = ck["similarity"]  # preserve raw ES score for logging
-                        ck["similarity"] = bm25_sim
-                        ck["term_similarity"] = bm25_sim
+                        ck["similarity"] = bm25_ceiling * (ck["similarity"] / max_raw_bm25)
+                        ck["term_similarity"] = ck["similarity"]
                         ck["vector_similarity"] = 0.0
                     # Sort primary by similarity ascending so we drop the worst
                     kbinfos["chunks"].sort(key=lambda c: c.get("similarity", 0))
@@ -276,7 +275,7 @@ class Retrieval(ToolBase, ABC):
                     kbinfos["chunks"].sort(key=lambda c: c.get("similarity", 0), reverse=True)
                     logging.info(f"[DUAL-PASS] Added {len(kw_added)} keyword chunks (norm_sim={bm25_sim:.4f}), dropped {slots} lowest-scored primary chunks")
                     for ki, kc in enumerate(kw_added):
-                        logging.info(
+                        logging.debug(
                             f"[BM25 {ki}] raw_es_score={kc.get('_raw_score', '?')} "
                             f"norm_sim={kc.get('similarity',0):.4f} "
                             f"doc={kc.get('docnm_kwd','')} "

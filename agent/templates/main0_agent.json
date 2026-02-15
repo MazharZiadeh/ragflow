@@ -158,7 +158,7 @@
           "max_rounds": 1,
           "max_tokens": 512,
           "mcp": [],
-          "message_history_window_size": 12,
+          "message_history_window_size": 4,
           "meta": {
             "description": "This is an agent for a specific task.",
             "name": "agent",
@@ -884,7 +884,7 @@
             "max_retries": 1,
             "max_rounds": 1,
             "max_tokens": 512,
-            "message_history_window_size": 12,
+            "message_history_window_size": 4,
             "outputs": {
               "content": {
                 "type": "string",
