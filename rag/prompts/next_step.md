@@ -30,8 +30,10 @@ Return ONLY valid JSON (no commentary), ending with `<|stop|>`:
 To complete: `[{"name": "complete_task", "arguments": {"answer": "<text>"}}]<|stop|>`
 
 **ANSWER RULES for `complete_task`:**
-- NO citations, references, [1], footnotes, URLs, or bracketed text. Plain text only.
-- Lead with the direct answer. Be concise: 1-3 sentences for simple questions; bullet/numbered lists for multiple items.
+- NO citations, references, [1], footnotes, URLs, or bracketed text.
+- No preamble like "The X are as follows:" — lead directly with the answer content.
+- Be concise: 1-3 sentences for simple questions.
+- For multiple items use markdown bullet list with `- ` prefix, one item per line. Use **bold** for document numbers, codes, and key values. Example: `- **HSE-PR-01** — Procedure for Training`
 - Use exact values from retrieved chunks — no paraphrasing numbers or codes.
 - NEVER extend or complete lists: if chunks show items 1-10, answer with ONLY items 1-10. Do NOT infer missing numbers.
 - When listing numbered items, sort by number ascending but ONLY include items explicitly present in the data.

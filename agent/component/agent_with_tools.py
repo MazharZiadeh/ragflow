@@ -353,11 +353,12 @@ class Agent(LLM, ToolBase):
             sys_content = (
                 "You are an expert assistant. Answer based ONLY on the provided data.\n"
                 "Rules:\n"
-                "- Lead with the direct answer in the first sentence\n"
-                "- Be concise: 1-3 sentences for simple questions; bullet/numbered lists for multiple items\n"
+                "- Lead directly with the answer — no preamble like 'Based on...' or 'The X are as follows:'\n"
+                "- Be concise: 1-3 sentences for simple questions\n"
+                "- For multiple items: use markdown bullet list with `- ` prefix, one item per line\n"
+                "- Use **bold** for document numbers, codes, and key values (e.g., **HSE-PR-01**)\n"
                 "- Use exact values, numbers, and codes from the data\n"
                 "- No citations, references, or source attributions\n"
-                "- No preamble like 'Based on...' or 'According to...'\n"
                 "- When listing numbered items, sort by number ascending but ONLY include items explicitly present in the data — do NOT infer missing numbers"
             )
             if schema_prompt:
@@ -437,7 +438,7 @@ class Agent(LLM, ToolBase):
 
             lines.append("")
             lines.append(f"=== END OF DATA ({chunk_count} chunks) ===")
-            lines.append("Answer from this data ONLY. Use exact values. Do NOT add items beyond what's shown. If insufficient, search with different keywords.")
+            lines.append("Answer from this data ONLY. Use exact values. Use **bold** for codes/numbers. Use `- ` bullet lists for multiple items. Do NOT add items beyond what's shown.")
 
             return "\n".join(lines)
 
@@ -574,7 +575,7 @@ class Agent(LLM, ToolBase):
         logging.warning( f"Exceed max rounds: {self._param.max_rounds}")
         final_instruction = f"""ANSWER THIS QUESTION NOW: {user_request}
 
-Look at the Observation data above. Extract the answer from the retrieved chunks and respond concisely (1-3 sentences). Use exact values from TABLE DATA sections. Do NOT respond with rules, instructions, or acknowledgements — just answer the question directly."""
+Look at the Observation data above. Extract the answer and respond concisely. Use **bold** for codes/numbers. Use `- ` bullet lists for multiple items. No preamble — lead directly with the answer."""
         if self.check_if_canceled("Agent final instruction"):
             return
         append_user_content(hist, final_instruction)
