@@ -1696,7 +1696,7 @@ class LiteLLMBase(ABC):
             if not max_len:
                 # Fallback: _max_length should be propagated from LLM4Tenant.
                 # If missing, use env var or default 32768 to prevent truncation.
-                max_len = int(os.environ.get("OLLAMA_NUM_CTX", 32768))
+                max_len = int(os.environ.get("OLLAMA_NUM_CTX", 16384))
             litellm.OllamaChatConfig.num_ctx = int(max_len)
             logging.debug(f"[OLLAMA] num_ctx={int(max_len)} for {self.model_name}")
 

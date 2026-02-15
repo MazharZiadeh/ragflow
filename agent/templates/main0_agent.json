@@ -40,10 +40,10 @@
             }
           },
           "llm_id": "gemma3:27b@Ollama",
-          "maxTokensEnabled": false,
+          "maxTokensEnabled": true,
           "max_retries": 2,
           "max_rounds": 1,
-          "max_tokens": 4096,
+          "max_tokens": 1024,
           "mcp": [],
           "message_history_window_size": 6,
           "meta": {
@@ -153,7 +153,7 @@
             }
           },
           "llm_id": "llama3.2:latest@Ollama",
-          "maxTokensEnabled": false,
+          "maxTokensEnabled": true,
           "max_retries": 1,
           "max_rounds": 1,
           "max_tokens": 512,
@@ -251,7 +251,7 @@
             }
           },
           "llm_id": "phi4:latest@Ollama",
-          "maxTokensEnabled": false,
+          "maxTokensEnabled": true,
           "max_retries": 1,
           "max_rounds": 1,
           "max_tokens": 512,
@@ -349,10 +349,10 @@
             }
           },
           "llm_id": "gemma3:27b@Ollama",
-          "maxTokensEnabled": false,
+          "maxTokensEnabled": true,
           "max_retries": 2,
           "max_rounds": 1,
-          "max_tokens": 2048,
+          "max_tokens": 512,
           "mcp": [],
           "message_history_window_size": 6,
           "meta": {
@@ -880,7 +880,7 @@
             "frequencyPenaltyEnabled": false,
             "frequency_penalty": 0.7,
             "llm_id": "llama3.2:latest@Ollama",
-            "maxTokensEnabled": false,
+            "maxTokensEnabled": true,
             "max_retries": 1,
             "max_rounds": 1,
             "max_tokens": 512,
@@ -930,10 +930,10 @@
             "frequencyPenaltyEnabled": false,
             "frequency_penalty": 0.7,
             "llm_id": "gemma3:27b@Ollama",
-            "maxTokensEnabled": false,
+            "maxTokensEnabled": true,
             "max_retries": 2,
             "max_rounds": 1,
-            "max_tokens": 2048,
+            "max_tokens": 512,
             "message_history_window_size": 6,
             "outputs": {
               "content": {
@@ -996,7 +996,7 @@
             "frequencyPenaltyEnabled": false,
             "frequency_penalty": 0.7,
             "llm_id": "phi4:latest@Ollama",
-            "maxTokensEnabled": false,
+            "maxTokensEnabled": true,
             "max_retries": 1,
             "max_rounds": 1,
             "max_tokens": 512,
@@ -1046,10 +1046,10 @@
             "frequencyPenaltyEnabled": false,
             "frequency_penalty": 0.7,
             "llm_id": "gemma3:27b@Ollama",
-            "maxTokensEnabled": false,
+            "maxTokensEnabled": true,
             "max_retries": 2,
             "max_rounds": 1,
-            "max_tokens": 4096,
+            "max_tokens": 1024,
             "message_history_window_size": 6,
             "outputs": {
               "content": {
