@@ -46,46 +46,90 @@ def _html_table_to_markdown(content: str) -> str:
 
 
 def _annotate_plain_text_tables(content: str) -> str:
-    """Detect plain-text scored/rated tables and wrap with [TABLE DATA] markers.
+    """Detect plain-text tables and wrap with [TABLE DATA: <title>] markers.
 
-    Catches patterns like:
-        WI - Work injuries
-        Points Description
-        25 There have been no work injuries in last 5 years.
-        15 There were some minor injuries...
+    Catches two patterns:
+      1. Numeric-keyed: "25 There have been no work injuries..."
+      2. Letter-keyed:  "A Exceptional >50"
 
-    These are NOT pipe tables or HTML tables, so _annotate_markdown_tables misses them.
+    Also captures section title context (e.g., "WI - Work injuries") so the
+    LLM can distinguish between multiple tables in the same chunk.
     """
     if not content:
         return content
+    # Row patterns: number-keyed OR single-letter-keyed
+    _NUM_ROW = re.compile(r'^\d{1,3}\s+\S')
+    _LETTER_ROW = re.compile(r'^[A-Z]\s+[A-Z]')  # "A Exceptional >50"
     lines = content.split('\n')
     result = []
     i = 0
+
+    def _find_section_title(idx):
+        """Walk backwards to find the nearest non-empty, non-header line as section title."""
+        for back in range(idx - 1, max(idx - 4, -1), -1):
+            ln = lines[back].strip()
+            if not ln or ln.startswith('['):
+                continue
+            # Skip header-like lines (e.g., "Points Description")
+            words = ln.split()
+            if len(words) <= 3 and all(w[0].isupper() for w in words if w):
+                continue  # likely a header, keep looking
+            return ln
+        return None
+
+    def _emit_table(start, end, pattern_type):
+        """Convert lines[start:end] into an annotated pipe table."""
+        # Determine header and optional section title
+        header = None
+        section_title = None
+        if start > 0:
+            prev = lines[start - 1].strip()
+            if prev and not prev.startswith('['):
+                # Check if prev looks like a column header (short, capitalized words)
+                words = prev.split()
+                if len(words) <= 4 and all(w[0].isupper() for w in words if w):
+                    header = prev
+                    if result and result[-1].strip() == prev:
+                        result.pop()  # Remove header we already appended
+                else:
+                    section_title = prev
+        # Look further back for section title if we only found a header
+        if header and not section_title:
+            section_title = _find_section_title(start - 1)
+        if not header:
+            header = "Value | Description" if pattern_type == "num" else "Rank | Description"
+
+        title_label = f" ({section_title})" if section_title else ""
+        result.append(f'[TABLE DATA{title_label}]')
+        cols = header.split(None, 1) if ' ' in header else [header]
+        result.append('| ' + ' | '.join(cols) + ' |')
+        result.append('| ' + ' | '.join(['---'] * len(cols)) + ' |')
+        for k in range(start, end):
+            parts = lines[k].strip().split(None, 1)
+            if len(parts) == 2:
+                result.append(f'| {parts[0]} | {parts[1]} |')
+            else:
+                result.append(f'| {parts[0]} | |')
+        result.append('[END TABLE]')
+
     while i < len(lines):
         stripped = lines[i].strip()
-        # Check if current line starts with a number followed by a space and text
-        if re.match(r'^\d{1,3}\s+[A-Z]', stripped):
-            # Count consecutive number-description lines
+        # Check for numeric-keyed table rows
+        if _NUM_ROW.match(stripped):
             j = i
-            while j < len(lines) and re.match(r'^\d{1,3}\s+\S', lines[j].strip()):
+            while j < len(lines) and _NUM_ROW.match(lines[j].strip()):
                 j += 1
-            if j - i >= 3:  # At least 3 consecutive rows = likely a table
-                # Look for a header line right before (e.g., "Points Description")
-                header = "Points | Description"
-                if i > 0 and lines[i - 1].strip() and not lines[i - 1].strip().startswith('['):
-                    header = lines[i - 1].strip()
-                    result.pop()  # Remove the header we already appended
-                result.append('[TABLE DATA]')
-                cols = header.split(None, 1) if ' ' in header else [header]
-                result.append('| ' + ' | '.join(cols) + ' |')
-                result.append('| ' + ' | '.join(['---'] * len(cols)) + ' |')
-                for k in range(i, j):
-                    parts = lines[k].strip().split(None, 1)
-                    if len(parts) == 2:
-                        result.append(f'| {parts[0]} | {parts[1]} |')
-                    else:
-                        result.append(f'| {parts[0]} | |')
-                result.append('[END TABLE]')
+            if j - i >= 3:
+                _emit_table(i, j, "num")
+                i = j
+                continue
+        # Check for letter-keyed table rows (A Exceptional, B Acceptable, etc.)
+        if _LETTER_ROW.match(stripped):
+            j = i
+            while j < len(lines) and _LETTER_ROW.match(lines[j].strip()):
+                j += 1
+            if j - i >= 3:
+                _emit_table(i, j, "letter")
                 i = j
                 continue
         result.append(lines[i])
@@ -246,7 +290,12 @@ def message_fit_in(msg, max_length=4000):
 def kb_prompt(kbinfos, max_tokens, hash_id=False):
     from api.db.services.document_service import DocumentService
 
-    knowledges = [get_value(ck, "content", "content_with_weight") for ck in kbinfos["chunks"]]
+    # Count tokens AFTER HTML→markdown conversion for accurate budget tracking.
+    # Raw HTML tables have ~50% tag overhead that inflates token estimates.
+    knowledges = []
+    for ck in kbinfos["chunks"]:
+        c = get_value(ck, "content", "content_with_weight")
+        knowledges.append(_html_table_to_markdown(c) if c else c)
     kwlg_len = len(knowledges)
     used_token_count = 0
     chunks_num = 0
