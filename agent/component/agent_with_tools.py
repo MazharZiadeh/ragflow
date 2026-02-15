@@ -379,7 +379,7 @@ class Agent(LLM, ToolBase):
             # Cap budget for simple queries (max_tokens <= 768) to reduce inference time
             obs_token_budget = int(self.chat_mdl.max_length * 0.6)
             if self._param.max_tokens <= 768:
-                obs_token_budget = min(obs_token_budget, 5000)
+                obs_token_budget = min(obs_token_budget, 6500)
             obs_tokens_used = 0
             selected_obs = []
             for obs in reversed(observations):  # most recent first
