@@ -1698,7 +1698,8 @@ class LiteLLMBase(ABC):
                 # If missing, use env var or default 32768 to prevent truncation.
                 max_len = int(os.environ.get("OLLAMA_NUM_CTX", 16384))
             litellm.OllamaChatConfig.num_ctx = int(max_len)
-            logging.debug(f"[OLLAMA] num_ctx={int(max_len)} for {self.model_name}")
+            litellm.OllamaChatConfig.keep_alive = int(os.environ.get("OLLAMA_KEEP_ALIVE", -1))
+            logging.debug(f"[OLLAMA] num_ctx={int(max_len)} keep_alive={litellm.OllamaChatConfig.keep_alive} for {self.model_name}")
 
         # Ollama deployments commonly sit behind a reverse proxy that enforces
         # Bearer auth. Ensure the Authorization header is set when an API key

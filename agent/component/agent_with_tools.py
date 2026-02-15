@@ -23,6 +23,7 @@ from functools import partial
 from typing import Any
 
 import json_repair
+import xxhash
 from timeit import default_timer as timer
 from agent.tools.base import LLMToolPluginCallSession, ToolParamBase, ToolBase, ToolMeta
 from api.db.services.llm_service import LLMBundle
@@ -304,12 +305,76 @@ class Agent(LLM, ToolBase):
         if use_tools:
             self.set_output("use_tools", use_tools)
 
+    @staticmethod
+    def _cache_key(question: str, kb_ids: list[str]) -> str | None:
+        """Build a deterministic cache key from question + kb_ids. Returns None if uncacheable."""
+        if not kb_ids:
+            return None
+        # Normalize: lowercase, strip punctuation, collapse whitespace
+        norm = re.sub(r'[^\w\s]', '', question.lower()).strip()
+        norm = re.sub(r'\s+', ' ', norm)
+        if not norm:
+            return None
+        key_input = norm + "|" + ",".join(sorted(kb_ids))
+        return f"cag:{xxhash.xxh64(key_input.encode('utf-8')).hexdigest()}"
+
     async def _react_with_tools_streamly_async_simple(self, prompt, history: list[dict], use_tools, user_defined_prompt={}, schema_prompt: str = ""):
         token_count = 0
         tool_metas = self.tool_meta
         hist = deepcopy(history)
         last_calling = ""
         user_request = history[-1]["content"]
+
+        # --- Redis response cache (CAG) ---
+        # Only cache first-turn queries with kb_ids (not multi-turn follow-ups)
+        cache_key = None
+        is_first_turn = len(history) <= 2  # system + user
+        if is_first_turn and tool_metas:
+            # Extract kb_ids from tool params
+            kb_ids = []
+            for tm in tool_metas:
+                props = tm.get("function", {}).get("parameters", {}).get("properties", {})
+                if "kb_ids" in props:
+                    kb_ids = props["kb_ids"].get("default", [])
+                    break
+            if not kb_ids:
+                # Try getting from tool objects
+                for tool_obj in self.tools.values():
+                    if hasattr(tool_obj, '_param') and hasattr(tool_obj._param, 'kb_ids'):
+                        kb_ids = tool_obj._param.kb_ids or []
+                        if kb_ids:
+                            break
+            cache_key = self._cache_key(user_request, kb_ids)
+
+        if cache_key:
+            try:
+                from rag.utils.redis_conn import REDIS_CONN
+                cached = REDIS_CONN.get(cache_key)
+                if cached:
+                    logging.info(f"[CAG] Cache HIT: {cache_key} for '{user_request[:60]}'")
+                    cached_data = json.loads(cached)
+                    answer = cached_data.get("answer", "")
+                    sources = cached_data.get("sources", "")
+                    if answer:
+                        yield answer, 0
+                        if sources:
+                            yield sources, 0
+                        return
+            except Exception as e:
+                logging.warning(f"[CAG] Cache read error: {e}")
+
+        def _store_cache(answer: str, sources: str = ""):
+            """Store answer in Redis cache if cache_key is set and answer is valid."""
+            if not cache_key or not answer or answer.startswith("I am sorry") or answer.startswith("I'm sorry"):
+                return
+            try:
+                from rag.utils.redis_conn import REDIS_CONN
+                ttl = int(os.environ.get("CAG_ANSWER_TTL", 14400))
+                payload = json.dumps({"answer": answer, "sources": sources}, ensure_ascii=False)
+                REDIS_CONN.set(cache_key, payload, exp=ttl)
+                logging.info(f"[CAG] Cached: {cache_key} (ttl={ttl}s, {len(answer)} chars)")
+            except Exception as e:
+                logging.warning(f"[CAG] Cache write error: {e}")
 
         def build_task_desc(prompt: str, user_request: str, user_defined_prompt: dict | None = None) -> str:
             """Build a minimal task_desc with just the user request (sys_prompt is already in system message)."""
@@ -454,6 +519,54 @@ class Agent(LLM, ToolBase):
         st = timer()
         task_desc = build_task_desc(prompt, user_request, user_defined_prompt)
         self.callback("analyze_task", {}, task_desc, elapsed_time=timer()-st)
+
+        # --- Direct retrieval mode for SimpleRetrieval ---
+        # When max_tokens <= 768 (SimpleRetrieval), skip the ReAct planning
+        # LLM call and go straight to search → complete(). Saves 10-15s by
+        # eliminating one LLM round-trip (next_step_async).
+        if self._param.max_tokens <= 768 and tool_metas:
+            logging.info(f"[DIRECT] SimpleRetrieval fast path for: {user_request[:80]}")
+            # Find the first retrieval tool and call it directly
+            retrieval_tool_name = None
+            for tm in tool_metas:
+                fname = tm.get("function", {}).get("name", "")
+                if fname.startswith("search_kb") or fname.startswith("retrieval"):
+                    retrieval_tool_name = fname
+                    break
+            if retrieval_tool_name:
+                try:
+                    tool_result = await self.toolcall_session.tool_call_async(
+                        retrieval_tool_name, {"query": user_request}
+                    )
+                    use_tools.append({
+                        "name": retrieval_tool_name,
+                        "arguments": {"query": user_request},
+                        "results": tool_result,
+                    })
+                    observation = build_observation([(retrieval_tool_name, tool_result)])
+                    append_user_content(hist, observation)
+                    self.callback("reflection", {}, observation, elapsed_time=timer() - st)
+                    logging.info(f"[DIRECT] retrieval done, falling through to complete()")
+                    # Fall through to complete() at end of method
+                except Exception as e:
+                    logging.warning(f"[DIRECT] retrieval failed ({e}), falling back to ReAct loop")
+                    retrieval_tool_name = None  # reset so we enter the loop
+
+            if retrieval_tool_name:
+                # Skip the ReAct loop entirely — go to max-rounds complete() path
+                direct_answer = ""
+                async for txt, tkcnt in complete():
+                    direct_answer += txt
+                    yield txt, tkcnt
+                sources_text = ""
+                retrievals = self._canvas.get_reference()
+                if retrievals.get("chunks"):
+                    sources_text = format_sources_section(list(retrievals["chunks"].values()))
+                    if sources_text:
+                        yield sources_text, 0
+                _store_cache(direct_answer, sources_text)
+                return
+
         for _ in range(self._param.max_rounds + 1):
             if self.check_if_canceled("Agent streaming"):
                 return
@@ -526,10 +639,11 @@ class Agent(LLM, ToolBase):
                             retrievals = self._canvas.get_reference()
                             chunk_count = len(retrievals.get("chunks", {}))
                             logging.info(f"[SOURCES] complete_task: chunks={chunk_count} has_searched={has_searched}")
+                            ct_sources = ""
                             if retrievals.get("chunks"):
-                                sources_text = format_sources_section(list(retrievals["chunks"].values()))
-                                if sources_text:
-                                    yield sources_text, 0
+                                ct_sources = format_sources_section(list(retrievals["chunks"].values()))
+                                if ct_sources:
+                                    yield ct_sources, 0
                             elif not has_searched:
                                 # No fresh retrieval — carry forward sources from
                                 # conversation history so follow-up answers still
@@ -540,8 +654,10 @@ class Agent(LLM, ToolBase):
                                         match = re.search(r'(?:\n|^)(Sources: .+?)$', content, re.MULTILINE)
                                         if match:
                                             logging.info(f"[SOURCES] Carried forward from history: {match.group(1)}")
-                                            yield "\n\n" + match.group(1), 0
+                                            ct_sources = "\n\n" + match.group(1)
+                                            yield ct_sources, 0
                                             break
+                            _store_cache(answer, ct_sources)
                             return
                         # Fallback: no answer text, re-generate via complete()
                         async for txt, tkcnt in complete():
@@ -584,14 +700,18 @@ Look at the Observation data above. Extract the answer and respond concisely. Us
             return
         append_user_content(hist, final_instruction)
 
+        mr_answer = ""
         async for txt, tkcnt in complete():
+            mr_answer += txt
             yield txt, tkcnt
         # Append sources after max rounds generation
+        mr_sources = ""
         retrievals = self._canvas.get_reference()
         if retrievals.get("chunks"):
-            sources_text = format_sources_section(list(retrievals["chunks"].values()))
-            if sources_text:
-                yield sources_text, 0
+            mr_sources = format_sources_section(list(retrievals["chunks"].values()))
+            if mr_sources:
+                yield mr_sources, 0
+        _store_cache(mr_answer, mr_sources)
 
 #     async def _react_with_tools_streamly_async(self, prompt, history: list[dict], use_tools, user_defined_prompt={}, schema_prompt: str = ""):
 #         token_count = 0
