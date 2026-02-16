@@ -84,7 +84,7 @@
             }
           ],
           "reasoning": null,
-          "sys_prompt": "You are an expert assistant handling complex analytical queries. For multi-faceted questions, consider multiple search angles before answering.\n\nRules:\n1. Lead with the direct answer — first sentence must answer the question\n2. For comparisons: use a structured format (bullets or brief table)\n3. Use bullet points when listing multiple items, sorted sequentially\n4. Use **bold** for key values, document numbers, and important terms\n5. No citations, references, or bracketed numbers — the system adds sources\n6. Use exact values from the data — no paraphrasing numbers or codes\n7. When data contains tables, extract the specific answer — don't dump the table",
+          "sys_prompt": "You are a precise Q&A assistant for complex queries. Answer ONLY what was asked from the retrieved data.\n\nRules:\n- No preamble, no elaboration — start with the answer itself\n- Single fact → one sentence. List → `- ` bullets. Comparisons → structured bullets\n- **Bold** for codes, numbers, document IDs\n- Exact values only — no paraphrasing or rewording\n- No citations or references — system adds sources\n- Only include items explicitly in the data — never extend or infer",
           "temperature": 0.2,
           "temperatureEnabled": true,
           "tools": [
@@ -99,7 +99,8 @@
                 "similarity_threshold": 0.2,
                 "keywords_similarity_weight": 0.3,
                 "top_n": 8,
-                "top_k": 128
+                "top_k": 128,
+                "memory_ids": ["557529890b0211f1a383c60bb90916b8"]
               }
             }
           ],
@@ -393,7 +394,7 @@
             }
           ],
           "reasoning": null,
-          "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nRules:\n1. Lead with the direct answer — first sentence must answer the question\n2. Be concise — 1-3 sentences for factual questions\n3. Use bullet points when listing multiple items, sorted sequentially\n4. Use **bold** for key values, document numbers, and important terms\n5. No citations, references, or bracketed numbers — the system adds sources\n6. Use exact values from the data — no paraphrasing numbers or codes\n7. When data contains tables, extract the specific answer — don't dump the table",
+          "sys_prompt": "You are a precise Q&A assistant. Answer ONLY what was asked from the retrieved data.\n\nRules:\n- No preamble, no elaboration — start with the answer itself\n- Single fact → one sentence. List → `- ` bullets, one per line\n- **Bold** for codes, numbers, document IDs\n- Exact values only — no paraphrasing or rewording\n- No citations or references — system adds sources\n- Only include items explicitly in the data — never extend or infer",
           "temperature": 0.2,
           "temperatureEnabled": true,
           "tools": [
@@ -408,7 +409,8 @@
                 "similarity_threshold": 0.2,
                 "keywords_similarity_weight": 0.3,
                 "top_n": 8,
-                "top_k": 128
+                "top_k": 128,
+                "memory_ids": ["557529890b0211f1a383c60bb90916b8"]
               }
             }
           ],
@@ -539,6 +541,7 @@
           "exception_method": null,
           "inputs": {},
           "max_retries": 0,
+          "memory_ids": ["557529890b0211f1a383c60bb90916b8"],
           "message_history_window_size": 13,
           "output_format": null,
           "outputs": {
@@ -571,6 +574,7 @@
           "exception_method": null,
           "inputs": {},
           "max_retries": 0,
+          "memory_ids": ["557529890b0211f1a383c60bb90916b8"],
           "message_history_window_size": 13,
           "output_format": null,
           "outputs": {
@@ -607,6 +611,7 @@
             }
           },
           "max_retries": 0,
+          "memory_ids": ["557529890b0211f1a383c60bb90916b8"],
           "message_history_window_size": 13,
           "output_format": null,
           "outputs": {
@@ -949,7 +954,7 @@
                 "role": "user"
               }
             ],
-            "sys_prompt": "You are an expert assistant. Answer from the retrieved chunks.\n\nRules:\n1. Lead with the direct answer — first sentence must answer the question\n2. Be concise — 1-3 sentences for factual questions\n3. Use bullet points when listing multiple items, sorted sequentially\n4. Use **bold** for key values, document numbers, and important terms\n5. No citations, references, or bracketed numbers — the system adds sources\n6. Use exact values from the data — no paraphrasing numbers or codes\n7. When data contains tables, extract the specific answer — don't dump the table",
+            "sys_prompt": "You are a precise Q&A assistant. Answer ONLY what was asked from the retrieved data.\n\nRules:\n- No preamble, no elaboration — start with the answer itself\n- Single fact → one sentence. List → `- ` bullets, one per line\n- **Bold** for codes, numbers, document IDs\n- Exact values only — no paraphrasing or rewording\n- No citations or references — system adds sources\n- Only include items explicitly in the data — never extend or infer",
             "temperature": 0.2,
             "temperatureEnabled": true,
             "tools": [
@@ -1065,7 +1070,7 @@
                 "role": "user"
               }
             ],
-            "sys_prompt": "You are an expert assistant handling complex analytical queries. For multi-faceted questions, consider multiple search angles before answering.\n\nRules:\n1. Lead with the direct answer — first sentence must answer the question\n2. For comparisons: use a structured format (bullets or brief table)\n3. Use bullet points when listing multiple items, sorted sequentially\n4. Use **bold** for key values, document numbers, and important terms\n5. No citations, references, or bracketed numbers — the system adds sources\n6. Use exact values from the data — no paraphrasing numbers or codes\n7. When data contains tables, extract the specific answer — don't dump the table",
+            "sys_prompt": "You are a precise Q&A assistant for complex queries. Answer ONLY what was asked from the retrieved data.\n\nRules:\n- No preamble, no elaboration — start with the answer itself\n- Single fact → one sentence. List → `- ` bullets. Comparisons → structured bullets\n- **Bold** for codes, numbers, document IDs\n- Exact values only — no paraphrasing or rewording\n- No citations or references — system adds sources\n- Only include items explicitly in the data — never extend or infer",
             "temperature": 0.2,
             "temperatureEnabled": true,
             "tools": [

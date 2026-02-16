@@ -46,6 +46,7 @@ services:
       - ../rag/prompts:/ragflow/rag/prompts:ro
       - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
       - ../agent/component/agent_with_tools.py:/ragflow/agent/component/agent_with_tools.py:ro
+      - ../agent/component/message.py:/ragflow/agent/component/message.py:ro
       - ../agent/tools/retrieval.py:/ragflow/agent/tools/retrieval.py:ro
       - ../rag/llm/chat_model.py:/ragflow/rag/llm/chat_model.py:ro
       - ../agent/templates/main0_agent.json:/ragflow/agent/templates/main0_agent.json:ro
@@ -105,6 +106,7 @@ services:
       - ../rag/prompts:/ragflow/rag/prompts:ro
       - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
       - ../agent/component/agent_with_tools.py:/ragflow/agent/component/agent_with_tools.py:ro
+      - ../agent/component/message.py:/ragflow/agent/component/message.py:ro
       - ../agent/tools/retrieval.py:/ragflow/agent/tools/retrieval.py:ro
       - ../rag/llm/chat_model.py:/ragflow/rag/llm/chat_model.py:ro
       - ../agent/templates/main0_agent.json:/ragflow/agent/templates/main0_agent.json:ro
@@ -140,6 +142,7 @@ services:
       - ../rag/prompts:/ragflow/rag/prompts:ro
       - ../api/db/services/dialog_service.py:/ragflow/api/db/services/dialog_service.py:ro
       - ../agent/component/agent_with_tools.py:/ragflow/agent/component/agent_with_tools.py:ro
+      - ../agent/component/message.py:/ragflow/agent/component/message.py:ro
       - ../agent/tools/retrieval.py:/ragflow/agent/tools/retrieval.py:ro
       - ../rag/llm/chat_model.py:/ragflow/rag/llm/chat_model.py:ro
       - ../agent/templates/main0_agent.json:/ragflow/agent/templates/main0_agent.json:ro

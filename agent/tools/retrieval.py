@@ -326,7 +326,37 @@ class Retrieval(ToolBase, ABC):
             if "content_ltks" in ck:
                 del ck["content_ltks"]
 
+        # --- Memory merge (Option C): query past Q&A and append as context ---
+        memory_context = ""
+        if hasattr(self._param, "memory_ids") and self._param.memory_ids:
+            try:
+                mem_results = memory_message_service.query_message(
+                    {"memory_id": self._param.memory_ids},
+                    {
+                        "query": query,
+                        "similarity_threshold": 0.5,  # Higher threshold — only strong matches
+                        "keywords_similarity_weight": 0.3,
+                        "top_n": 2,  # At most 2 past answers
+                    },
+                )
+                if mem_results:
+                    mem_lines = []
+                    for msg in mem_results:
+                        content = msg.get("content", msg.get("content_ltks", ""))
+                        if content and len(content) > 20:
+                            mem_lines.append(content)
+                    if mem_lines:
+                        memory_context = "\n[PAST CONVERSATIONS]\n" + "\n---\n".join(mem_lines) + "\n[END PAST CONVERSATIONS]"
+                        logging.info(f"[MEMORY] Merged {len(mem_lines)} memory hits for query '{query[:60]}'")
+            except Exception as e:
+                logging.warning(f"[MEMORY] Query failed: {e}")
+
         if not kbinfos["chunks"]:
+            if memory_context:
+                # No KB chunks but we have memory — use memory as fallback
+                logging.info(f"[MEMORY] No KB chunks, using memory-only for query '{query[:60]}'")
+                self.set_output("formalized_content", memory_context)
+                return memory_context
             logging.warning(f"Retrieval returned no chunks for query: '{query}' with similarity_threshold={self._param.similarity_threshold}. Consider lowering the threshold or checking the knowledge base content.")
             self.set_output("formalized_content", self._param.empty_response if self._param.empty_response else "No relevant information found in the knowledge base for this query.")
             return
@@ -344,6 +374,10 @@ class Retrieval(ToolBase, ABC):
 
         self._canvas.add_reference(kbinfos["chunks"], kbinfos["doc_aggs"])
         form_cnt = "\n".join(kb_prompt(kbinfos, 200000, True))
+
+        # Append memory context after KB chunks (KB is primary, memory is supplemental)
+        if memory_context:
+            form_cnt += "\n" + memory_context
 
         # Set both formalized content and JSON output
         self.set_output("formalized_content", form_cnt)

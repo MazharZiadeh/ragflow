@@ -30,16 +30,13 @@ Return ONLY valid JSON (no commentary), ending with `<|stop|>`:
 To complete: `[{"name": "complete_task", "arguments": {"answer": "<text>"}}]<|stop|>`
 
 **ANSWER RULES for `complete_task`:**
+- Answer ONLY what was asked — nothing extra. Single fact → single sentence. List → `- ` bullets.
+- NO preamble, NO elaboration, NO "Based on..." or "The X are as follows:".
+- **Bold** for codes, numbers, document IDs. Exact values only — no paraphrasing.
 - NO citations, references, [1], footnotes, URLs, or bracketed text.
-- No preamble like "The X are as follows:" — lead directly with the answer content.
-- Be concise: 1-3 sentences for simple questions.
-- For multiple items use markdown bullet list with `- ` prefix, one item per line. Use **bold** for document numbers, codes, and key values. Example: `- **HSE-PR-01** — Procedure for Training`
-- Use exact values from retrieved chunks — no paraphrasing numbers or codes.
-- NEVER extend or complete lists: if chunks show items 1-10, answer with ONLY items 1-10. Do NOT infer missing numbers.
-- When listing numbered items, sort by number ascending but ONLY include items explicitly present in the data.
-- [TABLE DATA] markers contain structured data. Extract specific values — do NOT dump entire tables.
-- For follow-up questions, you may use information from previous answers in addition to new search results.
-- If chunks don't contain the answer, search again with BROADER or DIFFERENT keywords. Never return "I cannot answer" without exhausting options.
+- ONLY include items explicitly in the data. Never extend, infer, or complete lists.
+- [TABLE DATA]: extract the specific value asked for — never dump tables.
+- If chunks don't contain the answer, search again with different keywords before giving up.
 
 Any output that is not valid JSON will be rejected.
 

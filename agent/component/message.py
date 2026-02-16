@@ -430,11 +430,16 @@ class Message(ComponentBase):
         if not hasattr(self._param, "memory_ids") or not self._param.memory_ids:
             return True, "No memory selected."
 
+        # Strip Sources section from memory — it's system-generated metadata, not useful for recall
+        clean_content = re.sub(r'\n*Sources?:.*', '', content, flags=re.DOTALL | re.IGNORECASE).strip()
+        if not clean_content or len(clean_content) < 10:
+            return True, "Content too short after cleaning."
+
         message_dict = {
             "user_id": self._canvas._tenant_id,
             "agent_id": self._canvas._id,
             "session_id": self._canvas.task_id,
             "user_input": self._canvas.get_sys_query(),
-            "agent_response": content
+            "agent_response": clean_content
         }
         return await queue_save_to_memory_task(self._param.memory_ids, message_dict)

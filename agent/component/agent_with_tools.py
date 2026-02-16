@@ -63,6 +63,9 @@ def strip_inline_citations(text: str) -> str:
     text = re.sub(r'^\|.+\|[  ]*$\n?', '', text, flags=re.MULTILINE)
     # Remove separator rows (| --- | --- |)
     text = re.sub(r'^\|[\s\-:|]+\|[  ]*$\n?', '', text, flags=re.MULTILINE)
+    # Remove LLM-generated Sources/References sections — the system appends its own.
+    # Strips everything from "Sources:" (or variants) to end of text since it always appears last.
+    text = re.sub(r'\n*\*{0,2}(?:Sources?|References?)\*{0,2}\s*:.*', '', text, flags=re.DOTALL | re.IGNORECASE)
     # Clean up extra whitespace
     text = re.sub(r'\n{3,}', '\n\n', text)
     return text.strip()
@@ -416,15 +419,16 @@ class Agent(LLM, ToolBase):
             #   2. Observation messages (contain retrieved chunks)
             #   3. A clear answering directive with the user's question
             sys_content = (
-                "You are an expert assistant. Answer based ONLY on the provided data.\n"
+                "You are a precise Q&A assistant. Answer ONLY from the provided data.\n"
                 "Rules:\n"
-                "- Lead directly with the answer — no preamble like 'Based on...' or 'The X are as follows:'\n"
-                "- Be concise: 1-3 sentences for simple questions\n"
-                "- For multiple items: use markdown bullet list with `- ` prefix, one item per line\n"
-                "- Use **bold** for document numbers, codes, and key values (e.g., **HSE-PR-01**)\n"
-                "- Use exact values, numbers, and codes from the data\n"
+                "- Answer ONLY what was asked — nothing extra. If they ask for a name, give the name. If they ask for a number, give the number.\n"
+                "- NO preamble ('Based on...', 'According to...', 'The answer is...') — start with the answer itself\n"
+                "- NO elaboration, context, or explanation unless explicitly asked\n"
+                "- Single-fact questions → single sentence. Lists → `- ` bullets, one per line\n"
+                "- **Bold** for codes, numbers, document IDs (e.g., **HSE-PR-01**)\n"
+                "- Exact values only — no paraphrasing, rounding, or rewording data\n"
                 "- No citations, references, or source attributions\n"
-                "- When listing numbered items, sort by number ascending but ONLY include items explicitly present in the data — do NOT infer missing numbers"
+                "- ONLY include items explicitly present in the data — never infer or extend"
             )
             if schema_prompt:
                 sys_content += "\n" + schema_prompt
@@ -462,7 +466,7 @@ class Agent(LLM, ToolBase):
             # "points" question).
             raw_question = history[-1]["content"] if history else user_request
             question_text = raw_question if raw_question == user_request else f"{user_request}\n\nOriginal question: {raw_question}"
-            _hist.append({"role": "user", "content": f"Based on the data above, answer this question: {question_text}"})
+            _hist.append({"role": "user", "content": f"Question: {question_text}\nAnswer ONLY what was asked. No preamble, no extra context."})
             logging.info(f"[COMPLETE] Built clean hist: {len(_hist)} messages, {len(observations)} observations, question='{user_request[:80]}'")
 
             yield "", token_count
@@ -506,7 +510,7 @@ class Agent(LLM, ToolBase):
 
             lines.append("")
             lines.append(f"=== END OF DATA ({chunk_count} chunks) ===")
-            lines.append("Answer from this data ONLY. Use exact values. Use **bold** for codes/numbers. Use `- ` bullet lists for multiple items. Do NOT add items beyond what's shown.")
+            lines.append("Answer ONLY what was asked. Exact values only. No preamble, no elaboration.")
 
             return "\n".join(lines)
 
@@ -695,7 +699,7 @@ class Agent(LLM, ToolBase):
         logging.warning( f"Exceed max rounds: {self._param.max_rounds}")
         final_instruction = f"""ANSWER THIS QUESTION NOW: {user_request}
 
-Look at the Observation data above. Extract the answer and respond concisely. Use **bold** for codes/numbers. Use `- ` bullet lists for multiple items. No preamble — lead directly with the answer."""
+Answer ONLY what was asked from the data above. No preamble, no elaboration. Exact values only."""
         if self.check_if_canceled("Agent final instruction"):
             return
         append_user_content(hist, final_instruction)
