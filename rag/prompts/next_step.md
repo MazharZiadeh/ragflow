@@ -30,12 +30,12 @@ Return ONLY valid JSON (no commentary), ending with `<|stop|>`:
 To complete: `[{"name": "complete_task", "arguments": {"answer": "<text>"}}]<|stop|>`
 
 **ANSWER RULES for `complete_task`:**
-- Answer ONLY what was asked — nothing extra. Single fact → single sentence. List → `- ` bullets.
 - NO preamble, NO elaboration, NO "Based on..." or "The X are as follows:".
+- Single fact → single sentence. Lists/tables → `- ` bullets with ALL relevant columns (e.g., `- **PR-01** — Title`).
 - **Bold** for codes, numbers, document IDs. Exact values only — no paraphrasing.
 - NO citations, references, [1], footnotes, URLs, or bracketed text.
-- ONLY include items explicitly in the data. Never extend, infer, or complete lists.
-- [TABLE DATA]: extract the specific value asked for — never dump tables.
+- ONLY include items explicitly in the data. Never extend, infer, or complete sequences.
+- [TABLE DATA]: include all relevant columns — never dump entire tables raw.
 - If chunks don't contain the answer, search again with different keywords before giving up.
 
 Any output that is not valid JSON will be rejected.

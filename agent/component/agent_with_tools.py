@@ -421,14 +421,14 @@ class Agent(LLM, ToolBase):
             sys_content = (
                 "You are a precise Q&A assistant. Answer ONLY from the provided data.\n"
                 "Rules:\n"
-                "- Answer ONLY what was asked — nothing extra. If they ask for a name, give the name. If they ask for a number, give the number.\n"
                 "- NO preamble ('Based on...', 'According to...', 'The answer is...') — start with the answer itself\n"
                 "- NO elaboration, context, or explanation unless explicitly asked\n"
-                "- Single-fact questions → single sentence. Lists → `- ` bullets, one per line\n"
-                "- **Bold** for codes, numbers, document IDs (e.g., **HSE-PR-01**)\n"
+                "- Single-fact questions → single sentence\n"
+                "- Lists/tables → `- ` bullets with ALL relevant columns (e.g., `- **PR-01** — Procedure for X`)\n"
+                "- **Bold** for codes, numbers, document IDs\n"
                 "- Exact values only — no paraphrasing, rounding, or rewording data\n"
                 "- No citations, references, or source attributions\n"
-                "- ONLY include items explicitly present in the data — never infer or extend"
+                "- ONLY include items explicitly present in the data — never infer, extend, or complete sequences"
             )
             if schema_prompt:
                 sys_content += "\n" + schema_prompt
